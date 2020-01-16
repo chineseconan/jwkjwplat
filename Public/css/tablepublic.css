@@ -1,0 +1,201 @@
+
+
+/*#sys_dlg_submit{*/
+    /*/!*margin-right: 30px;*!/*/
+/*}*/
+/*.fixed-table-pagination .pagination-info{*/
+    /*margin-left: 20px;*/
+/*}*/
+/*.table {*/
+    /*max-width: none;*/
+/*}*/
+/*.btn-info {*/
+    /*background-color: #23c6c8;*/
+    /*border-color: #23c6c8;*/
+    /*color: #FFFFFF;*/
+    /*margin-left: 10px;*/
+/*}*/
+.chosen-container {
+    height: 24px;
+    top:-7px;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 13px;
+    zoom: 1;
+    -webkit-user-select: none;
+}
+.chosen-container-single .chosen-single {
+    background: #ffffff;
+    box-shadow: none;
+    border: 1px solid #CBD5DD;
+    border-radius: 2px;
+    -ms-border-radius: 2px;
+    /*兼容ie8的关键属性*/
+    behavior: url(../vendor/ie8/PIE.htc);
+    cursor: text;
+    margin: 0;
+    /*兼容ie8min-height start*/
+    /*min-height: 34px;*/
+    /*height: auto !important;*/
+    overflow: visible;
+    /*兼容ie8min-height end*/
+    padding: 3px 12px 0;
+    -ms-box-sizing: border-box;
+    position: relative;
+    width: 100%;
+}
+.chosen-container-single .chosen-single {
+    min-height: inherit;
+    height: 32px!important;
+    line-height: 32px;
+}
+.chosen-container .chosen-results {
+    top: 4px;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0 4px 4px 0;
+    padding: 0 0 4px 4px;
+    box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    /*max-height: 240px;*/
+    -webkit-overflow-scrolling: touch;
+}
+/*.control-label{*/
+    /*width:90px;*/
+    /*height: 30px;*/
+    /*/!*margin-right: 5px;*!/*/
+/*}*/
+/*._box{*/
+    /*margin-bottom: 5px;;*/
+/*}*/
+/*.name{*/
+    /*color: #292929;*/
+    /*background-color: #fdf4d4;*/
+    /*text-align: center;*/
+    /*font-weight: bold;*/
+    /*font-family: 'Microsoft YaHei';*/
+    /*font-size: 24px;*/
+    /*line-height: 40px;*/
+    /*margin-bottom: 20px;*/
+/*}*/
+/*tr{*/
+    /*color: black;*/
+    /*background-color: #f5f4f4;*/
+/*}*/
+/*---------------------------------optimization-----------------------------------*/
+
+/*nav*/
+.ma{
+    margin:0 auto;
+}
+th,td{
+    text-align: center;
+}
+.pagination .pagination-outline{
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+#name{
+    height: 33px;
+    margin-bottom:10px ;
+}
+#layui-content{
+    /*min-height:450px!important;*/
+    height: auto;
+    overflow: auto;
+}
+/*#layui-layer1{*/
+   /*left: 50%;*/
+/*}*/
+/*.modal-body{*/
+    /*padding-top: 0px!important;*/
+/*}*/
+/*.layui-tab{*/
+    /*/!*overflow: auto;*!/*/
+/*}*/
+/*.chosen-select2{*/
+    /*position: absolute;*/
+/*}*/
+/*#frameBox{*/
+    /*margin-left: 0!important;*/
+    /*width: 100%;*/
+/*}*/
+/*.bootstrap-table{*/
+    /*width: 99%;*/
+/*}*/
+/*iframe{*/
+    /*display: block;*/
+/*}*/
+/*滚动条块隐藏*/
+/*::-webkit-scrollbar{*/
+    /*display: none;*/
+/*}*/
+/*ie滚动条样式自定义*/
+body,html{
+    scrollbar-face-color: #cccccc;
+    scrollbar-highlight-color: #fff;
+    scrollbar-shadow-color: #cccccc;
+    scrollerbar-3dlight-color:#cccccc;
+    scrollbar-arrow-color: #000;
+    scrollbar-track-color: #fff;
+    scrollbar-darkshadow-color: #fff;
+}
+/*滚动条默认显示样式*/
+::-webkit-scrollbar-thumb{
+    background-color: #eeeeee;
+    height: 20px;
+    outline-offset: 0px;
+    outline: 2px solid #fff;
+    -webkit-border-radius: 4px;
+    border: 2px solid #fff;
+}
+/*鼠标点击滚动条显示样式*/
+::-webkit-scrollbar-thumb:hover{
+    background-color: #eeeeee;
+    height: 20px;
+    -webkit-border-radius: 4px;
+}
+/*滚动条大小*/
+::-webkit-scrollbar{
+    height: 10px;
+    width: 16px;
+}
+/*滚动框背景样式*/
+::-webkit-scrollbar-track-piece{
+    background-color: #fff;
+    -webkit-border-radius: 0;
+}
+body,html{
+    font-family: '微软雅黑';
+    margin: 0;
+    padding: 0;
+}
+/*表格样式*/
+table{
+    table-layout: fixed;
+}
+table th{
+    text-align: center;
+}
+.editableform .input-sm{
+    width: 70px!important;
+    padding-right: 0!important;
+    margin-top: -22px;
+}
+@media (min-width: 768px) and (max-width: 1200px) {
+    .chosen-select{
+        width: 150px!important;
+    }
+}
+@media (min-width: 768px) and (max-width: 992px) {
+    .chosen-select{
+        width: 120px!important;
+    }
+}
+/*---------------------------------optimization-----------------------------------*/
+
+
+
+
