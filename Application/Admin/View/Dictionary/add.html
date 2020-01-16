@@ -1,0 +1,103 @@
+﻿<?php showViewsByPower() ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="__PUBLIC__/vendor/ie8/es5-shim.min.js"></script>
+    <![endif]-->
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+    <title>字典编辑</title>
+    <style>
+        .form-group{
+            margin-top: 26px;
+        }
+    </style>
+</head>
+<body style="margin: 0 auto;text-align: center">
+<form id="sys_dlg_form" role="form" class="form-horizontal" enctype="multipart/form-data">
+        <div class="tab-content" >
+            <div class="panel-body">
+                    <div class="form-group" style="margin-top: 6px">
+                        <label class=" control-label">字典类型：</label>
+                        <select id="dic_type" class="chosen-select" >
+                            <option value="">&nbsp;</option>
+                            <?php foreach($dictionaryType as $key=>$value){ ?>
+                            <option value="{$value.dic_type_id}"
+                            <?php
+                                if($choseDicType != ''){
+                                    if($choseDicType == $value['dic_type_id']) echo "selected";
+                                }else{
+                                    if($data['dic_type'] == $value['dic_type_id'])  echo "selected";
+                                } ?>
+                            >{$value.type_name}</option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class=" control-label">字典项名称：</label>
+                        <input id="dic_name" type="text"  value="{$data.dic_name}" style="width:300px;display: inline-block" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">字典值：</label>
+                        <input id="dic_value" class="form-control" style="width:300px;display: inline-block"  value="{$data.dic_value}">
+                    </div>
+                 </div>
+        </div>
+        <input id="id" type="hidden" value="{$data.dic_id}" class="form-control">
+    </form>
+<div class="modal-footer" style="margin-top: 30px">
+    <button type="button" data-dismiss="modal" id="sys_dlg_submit" class="btn btn-primary" style="margin-right: 20px;">保存</button>
+</div>
+</body>
+<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+<script>
+$(function () {
+    layui.use('layer', function() {
+        layer = layui.layer;
+    })
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '300px'});
+    $(".js-switch").each(function(){
+        new Switchery(this, {color: '#1AB394'});
+    });
+    $('#sys_dlg_submit').click(function(){
+        var id = $('#id').val();
+        var dic_name = $('#dic_name').val();
+        var dic_type = $('#dic_type').val();
+        var dic_value = $('#dic_value').val();
+        if(!dic_name){
+            layer.alert('请输入字典项名称');
+            return false;
+        }
+        if(!dic_type){
+            layer.alert('请输入字典类型');
+            return false;
+        }
+        $.ajax({
+            type:'post',
+            url:'__CONTROLLER__/addDictionary',
+            data:{dic_name:dic_name,dic_type:dic_type,dic_value:dic_value,id:id},
+            dataType :'json',
+            success:function(data){
+                if(data.code > 0){
+                    layer.alert('操作成功');
+                }else{
+                    layer.alert(data.message);
+                }
+                parent.$('#atpbiztable').bootstrapTable('refresh');
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+            }
+        })
+    })
+});
+</script>

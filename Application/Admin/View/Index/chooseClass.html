@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="__PUBLIC__/vendor/bootstrap/css/bootstrap.min.css">
+    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
+</head>
+<style>
+    .form-group span{
+        float: left;
+        display: block;
+        margin: 0 10px 0 15px;
+    }
+    .form-group input{
+        float: left;
+        margin: auto;
+    }
+    .top-content{
+        background-color: #E7EAEC;
+        background-size: 100% 100%;
+        /*针对ie8的hack，目的是除掉之前的background*/
+        /*关键设置*/
+        filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="__PUBLIC__/img/bgimg/0408_4.jpg",sizingMethod = 'scale');
+    }
+    .form-group span{
+        font-weight: bold;
+        font-family: "微软雅黑";
+        font-size: 18px;
+    }
+    .btn-info{
+        border-color: #eeeeee!important;
+        opacity: .9;
+    }
+    input:-webkit-autofill{
+        background-color: #fff!important;
+        -webkit-box-shadow: 0 0 0 1000px white inset;
+        background-image: none;
+    }
+    .form-password{
+        position: relative;
+    }
+    .form-username{
+        position: relative;
+    }
+    .form-password + i{
+        position: absolute;
+        top: 112px;
+        right: 45px;
+    }
+    .form-group i{
+        color: #cccccc;
+        font-size: 15px;
+    }
+    .form-username + i{
+        position: absolute;
+        top: 51px;
+        right: 48px;
+    }
+</style>
+<body>
+<div class="top-content" style="text-align: center;height: 320px;border:1px solid lightgrey" >
+    <div class="container clearfix" style="width:500px;">
+        <div class="col-sm-6 pull-right mart70" style="width:500px;height:250px;border: 1px solid #cccccc;margin-top:30px;box-shadow:-2px 2px 10px #e0e9e3">
+            <div class="form-top">
+                <div class="form-top-left" style="text-align:center">
+                    <!--<h4>登录风险管理系统</h4>-->
+                </div>
+            </div>
+            <div class="form-bottom" style="padding-top: 16px;box-sizing: border-box">
+                <form role="form" action="" method="post" class="login-form"  id="form-body">
+                    <foreach name="classids" item="cla" key="k" >
+                        <div class="form-group clearfix" style="margin-top: 25px;margin-left: 20px">
+                            <input type="radio" name="classid" value="{$cla}"/>{$cla}
+                        </div>
+                    </foreach>
+                    <div class="form-group clearfix" style="margin-left: 20px;margin-top: 18px">
+                        <!--<span style="margin-top:16px">密&emsp;码：</span><input style="margin-top: 10px;margin-left: -1px;" type="password" value="{$password}" placeholder="密码" class="form-password form-control" id="form-password">-->
+                        <!--<i class="fa fa-key"></i>-->
+                    </div>
+                    <button id='sys_dlg_submit' style="width:100px;font-size:16px;font-weight:bold;margin-top:18px;background: #31708F" type="button" class="btn btn-info" >保&nbsp;&nbsp;&nbsp;&nbsp;存</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/md5.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+
+<script type="text/javascript">
+    layui.use('layer', function() {
+        layer = layui.layer;
+    })
+    //    var captchaImg = $('#check_code_img');
+    //    var verifyimg = captchaImg.attr('src');
+    //    captchaImg.attr('title', '点击刷新');
+    //    captchaImg.click(function () {
+    //        if(verifyimg.indexOf('?') > 0){
+    //            $(this).attr('src', verifyimg+'&random='+Math.random());
+    //        }else{
+    //            $(this).attr('src', verifyimg.replace(/\?.*$/,'')+'?'+Math.random());
+    //        }
+    //    })
+
+    $('#sys_dlg_submit').on('click',function(){
+        var classid = $("input:checked").val();
+        if((classid == '') || typeof(classid) == 'undefined'){
+            layer.msg('请选择分组');
+        }else{
+            $.ajax({
+                type:'post',
+                url:'__MODULE__/Index/saveClass',
+                data:{classid:classid},
+                dataType:'json',
+                success:function(data){
+                    $('#sys_dlg_submit').attr('disabled', false);
+                    if(data.code==0){
+                            layer.msg('设置成功');
+                            parent.window.location.href = '__MODULE__/Index/index?noReopen=1';
+                    }else{
+                        layer.msg(data.message);
+                    }
+                }
+            })
+        }
+
+    })
+</script>
+</body>
+</html>

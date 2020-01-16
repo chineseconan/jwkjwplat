@@ -1,0 +1,125 @@
+﻿<?php showViewsByPower() ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all"/>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="__PUBLIC__/vendor/ie8/es5-shim.min.js"></script>
+    <![endif]-->
+    <title>用户编辑</title>
+    <style>
+        .box{
+            margin: 0 auto;
+            text-align: center;
+        }
+        .panel-body{
+            margin-top: 16px;
+        }
+        .chosen-drop{
+            text-align: left;
+        }
+        .chosen-single span{
+            text-align: left;
+        }
+        html{
+            overflow: hidden;
+        }
+        .chosen-drop{
+            height: 230px!important;
+        }
+        .chosen-results{
+            height: 190px!important;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <form id="sys_dlg_form" role="form" class="form-horizontal" enctype="multipart/form-data">
+        <div class="tab-content">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class=" control-label">父级部门：</label>
+                    <select id="org_pid" class="chosen-select">
+                        <option value="">&nbsp;</option>
+                        <?php foreach($orglist as $key=>$value){ ?>
+                        <option value="{$value.id}" <?php if($data['org_pid'] == $value['id'] || $value['id'] == $deptId){ echo "selected";} ?>>{$value.org_name}</option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class=" control-label">部门简称：</label>
+                    <input id="org_name" type="text" value="{$data.org_name}"
+                           style="width:300px;display: inline-block" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class=" control-label">部门全称：</label>
+                    <input id="org_fullname" type="text" value="{$data.org_fullname}" style="width:300px;display: inline-block"
+                           class="form-control">
+                </div>
+            </div>
+        </div>
+        <input id="id" type="hidden" value="{$data.org_id}" class="form-control">
+    </form>
+    <div class="modal-footer" style="padding: 18px 20px 0 0;box-sizing: border-box">
+        <button type="button" data-dismiss="modal" id="sys_dlg_submit" class="btn btn-primary">保存</button>
+    </div>
+</div>
+</body>
+<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+
+<script>
+    $(function () {
+        layui.use('layer', function () {
+            layer = layui.layer;
+        })
+        $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '300px'});
+        $(".js-switch").each(function () {
+            new Switchery(this, {color: '#1AB394'});
+        });
+        $('#sys_dlg_submit').click(function () {
+            var id = $('#id').val();
+            var org_name = $('#org_name').val();
+            var org_fullname = $('#org_fullname').val();
+            var org_pid = $('#org_pid').val();
+            if (!org_name) {
+                layer.alert('请输入部门名称');
+                return false;
+            }
+            $.ajax({
+                type: 'post',
+                url: '__CONTROLLER__/addOrg',
+                data: {
+                    org_name: org_name,
+                    id: id,
+                    org_fullname: org_fullname,
+                    org_pid: org_pid
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.code > 0) {
+                        layer.alert('操作成功');
+                    } else {
+                        layer.alert(data.message);
+                        return;
+                    }
+                    parent.$('#atpbiztable').bootstrapTable('refresh');
+                    parent.$('#search').click();
+
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                }
+            })
+        })
+    });
+</script>

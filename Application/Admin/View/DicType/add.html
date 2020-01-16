@@ -1,0 +1,77 @@
+﻿<?php showViewsByPower() ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="__PUBLIC__/vendor/ie8/es5-shim.min.js"></script>
+    <![endif]-->
+
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+
+    <title>字典编辑</title>
+    <style>
+        .form-group {
+            margin: 35px 0 0;
+        }
+
+    </style>
+</head>
+<body style="margin: 0 auto;text-align: center">
+<form id="sys_dlg_form" role="form" class="form-horizontal" enctype="multipart/form-data">
+    <div class="tab-content">
+        <div class="panel-body">
+            <div class="form-group">
+                <label class=" control-label">类型名称：</label>
+                <input id="type_name" type="text"  value="{$data.type_name}" style="width:300px;margin:0 10px;display: inline-block" class="form-control">
+                <button type="button" data-dismiss="modal" id="submit" class="btn btn-primary">保存</button>
+            </div>
+
+        </div>
+    </div>
+    <input id="id" type="hidden" value="{$data.dic_type_id}" class="form-control">
+</form>
+
+<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    })
+    $('#submit').click(function(){
+        var id = $('#id').val();
+        var type_name = $('#type_name').val();
+        if(!type_name){
+            layer.alert('请输入类型名称');
+            return false;
+        }
+
+        $.ajax({
+            type:'post',
+            url:'__CONTROLLER__/addDicType',
+            data:{type_name:type_name,id:id},
+            dataType :'json',
+            success:function(data){
+                if(data.code > 0){
+                    layer.alert('操作成功');
+                    parent.$('#atpbiztable').bootstrapTable('refresh');
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                }else{
+                    layer.alert(data.message);
+                }
+            }
+        })
+    })
+
+</script>

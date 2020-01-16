@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>职称评审系统</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="__PUBLIC__/css/public.css">
+    <link rel="stylesheet" href="/ReviewTitle/Public/vendor/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <style>
+        #treearea{
+            /*position: absolute;*/
+            /*left:0;*/
+            /*top:0;*/
+            /*bottom: 0;*/
+            width:300px;
+            height:100vh;
+            overflow:auto;
+            border: 1px solid grey;
+        }
+        #treearea h2{
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: '微软雅黑';
+            font-size: 15px;
+            border-bottom: 1px solid #cccccc;
+        }
+        .search{
+            width:260px;
+            height: 30px;
+            margin: 10px;
+            padding-left: 5px;
+        }
+    </style>
+</head>
+<body>
+<!--treearea start-->
+<div id="treearea">
+        <h2>总体部职称评审管理系统</h2>
+    <div class="treeBox" style="overflow-x: hidden">
+        <input type="search" placeholder="search" class="search">
+        <ul id="treeDemo"  class="ztree" style="width: 290px;border:0;"></ul>
+    </div>
+</div>
+<!--treearea end-->
+
+<!--atp_wrapper start-->
+<div id="atp_wrapper">
+
+</div>
+<!--atp_wrapper end-->
+
+
+
+<script src="/ReviewTitle/Public/vendor/jquery/jquery1.11.1.js"></script>
+<script src="/ReviewTitle/Public/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="/ReviewTitle/Public/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
+<script src="/ReviewTitle/Public/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
+<script type="text/javascript" src="/ReviewTitle/Public/vendor/zTree_v3/js/jquery.ztree.core.js"></script>
+<script src="/ReviewTitle/Public/vendor/chosen/chosen.jquery.js"></script>
+<script type="text/javascript" src="/ReviewTitle/Public/vendor/ie8/jquery.form.js"></script>
+<script src="/ReviewTitle/Public/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
+<script type="text/javascript" src="/ReviewTitle/Public/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="/ReviewTitle/Public/js/banBackSpace.js"></script>
+<script>
+    var setting = {
+        view: {
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable: true,
+                idKey: "id",
+                pIdKey: "pid",
+                rootPId: '0'
+            }
+        },
+        callback: {
+            onClick:onClick
+        }
+    };
+    var zNodes = null;
+    function onClick(event, treeId, treeNode, clickFlag) {
+        var resultZtree = $.fn.zTree.getZTreeObj("treeDemo");
+        var node =  resultZtree.getSelectedNodes()[0];
+        $('#choosemenu').val(node.id);
+        $('#atpbiztable').bootstrapTable('refresh');
+    }
+    $(document).ready(function() {
+        $.ajax({
+            url: "/ReviewTitle/index.php/Org/getOrgTree",
+            type: "post",
+            async: false,
+            dataType: "json",
+            success: function (data) {
+                zNodes = data;
+            },
+            error: function () {
+                layer.alert('获取数据失败');
+            }
+        });
+        $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+
+        var resultZtree = $.fn.zTree.getZTreeObj("treeDemo");
+        var node = resultZtree.getNodes()[0];
+    });
+    function refreshZTree() {
+        $.ajax({
+            url: "/ReviewTitle/index.php/Org/getOrgTree",
+            type: "post",
+            async: false,
+            data:{org_name:$('#org_name').val()},
+            dataType: "json",
+            success: function (data) {
+                zNodes = data;
+            },
+            error: function () {
+                layer.alert('获取数据失败');
+            }
+        });
+        $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+
+        var resultZtree = $.fn.zTree.getZTreeObj("treeDemo");
+        var node = resultZtree.getNodes()[0];
+    }
+
+</script>
+</body>
+</html>
