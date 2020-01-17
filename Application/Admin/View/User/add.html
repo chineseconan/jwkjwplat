@@ -1,0 +1,222 @@
+﻿<?php showViewsByPower() ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="__PUBLIC__/vendor/ie8/es5-shim.min.js"></script>
+    <![endif]-->
+
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all"/>
+
+    <title>用户编辑</title>
+    <style>
+        .box{
+            margin: 0 auto;
+            text-align: center;
+        }
+        .tab-content{
+            position: relative;
+        }
+        .form-group > div {
+            margin-top: 3px;
+            margin-bottom: 5px;
+        }
+        .form-group{
+            float: left;
+            width: 50%;
+            margin-top:10px ;
+        }
+        #xian{
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            top: 150px;
+            left: 0;
+            background: lightgrey;
+        }
+        .chosen-single{
+            width: 280px!important;
+        }
+        .control-label{
+            width: 78px!important;
+        }
+        .form-group input{
+            margin-left: 12px;
+            border-radius: 2px;
+        }
+        #sys_dlg_submit{
+            margin-right: 53px!important;
+        }
+        .panel-body{
+            margin: 10px 0 12px;
+        }
+        .chosen-drop{
+            text-align: left;
+        }
+        .chosen-single span{
+            text-align: left;
+        }
+        html{
+            overflow: hidden;
+        }
+        .department .chosen-drop{
+            height: 200px!important;
+        }
+        .department .chosen-results{
+            height: 160px!important;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+<form id="sys_dlg_form" role="form" class="form-horizontal" enctype="multipart/form-data">
+    <div class="tab-content">
+        <div class="panel-body">
+            <div class="clearfix" >
+                <div class="form-group pull-left clearfix">
+                    <label class=" control-label pull-left">单位：</label>
+                    <input id="user_orgid" type="text" value="{$data.user_orgid}"
+                           style="width:280px;display:block;float: left" class="form-control">
+                </div>
+                <div class="form-group pull-left clearfix">
+                    <label class=" control-label pull-left">分组:</label>
+                    <input id="user_group" type="text" value="{$data['user_class']}"
+                           style="width:280px;display:block;float: left" class="form-control">
+                </div>
+            </div>
+            <div class="clearfix" style="margin-top: 8px">
+                <div class="form-group pull-left clearfix" >
+                    <label class=" control-label" style="float: left">姓名：</label>
+                    <input id="real_name" type="text" value="{$data.user_realusername}"
+                           style="width:280px;display:block;float: left" class="form-control">
+                </div>
+                <div class="form-group pull-left clearfix" >
+                    <label class=" control-label" style="float: left">账号：</label>
+                    <input id="user_name" type="text" value="{$data.user_name}" style="width:280px;float: left"
+                           class="form-control">
+                </div>
+            </div>
+            <div class="clearfix" style="margin-top: 8px">
+                <div class="form-group pull-left clearfix" >
+                    <label class=" control-label" style="float: left">密码：</label>
+                    <input id="user_password" type="text" value="{$data.user_password}"
+                           style="width:280px;display:block;float: left" class="form-control">
+                </div>
+                <div class="form-group pull-left clearfix" >
+                    <label class=" control-label" style="float: left">职务/职称：</label>
+                    <input id="user_zhiwu" type="text" value="{$data.user_zhiwu}"
+                           style="width:280px;display:block;float: left" class="form-control">
+                </div>
+            </div>
+
+            <div class="clearfix" style="margin-top: 8px">
+                <div class="form-group pull-left clearfix" >
+                    <label class=" control-label" style="float: left">联系方式：</label>
+                    <input id="user_mobile" type="text" value="{$data.user_mobile}"
+                           style="width:280px;display:block;float: left" class="form-control">
+                </div>
+            </div>
+        </div>
+    </div>
+    <input id="id" type="hidden" value="{$data.user_id}" class="form-control">
+</form>
+<!--<div id="xian" style="margin-top: 30px"></div>-->
+<div class="modal-footer" style="border: none;">
+    <button type="button" data-dismiss="modal" id="sys_dlg_submit" class="btn btn-primary" style="margin-top: 11px">保存</button>
+</div>
+</div>
+</body>
+<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script src="__PUBLIC__/vendor/ie8/respond.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+
+<script>
+
+    $(function () {
+        layui.use('layer', function () {
+            layer = layui.layer;
+        })
+        $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '280px'});
+
+        $(".js-switch").each(function () {
+            new Switchery(this, {color: '#1AB394'});
+        });
+
+        $('#sys_dlg_submit').click(function () {
+            var id = $('#id').val();
+            var real_name = $('#real_name').val();
+            var user_name = $('#user_name').val();
+            var org_id = $('#user_orgid').val();
+            var user_group = $('#user_group').val();
+            var zhiwu = $("#user_zhiwu").val();
+            var zhicheng = $("#user_zhicheng").val();
+            var mobile = $("#user_mobile").val();
+            var user_password = $('#user_password').val()
+            if (!real_name) {
+                layer.alert('请输入姓名');
+                return false;
+            }
+            if (!user_name) {
+                layer.alert('请输入账号');
+                return false;
+            }
+            if(!user_password){
+                layer.alert('请输入密码');
+                return false;
+            }
+            if (!org_id) {
+                layer.alert('请填写单位名称');
+                return false;
+            }
+            if (!user_group) {
+                layer.alert('请选择分组');
+                return false;
+            }
+            if (!zhiwu) {
+                layer.alert('请填写专家职务');
+                return false;
+            }
+            if (!mobile) {
+                layer.alert('请填写联系方式');
+                return false;
+            }
+            $.ajax({
+                type: 'post',
+                url: '__CONTROLLER__/addSysUser',
+                data: {
+                    user_name: user_name,
+                    id: id,
+                    real_name: real_name,
+                    org_id: org_id,
+                    user_class: user_group,
+                    user_zhiwu:zhiwu,
+                    user_mobile:mobile,
+                    user_password:user_password
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.code > 0) {
+                        layer.alert('操作成功');
+                    } else {
+                        layer.alert(data.message);
+                        return;
+                    }
+                    parent.$('#atpbiztable').bootstrapTable('refresh');
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                }
+            })
+        })
+
+    });
+</script>
