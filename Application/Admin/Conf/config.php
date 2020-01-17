@@ -11,12 +11,10 @@ return array(
     'URL_CASE_INSENSITIVE' => false,
 
     'COMMONUSERID'=> 'T30E9CC5E140D43A6B0E448B8', //‘普通用户’的角色id
-    'RISKMANAGERID' => 'T13CD917D96F9416F968ADA97',//‘风险管理员’的角色id
-    'SYSSETTINGMANAGERID'=>'4',//‘系统配置管理员’的角色id
-    'SAFEMANAGERID'=>'3',//‘安全管理员’的角色id
-    'RISKMANAGE' => '4',//风险管理
-    'DESK' => '5',//工作台,
-    'PWD_SALT' => 'risk',//风险系统登录密码加密的盐
+    'PROFESSERID'=> 'TCAAB0FF33F1D45348204EB46', //‘专家’的角色id
+    'VIEWUSERID'=> 'TC0956A46AAEB448DB04EE0C0', //‘专家’的角色id
+
+    'PWD_SALT' => 'jwkjw',//系统登录密码加密的盐
     "xmfilepath"=>"ziyuan",
     "defaultfilename"=>"项目申报书.pdf",
     // 系统名称

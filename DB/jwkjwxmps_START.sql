@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 100119
 File Encoding         : 65001
 
-Date: 2020-01-17 09:43:31
+Date: 2020-01-17 10:58:20
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -232,7 +232,7 @@ INSERT INTO `sysrole` VALUES ('TCAAB0FF33F1D45348204EB46', '专家', '1528110552
 INSERT INTO `sysrole` VALUES ('2', '审计管理员', null, null, null, null, '否');
 INSERT INTO `sysrole` VALUES ('3', '安全管理员', null, null, null, null, '否');
 INSERT INTO `sysrole` VALUES ('1', '系统管理员', null, null, null, null, '否');
-INSERT INTO `sysrole` VALUES ('TEA7ECCADA3784874A074E57D', '特殊专家', '1559294159', 'system', null, null, '否');
+INSERT INTO `sysrole` VALUES ('TC0956A46AAEB448DB04EE0C0', '浏览专家', '1559294159', 'system', null, null, '否');
 
 -- ----------------------------
 -- Table structure for sysuser
