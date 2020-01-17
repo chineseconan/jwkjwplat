@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8,chrome=1">
+    <meta name="description" content="">
+
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="__PUBLIC__/vendor/ie8/es5-shim.min.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/ie8/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="__PUBLIC__/font-awesome/css/font-awesome.min.css">
+    <link href="__PUBLIC__/vendor/zuisexy/css/zui.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/zuisexy/lib/dashboard/zui.dashboard.css" rel="stylesheet">
+    <link rel="stylesheet" href="__PUBLIC__/css/public.css">
+    <script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
+    <script src="__PUBLIC__/vendor/ie8/jquery.form.js"></script>
+    <script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
+    <title>分组排序</title>
+    <style>
+        .form-group > div {
+            margin-top: -3px;
+            margin-bottom: -3px;
+        }
+        .modal-body {
+            padding-bottom: 0 !important;
+        }
+        #layui-title li {
+            width: 10%;
+        }
+
+        .chosen-container-multi .chosen-choices {
+            width: 105% !important;
+        }
+        .layui-unselect .layui-form-switch .layui-form-onswitch {
+            margin-top: -2px !important;
+        }
+        .dashboard .panel-heading{
+            padding: 0;
+            height: 30px;
+            line-height: 18px;
+            /*color: #6C9CE8;*/
+            /*color: #BC8F8F;*/
+            color: #ECE7E7;
+            vertical-align: middle;
+        }
+        .dashboard .panel{
+            margin-bottom: 0;
+        }
+        .panelBox{
+            margin: 6px 3px;
+        }
+        .dashboard .panel-heading{
+            overflow: inherit;
+            text-overflow: clip;
+            white-space:normal;
+        }
+        .dashboard{
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-body" style=" height: 100%;padding-top: 0">
+        <h2 style="font-size: 15px;color:darkred;margin-top: 20px;color:#3D6588;">
+            提示：您可根据需要拖动改变项目的顺序。
+        </h2>
+        <div class='dashboard' id='dashboard'>
+            <div class='row' style="height: 400px;overflow: auto" >
+                <?php foreach($data as $k=>$v){ ?>
+                <div class='panelBox col-sm-3 col-md-2' style="width: 16%;height:70px;display: inline-block">
+                    <div class='panel panel-block' data-id="{$v.xm_id}">
+                        <div class='panel-heading' style="height:70px;vertical-align:middle;border-radius:8px;padding:15px 3px 0;background-color:#5291C7;text-align: center;font-weight: 500">
+                            {$v.xm_code}
+                            <i class="fa fa-paperclip" style="position: absolute;top: -1px;right: 0;font-size: 23px;color: #FFD400;"></i>
+                        </div>
+                        <!--<div class='panel-body no-padding' style="height: 100px;text-align: left;background: #1AB394 !important;top: 30px; ">-->
+                            <!--<div style="text-align: center;margin: 8px 0 3px; font-weight: bold;">-->
+                                <!--{$v.xm_name}-->
+                            <!--</div>-->
+                            <!--<div style="text-align: center;font-size: 14px;min-height: 47px;line-height: 18px;width:100%;">-->
+                                <!--<span class='panel-title db'  style="vertical-align: middle;font-size: 14px;width:100%;">编号：{$v.xm_code}1244325325643554325</span>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </div>
+                </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<!--<script src="__PUBLIC__/vendor/zuisexy/assets/jquery.js"></script>-->
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<!--<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>-->
+<script src="__PUBLIC__/vendor/zuisexy/js/zui.js"></script>
+<script src="__PUBLIC__/vendor/zuisexy/lib/dashboard/zui.dashboard.js"></script>
+<script src="__PUBLIC__/vendor/zuisexy/lib/sortable/zui.sortable.js"></script>
+<script>window.jQuery || document.write('<script src="js/jquery-1.11.0.min.js"><\/script>')</script>
+<script>
+    $(function () {
+        var opener = '<?php echo trim(I("get.opener")); ?>';
+        layui.use(['form'], function () {
+            var form = layui.form()
+        });
+
+        $('#dashboard').dashboard({
+            draggable: true,
+            height:100,
+            width:200,
+            shadowType: false,
+            resizable: false,
+            sensitive: true,
+            url: '__CONTROLLER__/sort?id=f_atpid',         // 设定面板远程内容更新地址
+            afterOrdered: function (newOrders) {
+                $.ajax({
+                    type: 'post',
+                    url: '__CONTROLLER__/saveOrder',
+                    data: {data: newOrders},
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.code == 0) {
+                            parent.$('#information').bootstrapTable('refresh');
+                            layer.msg('操作成功');
+                        } else {
+                            layer.alert(data.message);
+                        }
+                    }
+                })
+            }
+        });
+
+    })
+
+</script>

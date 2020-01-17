@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/global.css" media="all" />
+    <link rel="stylesheet" href="__PUBLIC__/vendor/bootstrap-table/font-awesome/css/font-awesome.css" />
+
+    <style>
+        .na{
+            padding-right: 30px;
+            height: auto;
+            white-space: normal;
+        }
+        .logo img{
+            width:70px;
+            height: 60px;
+            margin-top: -20px;
+            margin-left: -8px;
+        }
+        .layui-main{
+            background: url("__PUBLIC__/img/bgimg/0408_5.jpg") repeat;
+            background-size:cover;
+        }
+        .layui-nav{
+            height: 60px;
+            background-color:#000018;
+        }
+        .logo span{
+            display: inline-block;
+            margin-top:3px;
+            font-size: 17px;
+        }
+        .fl{
+            float: left;
+        }
+        .layui-bg-black{
+            background-color:#000018;
+        }
+        .layui-layout-admin .layui-header {
+            border-bottom: 5px solid #ffffff;
+        }
+        .layui-nav-tree .layui-nav-child dd.layui-this, .layui-nav-tree .layui-this, .layui-nav-tree .layui-this>a, .layui-nav-tree .layui-this>a:hover {
+            background-color: #445872;
+            color: #fff;
+        }
+        .layui-nav-tree .layui-nav-bar {
+            width: 5px;
+            height: 0;
+             background-color: #445872;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header header">
+        <div class="layui-main">
+            <div style="height:65px;">
+                <h1 class="fl logo cb">
+                    <img src="__PUBLIC__/img/green1.png" alt="" class="fl">
+                    <span class="fl" style="font-weight: bold;font-family:微软雅黑;">{$Think.config.TITLE}</span>
+                </h1>
+                <div style="padding-left:30%;padding-top:15px;">
+                       <span style="font-size:20px;font-weight: bold;font-family:微软雅黑;">{$showlable}</span>
+                </div>
+            </div>
+            <div class="admin-side-toggle">
+                <i class="fa fa-angle-double-left" id="fa" aria-hidden="true"></i>
+            </div>
+        </div>
+    </div>
+    <div class="layui-side layui-bg-black" id="admin-side">
+        <div class="layui-side-scroll" id="admin-navbar-side" lay-filter="side" style="overflow: scroll"></div>
+    </div>
+    <div class="layui-body" style="bottom: 0;border-left: solid 2px #FFFFFF;" id="admin-body">
+        <div class="layui-tab admin-nav-card layui-tab-brief" lay-filter="admin-tab">
+            <ul id="lay" class="layui-tab-title na" style="display:none;">
+            </ul>
+            <div class="layui-tab-content" style="min-height: 150px; padding: 0 0 0 0;">
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+    <script>
+        var navs = {$ds_menu};
+        var relativePath = '{$relativePath}';
+        layui.config({
+            base: '__PUBLIC__/vendor/layui/js/'
+        }).use(['element', 'layer', 'navbar', 'tab'], function() {
+            var element = layui.element(),
+                    $ = layui.jquery,
+                    layer = layui.layer,
+                    navbar = layui.navbar(),
+                    tab = layui.tab({
+                        elem: '.admin-nav-card' //设置选项卡容器
+                    });
+            $('#header-img').on('click',function(){
+                window.location.reload();
+            });
+            //iframe自适应
+            $(window).on('resize', function() {
+                var $content = $('.admin-nav-card .layui-tab-content');
+                $content.height($(this).height()-100);
+                $content.find('iframe').each(function() {
+                    $(this).height($content.height());
+                });
+            }).resize();
+
+            //设置navbar
+            navbar.set({
+                spreadOne: true,
+                elem: '#admin-navbar-side',
+                cached: true,
+                data: navs
+                /*cached:true,
+                 url: 'datas/nav.json'*/
+            });
+            //渲染navbar
+            navbar.render();
+            //监听点击事件
+            navbar.on('click(side)', function(data) {
+                if(data.field.href.substring(0,7)=="outside") {
+                    data.field.href =data.field.href.substring(8, data.field.href.length);
+                }else {
+                    var href = relativePath + '/' + data.field.href;
+                    data.field.href = href;
+                }
+                tab.tabAdd(data.field, data.field.href);
+            });
+            $('.ban_menu').on('click',function(){
+                return false;
+            });
+
+            $('.admin-side-toggle').on('click', function() {
+                var sideWidth = $('#admin-side').width();
+                if(sideWidth === 200) {
+                    $('#admin-body').animate({
+                        left: '0'
+                    }); //admin-footer
+                    $('#admin-footer').animate({
+                        left: '0'
+                    });
+                    $('#admin-side').animate({
+                        width: '0'
+                    });
+                    $('.admin-side-toggle').animate({
+                        left: '0'
+                    });
+                    $('#fa').removeClass('fa-angle-double-left');
+                    $('#fa').addClass('fa-angle-double-right');
+
+
+                } else {
+                    $('#admin-body').animate({
+                        left: '200px'
+                    });
+                    $('#admin-footer').animate({
+                        left: '200px'
+                    });
+                    $('#admin-side').animate({
+                        width: '200px'
+                    });
+                    $('.admin-side-toggle').animate({
+                        left: '190px'
+                    });
+                    $('#fa').removeClass('fa-angle-double-right');
+                    $('#fa').addClass('fa-angle-double-left');
+                }
+            });
+
+            $('body').on('click','.fa', function(){
+                var id = $(this).next().attr('data-id');
+                var target = $('.layui-tab-item iframe[data-id="' + id + '"]');
+                var url = target.attr('src');
+                target.attr('src', url).load(function () {
+                });
+            });
+            var jianyishu=$("#admin-side li:eq(0)");
+            if(jianyishu.length!=0){
+                $(jianyishu).click();
+            }
+        });
+
+    </script>
+</div>
+</body>
+</html>

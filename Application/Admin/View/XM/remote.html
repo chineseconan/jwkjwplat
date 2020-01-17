@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="__PUBLIC__/css/tablepublic.css">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="__PUBLIC__/css/public.css">
+    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
+    <title>创建项目</title>
+    <style>
+        .content select{
+            width: 130px;
+            height: 26px;
+            font-size: 16px;
+            border-radius: 2px;
+            margin-right: 30px;
+        }
+        .content select option{
+            height: 26px;
+            line-height: 26px;
+            font-size: 17px;
+        }
+        .chosen-select{
+            width: 280px!important;
+        }
+        .confirm{
+            margin-right: 50px;
+        }
+        #confirm,#cancel{
+            padding: 6px 36px;
+        }
+        .alternative,.selected{
+            width: 50%;
+        }
+        #participants .chosen-container-single{
+            width: 175px!important;
+        }
+        #judges .chosen-container-single{
+            width: 150px!important;
+        }
+        .alternative>div{
+            margin-bottom: 20px;
+        }
+        .personneltype {
+            margin-bottom: 8px;
+            color:blue;
+            font-weight: bold;
+        }
+        #alternativeTable,#selectedTable{
+            table-layout: fixed;
+            width: 500px;
+        }
+        #alterjudges,#seljudges{
+            table-layout: fixed;
+            width: 420px;
+        }
+        span i{
+            font-size: 20px;
+        }
+        .form{
+            margin-top: 30px;
+        }
+        .tab-content{
+            padding-top: 10px;
+            margin-left: 10px;
+            box-sizing: border-box;
+        }
+        .tab-content span{
+            display: block;
+            margin-bottom: 10px;
+        }
+        .personnel{
+            margin: 10px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+<input type="hidden" value="{$xmId}" id="xmId">
+<input type="hidden" value="{$xm_class}" id="xm_class">
+<div class="dialog">
+    <div class="content">
+        <div class="body">
+            <div>
+                <div class="tab-content">
+                    <!--participants start-->
+                    <div id="participants">
+                        <div class="personnel cb">
+                            <div class="alternative fl">
+                                <span class="db personneltype" style="margin-top: -8px">备选人员</span>
+                                <div>
+                                    <label>专&emsp;&emsp;家:</label>
+                                    <select id="alternative_name" class="chosen-select sbInfoName" style="height: 30px;width:175px;border-radius: 3px">
+                                        <option value="">&nbsp;</option>
+                                        <foreach name="userdata" item="item">
+                                            <option value="{$item.user_realusername}">{$item.user_realusername}</option>
+                                        </foreach>
+                                    </select>
+                                    <label class="" style="margin-left:5px;">分组:</label>
+
+                                    <input type="text" id="search_class" name="search_class" style="margin-left:10px;width: 175px;height: 32px;border-radius: 4px" value="{$xm_class}">
+
+                                </div>
+                            </div>
+                            <div class="selected fl">
+                                <span class="db personneltype">已选人员</span>
+                                <label>专&emsp;&emsp;家:</label>
+                                <select id="selected_name" class="chosen-select sbInfoName" style="height: 30px;width:175px;border-radius: 3px">
+                                    <option value="">&nbsp;</option>
+                                    <foreach name="userdata" item="item">
+                                        <option value="{$item.user_realusername}">{$item.user_realusername}</option>
+                                    </foreach>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="cb" style="">
+                            <div class="alterBox fl" >
+                                <table id="alternativeTable" data-height="360"></table>
+                            </div>
+                            <div class="fl" style="width: 60px;margin-top:113px;">
+                                <div class="tc">
+                                    <button class="btn btn-warning" id="addAlternative">添加</button><br>
+                                    <i class="fa fa-long-arrow-right"></i>
+                                </div>
+                                <div class="tc">
+                                    <button class="btn btn-danger" id="removeSelected">移除</button><br>
+                                    <i class="fa fa-long-arrow-left"></i>
+                                </div>
+                            </div>
+                            <div class="selBox fl" >
+                                <table id="selectedTable" data-height="360"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tc" style="height:50px;margin-top: 20px">
+                    <a class="btn btn-success confirm" id="confirm">确定</a>
+                    <a class="btn btn-primary" id="cancel">取消</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script type="text/javascript" src="__PUBLIC__/vendor/ie8/jquery.form.js"></script>
+<script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
+<script>
+    var rightdata=[];
+    var newrightdata=[];
+    var  manualOp = false;
+    $(function(){
+//        下拉菜单
+        $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true});
+        var $delete  = [];
+//        备选评委
+        var TableObj_alternative = {
+            oTableInit:function(){
+                $('#alternativeTable').bootstrapTable({
+                    url: '__CONTROLLER__/getAlternativeData',         //请求后台的URL（*）
+                    method: 'post',                      //请求方式（*）
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: false,                   //是否显示分页（*）
+                    iconSize: 'outline',
+                    sortable: true,                     //是否启用排序
+                    queryParams:queryParams_alternative,
+                    search:false ,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                    showColumns: false,                  //是否显示所有的列
+                    showRefresh: false,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "user_id",                     //每一行的唯一标识，一般为主键列
+                    showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    showExport:true,
+                    exportDataType:'all',
+                    columns: [
+                        [
+                            {checkbox: true},
+                            {field: 'user_realusername', title: '专家',width: 80},
+                            {field: 'user_class', title: '分组',width: 80},
+                            {field: 'user_orgid', title: '单位',width: 80},
+                        ]
+                    ],
+                    onDblClickRow:function(row){
+                        getdata();
+                        var selectedLen = $('#selectedTable').bootstrapTable("getData").length;
+                        if(row['xr_id']==undefined){
+                            row['xr_id'] = "";
+                        }
+                        for(var i=0;i<$delete.length;i++){
+                            if($delete[i]['user_id']==row['user_id']){
+                                row['xr_id'] = $delete[i]['xr_id'];
+                            }
+                        }
+                        newrightdata.push(row);
+                        row[0] = false;
+                        var data = {
+                            index: selectedLen + 1,
+                            row: row
+                        }
+                        $('#selectedTable').bootstrapTable("insertRow", data);
+                        $('#alternativeTable').bootstrapTable("remove", {
+                            field:'user_id',
+                            values:[row['user_id']]
+                        });
+                    }
+                });
+            }
+        }
+        $(".sbInfoName").on("change",function(){
+            if($(this).attr("id")=="alternative_name"){
+                $('#alternativeTable').bootstrapTable("refresh");
+            }else if($(this).attr("id")=="selected_name"){
+                getdata();
+                $('#selectedTable').bootstrapTable("refresh");
+            }
+        });
+        $("#search_class").on("keyup",function(){
+            $('#alternativeTable').bootstrapTable("refresh");
+        });
+        function getdata(){
+            if(manualOp==false){
+                rightdata=$('#selectedTable').bootstrapTable("getData");
+                var rightdatalen=rightdata.length;
+                for(var i=0;i<rightdatalen;i++){
+                    newrightdata.push(rightdata[i]);
+                }
+                manualOp=true;
+            }
+        }
+        TableObj_alternative.oTableInit();
+        function queryParams_alternative(params){
+            var user_id = "";
+            var is_delete = 0;
+            var selected = newrightdata;
+            if(selected.context==undefined){
+                user_id = selected;
+            }
+            if(!$.isEmptyObject($delete)){
+                is_delete = 1;
+            }
+            return {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                'class': $("#search_class").val(),
+                name: $("#alternative_name").val(),
+                xmId:$("#xmId").val(),
+                user_id:user_id,
+                'delete':is_delete
+            };
+        };
+//        已选评委
+        var TableObj_selected = {
+            oTableInit:function(){
+                $('#selectedTable').bootstrapTable({
+                    url: '__CONTROLLER__/selectedData',         //请求后台的URL（*）
+                    method: 'post',                      //请求方式（*）
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: false,                   //是否显示分页（*）
+                    iconSize: 'outline',
+                    sortable: true,                     //是否启用排序
+                    queryParams:queryParams_selected,
+                    search: false,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                    showColumns: false,                  //是否显示所有的列
+                    showRefresh: false,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "user_id",                     //每一行的唯一标识，一般为主键列
+                    showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    showExport:true,
+                    exportDataType:'all',
+                    columns: [
+                        [
+                            {checkbox: true},
+                            {field: 'user_realusername', title: '专家',width: 80},
+                            {field: 'user_class', title: '分组',width: 80},
+                            {field: 'user_orgid', title: '单位',width: 80},
+                        ]
+                    ],
+                    onDblClickRow:function(row){
+                        getdata();
+                        var alternativeLen = $('#alternativeTable').bootstrapTable("getData").length;
+                        var data = {
+                            index: alternativeLen + 1,
+                            row: row
+                        }
+                        var rightlen=newrightdata.length;
+                        for(var j=0;j<rightlen;j++){
+                            if(newrightdata[j]["user_id"]==row["user_id"]){
+                                newrightdata.splice(j,1);
+                                break;
+                            }
+                        }
+                        $delete.push(row);
+                        if($("#search_class").val()==""){
+                            $('#alternativeTable').bootstrapTable("insertRow", data);
+                        }else if(row['user_class'].indexOf($("#search_class").val())!="-1"){
+                            $('#alternativeTable').bootstrapTable("insertRow", data);
+                        }
+                        $('#selectedTable').bootstrapTable("remove",{
+                            field:'user_id',
+                            values:[row['user_id']]
+                        } );
+
+                    }
+                });
+            }
+        }
+        TableObj_selected.oTableInit();
+        function queryParams_selected(params){
+            var user_id=[];
+            var selected = newrightdata;
+            if(selected.length!=0){
+                user_id = selected;
+            }
+
+            return {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                name: $("#selected_name").val(),
+                xmId:$("#xmId").val(),
+                user_id:user_id,
+                'delete':manualOp
+            };
+        };
+
+        $("#addAlternative").on("click",function(){
+            getdata();
+            var alternativeData = $('#alternativeTable').bootstrapTable("getAllSelections");
+            var len = alternativeData.length;
+            var selectedLen = $('#selectedTable').bootstrapTable("getData").length;
+            for (var i = 0; i < len; i++) {
+                if(alternativeData[i]['xr_id'] ==  undefined){
+                    alternativeData[i]['xr_id'] =  "";
+                }
+                for(var j=0;j<$delete.length;j++){
+                    if($delete[j]['user_id']==alternativeData[i]['user_id']){
+                        alternativeData[i]['xr_id'] = $delete[j]['xr_id'];
+                        break;
+                    }
+                }
+                alternativeData[i][0] = false;
+                var data = {
+                    index: selectedLen + 1,
+                    row: alternativeData[i]
+                }
+                newrightdata.push(alternativeData[i]);
+                $('#selectedTable').bootstrapTable("insertRow", data);
+                $('#alternativeTable').bootstrapTable("remove", {
+                    field:'user_id',
+                    values:[alternativeData[i]['user_id']]
+                });
+                selectedLen++;
+            }
+            return false;
+        });
+
+        $("#removeSelected").on("click",function(){
+            getdata();
+            var selectedData = $('#selectedTable').bootstrapTable("getAllSelections");
+            var len = selectedData.length;
+            var alternativeLen = $('#alternativeTable').bootstrapTable("getData").length;
+            for (var i = 0; i < len; i++) {
+                selectedData[i][0] = false;
+                var data = {
+                    index: alternativeLen + 1,
+                    row: selectedData[i]
+                }
+                if($("#search_class").val()!=""){
+                    $('#alternativeTable').bootstrapTable("insertRow", data);
+
+                }else if(selectedData[i]['user_class'].indexOf($("#search_class").val())!="-1"){
+                    $('#alternativeTable').bootstrapTable("insertRow", data);
+                }
+                $delete.push(selectedData[i]);
+                $('#selectedTable').bootstrapTable("remove",{
+                    field:'user_id',
+                    values:[selectedData[i]['user_id']]
+                });
+                var rightlen=newrightdata.length;
+                for(var j=0;j<rightlen;j++){
+                    if(newrightdata[j]["user_id"]==selectedData[i]["user_id"]){
+                        newrightdata.splice(j,1);
+                        break;
+                    }
+                }
+                alternativeLen++;
+            }
+            return false;
+        });
+    })
+
+    $("#confirm").on("click",saveData);
+    function saveData(){
+        if(manualOp==false){
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+            return;
+        }
+        var data = {};
+        var len =newrightdata.length;
+        var xrid="";
+        var userid="";
+        for(var i=0;i<len;i++){
+            xrid+=newrightdata[i].xr_id+",";
+            userid+=newrightdata[i].user_id+",";
+        }
+        if(userid!=""){
+            xrid=xrid.substring(0,xrid.length-1);
+            userid=userid.substring(0,userid.length-1)
+        }
+        data['xrid'] = xrid;
+        data['userid'] = userid;
+        data['xm_id'] = $("#xmId").val();
+        $.post("__CONTROLLER__/saveXMData",data,function(rep){
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+        });
+    }
+    $('#confirm').click(function(){
+        parent.$('#refresh').click();
+        parent.$('#information').bootstrapTable('refresh');
+    });
+
+//    取消按钮点击退出
+    $('#cancel').on('click',function(){
+        var index = parent.layer.getFrameIndex(window.name);
+        parent.layer.close(index);
+    })
+
+</script>
+</body>
+</html>
