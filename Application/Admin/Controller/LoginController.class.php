@@ -24,7 +24,7 @@ class LoginController extends Controller
 
         $model = M('sysuser');
         //获取角色信息
-        $data = $model->field('user_id,user_realusername,user_password,user_name,user_secretlevel,user_orgid,user_enable,user_issystem,user_secretlevelcode,user_firstuse,user_passworderrornum,user_frozentime,user_lastmodifytime,user_passworderrortime')
+        $data = $model->field('user_id,user_realusername,user_password,user_name,user_secretlevel,user_orgid,user_enable,user_issystem,user_secretlevelcode,user_passworderrornum,user_frozentime,user_lastmodifytime,user_passworderrortime')
             ->where("user_isdelete !='1' and user_name='".$username."' and user_password='".$password."'")
             ->find();
         $userId = $data['user_id'];
