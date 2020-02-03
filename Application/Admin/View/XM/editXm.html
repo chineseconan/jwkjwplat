@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="__PUBLIC__/css/public.css">
     <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
     <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
     <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
     <title>创建项目</title>
@@ -66,104 +65,108 @@
             height: 32px;
             border-radius: 4px;
         }
+        .cb>.fl>input{
+            width: 250px;height: 32px;border-radius: 4px;display: inline-block;
+        }
     </style>
 </head>
 <body>
-<input type="hidden" value="{$xmId}" id="xmId">
 <div class="dialog">
     <div class="content">
-        <div class="body">
-            <div>
-                <!--<ul class="nav nav-tabs">-->
-                    <!--<li class="active"><a href="#basicInfo" data-toggle="tab">基本信息</a></li>-->
-                <!--</ul>-->
-                <div class="tab-content">
-                    <div id="basicInfo" class="tab-pane fade active in">
-                        <form class="form">
-                            <div class="cb">
-                                <div class="fl">
-                                    <label>年度：</label>
-                                    <select name="xm_year" id="xm_year" class="chosen-select">
-                                        <option value=""></option>
-                                        <foreach name="year" item="yearItem">
-                                            <option value="{$yearItem.val}" <if condition="$xmData['xm_year'] eq $yearItem['val']">selected</if> >{$yearItem.val}</option>
-                                        </foreach>
-                                    </select>
-                                </div>
-                                <div class="fl">
-                                    <label>分组：</label>
-                                    <input type="text" id="xm_class" name="xm_class" style="width: 250px;height: 32px;border-radius: 4px" value="{$xmData.xm_class}">
-                                </div>
-                            </div>
-                            <div class="cb">
-                                <div class="fl">
-                                    <label>类别：</label>
-                                    <select id="xm_type" name="xm_type" value="{$xmData.xm_type}" class="chosen-select">
-                                        <option value="">&nbsp;</option>
-                                        <option <?php if($xmData['xm_type'] == '军队') echo "selected";?>>军队</option>
-                                        <option <?php if($xmData['xm_type'] == '地方') echo "selected";?>>地方</option>
-                                    </select>
-                                </div>
-                                <div class="fl">
-                                    <label>技术方向：</label>
-                                    <input type="text" id="xm_group" name="xm_group" value="{$xmData.xm_group}">
-                                </div>
-                            </div>
-                            <div class="cb">
-                                <div class="fl">
-                                    <label>项目名称：</label>
-                                    <input type="text" id="xm_name" name="xm_name" value="{$xmData.xm_name}">
-                                </div>
-                                <div class="fl">
-                                    <label>项目编号：</label>
-                                    <input type="text" id="xm_code" name="xm_code" value="{$xmData.xm_code}">
-                                </div>
-                            </div>
-                            <div class="cb">
-                                <div class="fl">
-                                    <label>申请人：</label>
-                                    <input type="text" id="xm_createuser" name="xm_createuser" value="{$xmData.xm_createuser}">
-                                </div>
-                                <div class="fl">
-                                    <label>依托单位：</label>
-                                    <input type="text" id="xm_company" name="xm_company" value="{$xmData.xm_company}">
-                                </div>
-                            </div>
-                            <div class="cb">
-                                <div class="fl">
-                                    <label>推荐方式：</label>
-                                    <input type="text" id="xm_tmfs" name="xm_tmfs" value="{$xmData.xm_tmfs}">
-                                </div>
-                                <div class="fl">
-                                    <label>答辩顺序：</label>
-                                    <input type="text" id="xm_ordernum" name="xm_ordernum" value="{$xmData.xm_ordernum}">
-                                </div>
-                            </div>
-                            <div class="cb">
-                                <div class="fl">
-                                    <label>初审分组：</label>
-                                    <input type="text" id="xm_oldfenzu" name="xm_oldfenzu" value="{$xmData.xm_oldfenzu}">
-                                </div>
-                                <div class="fl">
-                                    <label>初审得分：</label>
-                                    <input type="text" id="xm_oldscore" name="xm_oldscore" value="{$xmData.xm_oldscore}">
-                                </div>
-                            </div>
-                            <div class="cb">
-                                <div class="fl">
-                                    <label>初审排名：</label>
-                                    <input type="text" id="xm_oldrank" name="xm_oldrank" value="{$xmData.xm_oldrank}">
-                                </div>
-
-                            </div>
-                        </form>
-                    </div>
+        <form class="form" id="xm" name="xm">
+            <input type="hidden" value="{$xmId}" name="xm_id" id="xm_id"/>
+            <div class="cb">
+                <div class="fl">
+                    <label>分组：</label>
+                    <input type="text" id="xm_class" name="xm_class" class="form-control" value="{$xmData.xm_class}">
                 </div>
-                <div class="tc" style="height:50px;margin-top: 60px">
-                    <a class="btn btn-success confirm" id="confirm">确定</a>
-                    <a class="btn btn-primary" id="cancel">取消</a>
+                <div class="fl">
+                    <label>类别：</label>
+                    <input type="text" id="xm_type" name="xm_type" class="form-control" value="{$xmData.xm_type}"/>
+
                 </div>
             </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>技术方向：</label>
+                    <input type="text" id="xm_group" name="xm_group" class="form-control" value="{$xmData.xm_group}">
+                </div>
+                <div class="fl">
+                    <label>答辩顺序：</label>
+                    <input type="text" id="xm_ordernum" name="xm_ordernum" class="form-control" value="{$xmData.xm_ordernum}">
+                </div>
+            </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>项目名称：</label>
+                    <input type="text" id="xm_name" name="xm_name" class="form-control" value="{$xmData.xm_name}">
+                </div>
+                <div class="fl">
+                    <label>项目编号：</label>
+                    <input type="text" id="xm_code" name="xm_code" class="form-control" value="{$xmData.xm_code}">
+                </div>
+            </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>申请人：</label>
+                    <input type="text" id="xm_createuser" name="xm_createuser" class="form-control" value="{$xmData.xm_createuser}">
+                </div>
+                <div class="fl">
+                    <label>依托单位：</label>
+                    <input type="text" id="xm_company" name="xm_company" class="form-control" value="{$xmData.xm_company}">
+                </div>
+            </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>推荐方式：</label>
+                    <input type="text" id="xm_tmfs" name="xm_tmfs" class="form-control" value="{$xmData.xm_tmfs}">
+                </div>
+                <div class="fl">
+                    <label>研究目标：</label>
+                    <input type="text" id="xm_target" name="xm_target" class="form-control" value="{$xmData.xm_target}">
+                </div>
+            </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>预期成果：</label>
+                    <input type="text" id="xm_expect" name="xm_expect" class="form-control" value="{$xmData.xm_expect}">
+                </div>
+                <div class="fl">
+                    <label>研究周期：</label>
+                    <input type="text" id="xm_cycle" name="xm_cycle" class="form-control" value="{$xmData.xm_cycle}">
+                </div>
+            </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>经费概算：</label>
+                    <input type="text" id="xm_funds" name="xm_funds" class="form-control" value="{$xmData.xm_funds}">
+                </div>
+                <div class="fl">
+                    <label>备注：</label>
+                    <input type="text" id="xm_remark" name="xm_remark" class="form-control" value="{$xmData.xm_remark}">
+                </div>
+            </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>初审分组：</label>
+                    <input type="text" id="xm_oldfenzu" name="xm_oldfenzu" class="form-control" value="{$xmData.xm_oldfenzu}">
+                </div>
+                <div class="fl">
+                    <label>初审得分：</label>
+                    <input type="text" id="xm_oldscore" name="xm_oldscore" class="form-control" value="{$xmData.xm_oldscore}">
+                </div>
+            </div>
+            <div class="cb">
+                <div class="fl">
+                    <label>初审排名：</label>
+                    <input type="text" id="xm_oldrank" name="xm_oldrank" class="form-control" value="{$xmData.xm_oldrank}">
+                </div>
+
+            </div>
+        </form>
+        <div class="tc" style="height:40px;margin-top: 30px">
+            <a class="btn btn-success confirm" id="confirm">确定</a>
+            <a class="btn btn-primary" id="cancel">取消</a>
         </div>
     </div>
 </div>
@@ -173,7 +176,6 @@
 <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
 <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
 <script type="text/javascript" src="__PUBLIC__/vendor/ie8/jquery.form.js"></script>
-<script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
 <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
 <script>
     layui.use('layer', function() {
@@ -187,15 +189,14 @@
             var company       = $("#xm_company").val();
             var group         = $("#xm_class").val();
             var name          = $("#xm_name").val();
-            var xmId          = $("#xmId").val();
-            var xm_code       = $("#xm_code").val()
+            var xm_code       = $("#xm_code").val();
             var createuser    = $("#xm_createuser").val();
             var tmfs          = $('#xm_tmfs').val();
             var xm_ordernum   = $('#xm_ordernum').val();
             var xm_oldfenzu   = $('#xm_oldfenzu').val();
             var xm_oldscore   = $('#xm_oldscore').val();
             var xm_oldrank    = $('#xm_oldrank').val();
-            var xm_type       = $('#xm_type option:selected').val();
+            var xm_type       = $('#xm_type').val();
             var xm_group      = $('#xm_group').val();
             if (year == "") {
                 alert("请选择年度");
@@ -233,35 +234,22 @@
                 alert("请填写原排名");
                 return false;
             }
-            var data = {
-                xm_id: xmId,
-                xm_year: year,
-                xm_company: company,
-                xm_name: name,
-                xm_class: group,
-                xm_type: xm_type,
-                xm_group: xm_group,
-                xm_createuser:createuser,
-                xm_code:xm_code,
-                xm_tmfs:tmfs,
-                xm_ordernum:xm_ordernum,
-                xm_oldfenzu:xm_oldfenzu,
-                xm_oldscore:xm_oldscore,
-                xm_oldrank:xm_oldrank
-            };
-   
-            //console.log(data);return;
+            //console.log($("#xm").serialize());return;
 
-            $.post("__CONTROLLER__/saveXM", data, function (rep) {
+            $.post("__CONTROLLER__/saveXM", $("#xm").serialize(), function (rep) {
 //                rep = $.parseJSON(rep);
-                if (rep.code <= 0) {
-                    //alert("保存失败，请关闭重试");
-                    layer.alert(rep.message);
+                if (rep.code == 0) {
+                    layer.alert(rep.message,function(){
+                        var index = parent.layer.getFrameIndex(window.name);
+                        parent.$('#refresh').click();
+                        parent.$('#xmTable').bootstrapTable('refresh');
+                        parent.layer.close(index);
+                    });
                 } else if(rep.code== '99'){
                     layer.alert(rep.message,function(){
                         var index = parent.layer.getFrameIndex(window.name);
                         parent.$('#refresh').click();
-                        parent.$('#information').bootstrapTable('refresh');
+                        parent.$('#xmTable').bootstrapTable('refresh');
                         parent.layer.close(index);
                     });
 
@@ -270,7 +258,7 @@
                     setTimeout(function(){
                         var index = parent.layer.getFrameIndex(window.name);
                         parent.$('#refresh').click();
-                        parent.$('#information').bootstrapTable('refresh');
+                        parent.$('#xmTable').bootstrapTable('refresh');
                         parent.layer.close(index);
                     },2000);
                 }

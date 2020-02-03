@@ -124,7 +124,6 @@ class UserSafeController extends BaseController {
             $operation='重置密码:';
             $data['user_password']= 'Guanli'.date('Y');
             $data['user_passworderrornum']=0;
-            $data['user_firstuse']='是';
         }
         $data['user_lastmodifytime'] = time();
         $data['user_lastmodifyuser'] = session('user_id');

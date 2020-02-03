@@ -64,7 +64,7 @@ class LoginController extends Controller
             }
         } else {
             //密码错误
-            $data = $model->field('user_id,user_realusername,user_password,user_name,user_secretlevel,user_orgid,user_enable,user_issystem,user_secretlevelcode,user_firstuse,user_passworderrornum,user_frozentime,user_lastmodifytime,user_passworderrortime')
+            $data = $model->field('user_id,user_realusername,user_password,user_name,user_secretlevel,user_orgid,user_enable,user_issystem,user_secretlevelcode,user_passworderrornum,user_frozentime,user_lastmodifytime,user_passworderrortime')
             ->where("user_isdelete !='1' and user_name='".$username."'")
             ->find();
             if(empty($data)){
@@ -179,13 +179,8 @@ class LoginController extends Controller
         $data['user_password'] = $new;
         $data['user_lastmodifytime'] = time();
         $data['user_lastmodifyuser'] = $data['user_id'];
-        if (empty($data['user_firstuse'])||$data['user_firstuse']==='是') {
-            $data['user_firstuse'] = '否';
-            $this->addLog('', '用户登录日志', '', '账号('.$user_name. ')首次登录', '成功');
-        }else
-        {
-            $this->addLog('', '用户登录日志', '', '账号('.$user_name. ')登录', '成功');
-        }
+        $this->addLog('', '用户登录日志', '', '账号('.$user_name. ')登录', '成功');
+        
         $data['user_passworderrornum'] = 0;
         $now = time();
         session('operatetime',$now);

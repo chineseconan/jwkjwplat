@@ -10,14 +10,20 @@ namespace Admin\Controller;
 use Think\Controller;
 use Think\Exception;
 
-class XMController extends Controller
+class XMController extends BaseController
 {
+    /**
+     * 项目管理页面
+     */
     public function index()
     {
         $this->getDic();
         $this->display();
     }
 
+    /**
+     * 获取分组、项目类别信息
+     */
     private function getDic()
     {
         $xmInfo = M("xmps_xm")->field("xm_class,xm_type")->select();
@@ -27,24 +33,29 @@ class XMController extends Controller
         $this->assign("xmType", $xmType);
     }
 
-    public function remote()
+    /**
+     * 项目新增编辑页面
+     */
+    public function editXm()
     {
         $id = I("get.id");
         $Task = M("xmps_xm");
         $data = $Task->where("xm_id='$id'")->find();
         $this->assign("xmData", $data);
         $this->assign("xmId", $id);
-        $this->getDic();
-        $this->display("editXm");
+        $this->display();
     }
 
-    public function saveXMData()
+    /**
+     * 项目选择专家保存方法（旧）
+     */
+    public function saveXMDataOld()
     {
         $param = I("post.");
         $XR = M("xmps_xmrelation");
         $xrData = $XR->field("xr_id")->where("xr_xm_id='" . $param['xm_id'] . "'")->select();
         $postuserdata = explode(",", $param['userid']);
-        $postxrdata = explode(",", $param['xrid']);
+        $postxrdata   = explode(",", $param['xrid']);
         foreach ($postuserdata as $key => $val) {
             if ($postxrdata[$key] == "") {
                 $data['xr_user_id'] = $val;
@@ -65,16 +76,44 @@ class XMController extends Controller
         }
     }
 
+    /**
+     * 项目选择专家保存方法
+     */
+    public function saveXMData()
+    {
+        $param = I("post.");
+        $XR = M("xmps_xmrelation");
+        try{
+            $XR->startTrans();
+            $xrData = $XR->field("xr_id")->where("xr_xm_id='%s'",trim($param['xm_id']))->delete();
+            $userIds = I('post.userid');
+            foreach ($userIds as $key => $val) {
+                $data['xr_user_id'] = $val;
+                $data['xr_xm_id'] = $param['xm_id'];
+                $data['xr_id'] = makeGuid();
+                $data['xr_status'] = "进行中";
+                $XR->add($data);
+            }
+            $XR->commit();
+            exit(makeStandResult(0,'保存成功'));
+        }catch(\Exception $e){
+            $XR->rollback();
+            exit(makeStandResult(1,'保存失败，错误信息：'.$e));
+        }
+    }
+
+    /**
+     * 项目信息保存方法
+     */
     public function saveXm(){
         $param = I("post.");
-        //dump($param);die;
         $Model = M("xmps_xm");
         $xm_code = $Model
             ->field("xm_code,xm_id")
             ->where("xm_code='".$param['xm_code']."' and xm_id!='".$param['xm_id']."'")
             ->find();
         if(!empty($xm_code)){
-            echo makeStandResult("-1", "已存在相同的项目编号");die;
+            echo makeStandResult("1", "已存在相同的项目编号");die;
         }
         $relationModel = M("xmps_xmrelation");
         $data = $param;
@@ -103,13 +142,13 @@ class XMController extends Controller
                 if($count>1) $isSame = 1;
                 $Model->commit();
                 if($isSame == 0){
-                    echo makeStandResult("200", "保存成功!");die;
+                    echo makeStandResult("0", "保存成功!");die;
                 }else{
                     echo makeStandResult("99", "保存成功，当前分组下答辩顺序重复");die;
                 }
             }catch(Exception $e){
                 $Model->rollback();
-                echo makeStandResult("0", "保存失败,请关闭重试");die;
+                echo makeStandResult("2", "保存失败,请关闭重试");die;
             }
         } else {
             $XM = M("xmps_xm");
@@ -132,30 +171,45 @@ class XMController extends Controller
             }
         }
         if ($re===false) {
-            echo makeStandResult("0", "保存失败,请关闭重试");die;
+            echo makeStandResult("3", "保存失败,请关闭重试");die;
         } else {
             if($isSame == 0){
-                echo makeStandResult("200", "保存成功!");die;
+                echo makeStandResult("0", "保存成功!");die;
             }else{
                 echo makeStandResult("99", "保存成功，当前分组下答辩顺序重复");die;
             }
         }
     }
 
+    /**
+     * 项目选择评委页面
+     */
     public function setExt(){
         $id = I("get.id");
-        $Model = M("xmps_xm");
-        $group = $Model->where("xm_id='$id'")->getField("xm_class");
         $this->getDic();
-        $this->assign("xm_class",$group);
-        $this->assign("xmId", $id);
         $model = M('sysuser');
         $userdata = $model->field("user_id,user_realusername")
             ->where(" user_issystem != '是' and user_isdelete ='0'")
             ->order("user_realusername")
             ->select();
+
+        $Model = D("xmps_xmrelation");
+        $map   = [];
+        $map['xr_xm_id']      = Array("eq", $id);
+        $map['user_enable']   = Array("eq", "启用");
+        $map['user_issystem'] = Array("eq", "否");
+        $map['user_isdelete'] = Array("neq", "1");
+        $selectedData = $Model
+            ->alias("t")
+            ->where($map)
+            ->field("user_id,user_realusername,user_class,user_orgid,xr_id")
+            ->join("left join sysuser m on t.xr_user_id=m.user_id")
+            ->select();
+
+        $this->assign("xmId", $id);
         $this->assign("userdata", $userdata);
-        $this->display("remote");
+        $this->assign("data", json_encode($selectedData));
+        $this->display();
     }
 
     private function _filter($param)
@@ -187,6 +241,7 @@ class XMController extends Controller
         }
         return $map;
     }
+
     public function getData()
     {
         $param = json_decode(file_get_contents("php://input"), true);
@@ -204,26 +259,13 @@ class XMController extends Controller
         if ($param['name'] != "") {
             $map['user_realusername'] = Array("like", "%" . $param['name'] . "%");
         }
-        $map['user_enable'] = Array("eq", "启用");
-        $map['user_issystem'] = Array("eq", "否");
-        $map['user_class'] = Array("like",'%'.$param['class'].'%');
-        $map['user_isdelete'] = Array("neq","1");
+        $map['user_enable']   = ["eq", "启用"];
+        $map['user_issystem'] = ["eq", "否"];
+        if($param['class'] != '') $map['user_class']    = ["eq",trim($param['class'])];
+        $map['user_isdelete'] = ["neq","1"];
         $Model = M("sysuser");
-        $XR = M("xmps_xmrelation");
-        $xrData = $XR->where("xr_xm_id='".$param['xmId']."'")->select();
-        $notIn = "";
-        if(empty($param['user_id']) && !$param['delete']){
-            foreach($xrData as $val){
-                $notIn .= $val['xr_user_id'].",";
-            }
-        }else{
-            foreach($param['user_id'] as $val1){
-                $notIn .= $val1['user_id'].",";
-            }
-        }
-        $notIn = rtrim($notIn,",");
-        $map['user_id'] = Array("not in",$notIn);
         $data = $Model->field("user_id,user_realusername,user_class,user_orgid")->where($map)->select();
+//        echo $Model->_sql();die;
         $this->ajaxReturn($data);
     }
 
@@ -237,31 +279,22 @@ class XMController extends Controller
         if ($param['name'] != "") {
             $map['user_realusername'] = Array("like", "%" . $param['name'] . "%");
         }
-        $map['xr_xm_id'] = Array("eq", $param['xmId']);
-        $map['user_enable'] = Array("eq", "启用");
+        $map['xr_xm_id']      = Array("eq", $param['xmId']);
+        $map['user_enable']   = Array("eq", "启用");
         $map['user_issystem'] = Array("eq", "否");
         $map['user_isdelete'] = Array("neq", "1");
-        if ($param["delete"] == true) {
-            if ($param['name'] != "") {
-                foreach($param['user_id'] as $key=>$da){
-                    if(in_array($param['name'],$da)) {
-                        $data[count($data)]=$da;
-                    }
-                }
-            }else{
-                $data =$param['user_id'];
-            }
-        }else{
-            $data = $Model
-                ->alias("t")
-                ->where($map)
-                ->field("user_id,user_realusername,user_class,user_orgid,xr_id")
-                ->join("left join sysuser m on t.xr_user_id=m.user_id")
-                ->select();
-        }
+        $data = $Model
+            ->alias("t")
+            ->where($map)
+            ->field("user_id,user_realusername,user_class,user_orgid,xr_id")
+            ->join("left join sysuser m on t.xr_user_id=m.user_id")
+            ->select();
         $this->ajaxReturn($data);
     }
 
+    /**
+     * 项目导入
+     */
     public function import(){
         if(IS_POST){
             $Model = M("xmps_xm");
@@ -302,18 +335,20 @@ class XMController extends Controller
                             $data['xm_oldrank'] = $val['L'];
                             $data['xm_year'] = date("Y",time());
                             $Model->add($data);
-                            $userModel  = M("sysuser");
-                            $userMap['is_delete'] = Array("eq","0");
-                            $userMap['is_enable'] = Array("eq","启用");
+
+                            $userModel = M("sysuser");
+                            $userMap['is_delete']   = Array("eq","0");
+                            $userMap['is_enable']   = Array("eq","启用");
                             $userMap['is_issystem'] = Array("eq","否");
-                            $userMap['user_class'] = Array("eq",$data['xm_class']);
+                            $userMap['user_class']  = Array("eq",$data['xm_class']);
                             $userData = $userModel->where($userMap)->select();
+
                             $relationModel = M("xmps_xmrelation");
                             foreach($userData as $user){
-                                $item['xr_id'] = makeGuid();
+                                $item['xr_id']       = makeGuid();
                                 $item['xr_user_id'] = $user['user_id'];
-                                $item['xr_xm_id'] = $data['xm_id'];
-                                $item['xr_status'] = "进行中";
+                                $item['xr_xm_id']   = $data['xm_id'];
+                                $item['xr_status']  = "进行中";
                                 $relationModel->add($item);
                             }
                         }
@@ -332,9 +367,14 @@ class XMController extends Controller
         }
     }
 
+    /**
+     * 项目导出
+     */
     public function export(){
         $Model = D("xmps_xm");
-        $data = $Model->field("xm_name,xm_code,xm_class,xm_type,xm_group,xm_company")->where($map)->select();
+        $param = I('get.');
+        $map = $this->_filter($param);
+        $data = $Model->field("xm_name,xm_code,xm_class,xm_type,xm_group,xm_company")->where($map)->order($param['sort']." ".$param['sortOrder'])->select();
         $column = Array(
             "项目名称",
             "项目编号",
@@ -347,28 +387,37 @@ class XMController extends Controller
         echo excelExport($column,$data,true,$width);
     }
 
+    /**
+     * 删除项目
+     */
     public function deleteXm(){
-        $ids = I("post.ids");
+        $ids   = I("post.ids");
         $Model = D("xmps_xm");
-        $map['xm_id'] = Array("in",$ids);
-        $re = $Model->where($map)->setField("xm_status","删除");
-        if($re){
-            echo makeStandResult("200", "删除成功");
-        }else{
-            echo makeStandResult("0", "删除失败");
+        $map['xm_id']     = Array("in",$ids);
+        $mapR['xr_xm_id'] = Array("in",$ids);
+        try{
+            $Model->startTrans();
+            $Model->where($map)->delete();
+            M("xmps_xmrelation")->where($mapR)->delete();
+            $Model->commit();
+            echo makeStandResult("0", "删除成功");
+        }catch (\Exception $e){
+            $Model->rollback();
+            echo makeStandResult("1", "删除失败,错误信息：$e");
         }
     }
-	
-	
-    public function listindex()
+
+    /**
+     * 项目预览
+     * 多个文件（包含在项目编号名称的文件夹中所有文件的展示，C("defaultfilename")置顶）
+     */
+    public function listindexs()
     {
-        $xm_id=I("get.id");
+        $xm_id=I("get.xm_id");
         $model = M('xmps_xm');
         $xmdata=$model->where("xm_id='".$xm_id."'")->find();
         $path = './Public/'. C("xmfilepath")."/".$xmdata["xm_code"];
-
         $file = scandir($path);
-
         $filesort = [];
         foreach($file as $fileSortName){
             if($fileSortName == '.' || $fileSortName == '..'){
@@ -386,9 +435,7 @@ class XMController extends Controller
                     $filesort[] = $fileSortName;
                 }
             }
-
         }
-
 
         $menu=array();
         $relativePath = $_SERVER['SCRIPT_NAME'];
@@ -431,6 +478,56 @@ class XMController extends Controller
     }
 
     /**
+     * 项目预览
+     * 指定文件（展示pdf格式且文件名称为项目名称的文件）
+     */
+    public function listindex()
+    {
+        $xm_id   = I("get.xm_id");
+        $model   = M('xmps_xm');
+        $xmdata  = $model->where("xm_id='".$xm_id."'")->find();
+        $xm_code = $xmdata["xm_code"];
+
+        $path    = './Public/'. C("xmfilepath");
+
+        $file    = scandir($path);
+        $menu    = array();
+        $relativePath = $_SERVER['SCRIPT_NAME'];
+        array_multisort($file);
+        $other     = array();
+        foreach($file as $key=>$val){
+            if($val!='.' && $val!='..') {
+                $encode = mb_detect_encoding($val, array("UTF-8", "GB2312"));
+                $vals = $val;
+                if ($encode != "UTF-8") {
+                    $vals = iconv('gb2312', 'utf-8', $val);
+                }
+                array_push($other,$vals);
+
+            }else{
+                unset($file[$key]);
+            }
+        }
+        foreach($other as $val) {
+            $temparr = explode(".", $val);
+            if($temparr[0] == $xmdata['xm_name'] && $temparr[1] == 'pdf'){
+                $houzhui = $temparr[count($temparr) - 1];
+                $title = str_replace('.' . $houzhui, '', $val);
+                $child = array(
+                    'title' => $title, //标题
+                    'icon' => '&#xe63c;',//图标
+                    'href' => '.' . $path . "/" . $val,//链接
+                );
+                array_push($menu, $child);
+            }
+        }
+        $this->assign('relativePath',$relativePath);
+        $this->assign('ds_menu', json_encode($menu));
+        $this->assign('showlable', $xmdata["xm_createuser"]."(".$xmdata["xm_company"].")".$xmdata["xm_code"]."_".$xmdata["xm_name"]);
+        $this->display();
+    }
+
+    /**
      * 拖动排序页面
      */
     function sortByClass(){
@@ -443,6 +540,9 @@ class XMController extends Controller
         $this->display();
     }
 
+    /**
+     * 拖动排序保存
+     */
     function saveOrder(){
         $orderData = I('post.data');
         $Model     = M('xmps_xm');

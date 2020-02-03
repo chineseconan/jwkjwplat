@@ -101,9 +101,13 @@
                                             <option value="{$item.user_realusername}">{$item.user_realusername}</option>
                                         </foreach>
                                     </select>
-                                    <label class="" style="margin-left:5px;">分组:</label>
-
-                                    <input type="text" id="search_class" name="search_class" style="margin-left:10px;width: 175px;height: 32px;border-radius: 4px" value="{$xm_class}">
+                                    <label style="margin-left:5px;">分组:</label>
+                                    <select id="search_class" class="chosen-select" style="width: 175px;">
+                                        <option value="">全部</option>
+                                        <foreach name="xmClass" item="val">
+                                            <option>{$val}</option>
+                                        </foreach>
+                                    </select>
 
                                 </div>
                             </div>
@@ -154,13 +158,11 @@
 <script type="text/javascript" src="__PUBLIC__/vendor/ie8/jquery.form.js"></script>
 <script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
 <script>
-    var rightdata=[];
-    var newrightdata=[];
-    var  manualOp = false;
+    // 已选评委列表(最后提交保存的评委信息)
+    var selectedDataStart = $.parseJSON('{$data}');
     $(function(){
-//        下拉菜单
         $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true});
-        var $delete  = [];
+
 //        备选评委
         var TableObj_alternative = {
             oTableInit:function(){
@@ -188,83 +190,83 @@
                             {checkbox: true},
                             {field: 'user_realusername', title: '专家',width: 80},
                             {field: 'user_class', title: '分组',width: 80},
-                            {field: 'user_orgid', title: '单位',width: 80},
+                            {field: 'user_orgid', title: '单位',width: 80}
                         ]
                     ],
                     onDblClickRow:function(row){
-                        getdata();
                         var selectedLen = $('#selectedTable').bootstrapTable("getData").length;
-                        if(row['xr_id']==undefined){
+                        if(row['xr_id'] == undefined){
                             row['xr_id'] = "";
                         }
-                        for(var i=0;i<$delete.length;i++){
-                            if($delete[i]['user_id']==row['user_id']){
-                                row['xr_id'] = $delete[i]['xr_id'];
-                            }
-                        }
-                        newrightdata.push(row);
-                        row[0] = false;
+                        row[0] = false;     //默认本条数据不选中
                         var data = {
                             index: selectedLen + 1,
                             row: row
-                        }
+                        };
                         $('#selectedTable').bootstrapTable("insertRow", data);
+                        selectedDataStart.push(row);
                         $('#alternativeTable').bootstrapTable("remove", {
                             field:'user_id',
                             values:[row['user_id']]
                         });
+                    },
+                    onPostBody:function(){
+                        var selectedData = $('#selectedTable').bootstrapTable("getData");
+                        var selectedLen  = selectedData.length;
+                        if(selectedLen>0){
+                            if(typeof(selectedData[0]['user_realusername']) != 'undefined'){
+                                for(var i=0;i<selectedLen;i++){
+                                    var user_id = selectedData[i]['user_id'];
+                                    $('#alternativeTable').bootstrapTable('remove',{
+                                       field:'user_id',
+                                        values:[user_id]
+                                    });
+                                }
+                            }
+                        }
                     }
                 });
             }
+        };
+        function queryParams_alternative(params){
+            return {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                'class': $("#search_class").val(),
+                name: $("#alternative_name").val(),
+                xmId:$("#xmId").val()
+            };
         }
         $(".sbInfoName").on("change",function(){
             if($(this).attr("id")=="alternative_name"){
                 $('#alternativeTable').bootstrapTable("refresh");
             }else if($(this).attr("id")=="selected_name"){
-                getdata();
-                $('#selectedTable').bootstrapTable("refresh");
+                var selected_name = $(this).val();
+                if(selected_name != ''){
+                    var tableData = new Array();
+                    for(var i=0;i<selectedDataStart.length;i++){
+                        if(selectedDataStart[i]['user_realusername'] == selected_name){
+                            tableData[0] = selectedDataStart[i];
+                        }
+                    }
+                    $('#selectedTable').bootstrapTable("removeAll");
+                    $('#selectedTable').bootstrapTable("append",tableData);
+                }else{
+                    $('#selectedTable').bootstrapTable("removeAll");
+                    $('#selectedTable').bootstrapTable("append",selectedDataStart);
+                }
             }
         });
-        $("#search_class").on("keyup",function(){
+        $("#search_class").on("change",function(){
             $('#alternativeTable').bootstrapTable("refresh");
         });
-        function getdata(){
-            if(manualOp==false){
-                rightdata=$('#selectedTable').bootstrapTable("getData");
-                var rightdatalen=rightdata.length;
-                for(var i=0;i<rightdatalen;i++){
-                    newrightdata.push(rightdata[i]);
-                }
-                manualOp=true;
-            }
-        }
-        TableObj_alternative.oTableInit();
-        function queryParams_alternative(params){
-            var user_id = "";
-            var is_delete = 0;
-            var selected = newrightdata;
-            if(selected.context==undefined){
-                user_id = selected;
-            }
-            if(!$.isEmptyObject($delete)){
-                is_delete = 1;
-            }
-            return {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
-                'class': $("#search_class").val(),
-                name: $("#alternative_name").val(),
-                xmId:$("#xmId").val(),
-                user_id:user_id,
-                'delete':is_delete
-            };
-        };
 //        已选评委
         var TableObj_selected = {
             oTableInit:function(){
                 $('#selectedTable').bootstrapTable({
-                    url: '__CONTROLLER__/selectedData',         //请求后台的URL（*）
+                    data:$.parseJSON('{$data}'),
+//                    url: '__CONTROLLER__/selectedData',         //请求后台的URL（*）
                     method: 'post',                      //请求方式（*）
                     striped: true,                      //是否显示行间隔色
-                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    cache: true,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
                     pagination: false,                   //是否显示分页（*）
                     iconSize: 'outline',
                     sortable: true,                     //是否启用排序
@@ -284,146 +286,105 @@
                             {checkbox: true},
                             {field: 'user_realusername', title: '专家',width: 80},
                             {field: 'user_class', title: '分组',width: 80},
-                            {field: 'user_orgid', title: '单位',width: 80},
+                            {field: 'user_orgid', title: '单位',width: 80}
                         ]
                     ],
                     onDblClickRow:function(row){
-                        getdata();
                         var alternativeLen = $('#alternativeTable').bootstrapTable("getData").length;
                         var data = {
                             index: alternativeLen + 1,
                             row: row
-                        }
-                        var rightlen=newrightdata.length;
-                        for(var j=0;j<rightlen;j++){
-                            if(newrightdata[j]["user_id"]==row["user_id"]){
-                                newrightdata.splice(j,1);
-                                break;
-                            }
-                        }
-                        $delete.push(row);
-                        if($("#search_class").val()==""){
-                            $('#alternativeTable').bootstrapTable("insertRow", data);
-                        }else if(row['user_class'].indexOf($("#search_class").val())!="-1"){
-                            $('#alternativeTable').bootstrapTable("insertRow", data);
-                        }
+                        };
                         $('#selectedTable').bootstrapTable("remove",{
                             field:'user_id',
                             values:[row['user_id']]
-                        } );
+                        });
 
+                        unsetSelected(row['user_id']);
+                        // 如果用户的分组不包含筛选的分组，则不将用户插入备选评委列表
+                        if(($("#search_class").val() == '') || (row['user_class'] == $("#search_class").val())){
+                            $('#alternativeTable').bootstrapTable("insertRow", data);
+                        }
                     }
                 });
             }
-        }
-        TableObj_selected.oTableInit();
-        function queryParams_selected(params){
-            var user_id=[];
-            var selected = newrightdata;
-            if(selected.length!=0){
-                user_id = selected;
-            }
-
-            return {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
-                name: $("#selected_name").val(),
-                xmId:$("#xmId").val(),
-                user_id:user_id,
-                'delete':manualOp
-            };
         };
-
+        TableObj_selected.oTableInit();
+        TableObj_alternative.oTableInit();
+        function queryParams_selected(params){
+            return {
+                name: $("#selected_name").val(),
+                xmId:$("#xmId").val()
+            };
+        }
+        // 添加专家
         $("#addAlternative").on("click",function(){
-            getdata();
             var alternativeData = $('#alternativeTable').bootstrapTable("getAllSelections");
             var len = alternativeData.length;
             var selectedLen = $('#selectedTable').bootstrapTable("getData").length;
-            for (var i = 0; i < len; i++) {
-                if(alternativeData[i]['xr_id'] ==  undefined){
-                    alternativeData[i]['xr_id'] =  "";
+            if(len == 0){
+                layer.alert("请选择要添加的评委");
+            }else{
+                var ids = [];
+                for (var i = 0; i < len; i++) {
+                    ids.push(alternativeData[i]['user_id']);
+                    selectedDataStart.push(alternativeData[i]);
                 }
-                for(var j=0;j<$delete.length;j++){
-                    if($delete[j]['user_id']==alternativeData[i]['user_id']){
-                        alternativeData[i]['xr_id'] = $delete[j]['xr_id'];
-                        break;
-                    }
-                }
-                alternativeData[i][0] = false;
-                var data = {
-                    index: selectedLen + 1,
-                    row: alternativeData[i]
-                }
-                newrightdata.push(alternativeData[i]);
-                $('#selectedTable').bootstrapTable("insertRow", data);
                 $('#alternativeTable').bootstrapTable("remove", {
                     field:'user_id',
-                    values:[alternativeData[i]['user_id']]
+                    values:ids
                 });
-                selectedLen++;
+                $('#selectedTable').bootstrapTable("append",alternativeData);
             }
             return false;
         });
-
+        // 移除专家
         $("#removeSelected").on("click",function(){
-            getdata();
             var selectedData = $('#selectedTable').bootstrapTable("getAllSelections");
-            var len = selectedData.length;
-            var alternativeLen = $('#alternativeTable').bootstrapTable("getData").length;
+            var len          = selectedData.length;
+            var ids          = [];
             for (var i = 0; i < len; i++) {
-                selectedData[i][0] = false;
-                var data = {
-                    index: alternativeLen + 1,
-                    row: selectedData[i]
-                }
-                if($("#search_class").val()!=""){
-                    $('#alternativeTable').bootstrapTable("insertRow", data);
-
-                }else if(selectedData[i]['user_class'].indexOf($("#search_class").val())!="-1"){
-                    $('#alternativeTable').bootstrapTable("insertRow", data);
-                }
-                $delete.push(selectedData[i]);
-                $('#selectedTable').bootstrapTable("remove",{
-                    field:'user_id',
-                    values:[selectedData[i]['user_id']]
-                });
-                var rightlen=newrightdata.length;
-                for(var j=0;j<rightlen;j++){
-                    if(newrightdata[j]["user_id"]==selectedData[i]["user_id"]){
-                        newrightdata.splice(j,1);
-                        break;
-                    }
-                }
-                alternativeLen++;
+                ids.push(selectedData[i]['user_id']);
+                unsetSelected(selectedData[i]['user_id']);
             }
+            $('#selectedTable').bootstrapTable("remove",{
+                field:'user_id',
+                values:ids
+            });
+            $('#alternativeTable').bootstrapTable("append",selectedData);
             return false;
         });
-    })
+    });
 
+    function unsetSelected(userid){
+        var newSelected = [];
+        for(var i=0;i<selectedDataStart.length;i++){
+            if(selectedDataStart[i]['user_id'] != userid){
+                newSelected.push(selectedDataStart[i]);
+            }
+        }
+        selectedDataStart = newSelected;
+    }
     $("#confirm").on("click",saveData);
     function saveData(){
-        if(manualOp==false){
-            var index = parent.layer.getFrameIndex(window.name);
-            parent.layer.close(index);
-            return;
+        var selectedData = selectedDataStart;
+        var len =selectedData.length;
+        var userid = [];
+        for(var i=0;i<len;i++){
+            userid.push(selectedData[i]['user_id']);
         }
         var data = {};
-        var len =newrightdata.length;
-        var xrid="";
-        var userid="";
-        for(var i=0;i<len;i++){
-            xrid+=newrightdata[i].xr_id+",";
-            userid+=newrightdata[i].user_id+",";
-        }
-        if(userid!=""){
-            xrid=xrid.substring(0,xrid.length-1);
-            userid=userid.substring(0,userid.length-1)
-        }
-        data['xrid'] = xrid;
         data['userid'] = userid;
-        data['xm_id'] = $("#xmId").val();
+        data['xm_id']  = $("#xmId").val();
         $.post("__CONTROLLER__/saveXMData",data,function(rep){
-            var index = parent.layer.getFrameIndex(window.name);
-            parent.layer.close(index);
-        });
+            if(rep.code == 0){
+                parent.layer.msg(rep.message);
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+            }else{
+                parent.layer.alert(rep.message);
+            }
+        },'json');
     }
     $('#confirm').click(function(){
         parent.$('#refresh').click();

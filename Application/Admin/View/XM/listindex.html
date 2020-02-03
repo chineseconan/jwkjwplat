@@ -93,6 +93,7 @@
     <script>
         var navs = {$ds_menu};
         var relativePath = '{$relativePath}';
+        var heights = 0;
         layui.config({
             base: '__PUBLIC__/vendor/layui/js/'
         }).use(['element', 'layer', 'navbar', 'tab'], function() {
@@ -109,6 +110,7 @@
             //iframe自适应
             $(window).on('resize', function() {
                 var $content = $('.admin-nav-card .layui-tab-content');
+                heights = $(this).height()-100;
                 $content.height($(this).height()-100);
                 $content.find('iframe').each(function() {
                     $(this).height($content.height());
@@ -177,11 +179,17 @@
                 }
             });
 
-            $('body').on('click','.fa', function(){
-                var id = $(this).next().attr('data-id');
-                var target = $('.layui-tab-item iframe[data-id="' + id + '"]');
-                var url = target.attr('src');
-                target.attr('src', url).load(function () {
+       
+            $('.layui-nav-item').on('click',function(){
+                var data_url = $(this).children("a").attr('data-url');
+                var target = $('.layui-tab-item iframe[src="{:getWebsiteRootPath()}index.php/' + data_url+ '"]');
+                target.on('load',function () {
+                    var imgObj = target[0].contentWindow.document.getElementsByTagName("img");
+                    if(imgObj.length>0){
+                        $(imgObj).css('max-width','100%');
+                        // $(imgObj).css('max-height','100%');
+                        $(imgObj).css('max-height',heights+'px');
+                    }
                 });
             });
             var jianyishu=$("#admin-side li:eq(0)");
