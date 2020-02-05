@@ -12,7 +12,7 @@ return array(
 
     'COMMONUSERID'=> 'T30E9CC5E140D43A6B0E448B8', //‘普通用户’的角色id
     'PROFESSERID'=> 'TCAAB0FF33F1D45348204EB46', //‘专家’的角色id
-    'VIEWUSERID'=> 'TC0956A46AAEB448DB04EE0C0', //‘专家’的角色id
+    'VIEWUSERID'=> 'TC0956A46AAEB448DB04EE0C0', //‘浏览专家’的角色id
 
     'PWD_SALT' => 'jwkjw',//系统登录密码加密的盐
     "xmfilepath"=>"ziyuan",

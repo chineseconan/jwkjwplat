@@ -39,10 +39,12 @@ class XMController extends BaseController
     public function editXm()
     {
         $id = I("get.id");
-        $Task = M("xmps_xm");
-        $data = $Task->where("xm_id='$id'")->find();
-        $this->assign("xmData", $data);
-        $this->assign("xmId", $id);
+        if($id){
+            $Task = M("xmps_xm");
+            $data = $Task->where("xm_id='$id'")->find();
+            $this->assign("xmData", $data);
+            $this->assign("xmId", $id);
+        }
         $this->display();
     }
 
@@ -82,7 +84,7 @@ class XMController extends BaseController
     public function saveXMData()
     {
         $param = I("post.");
-        $XR = M("xmps_xmrelation");
+        $XR    = M("xmps_xmrelation");
         try{
             $XR->startTrans();
             $xrData = $XR->field("xr_id")->where("xr_xm_id='%s'",trim($param['xm_id']))->delete();
@@ -188,6 +190,7 @@ class XMController extends BaseController
         $id = I("get.id");
         $this->getDic();
         $model = M('sysuser');
+        // 查询所有专家
         $userdata = $model->field("user_id,user_realusername")
             ->where(" user_issystem != '是' and user_isdelete ='0'")
             ->order("user_realusername")
@@ -199,6 +202,7 @@ class XMController extends BaseController
         $map['user_enable']   = Array("eq", "启用");
         $map['user_issystem'] = Array("eq", "否");
         $map['user_isdelete'] = Array("neq", "1");
+        // 查询已选择专家
         $selectedData = $Model
             ->alias("t")
             ->where($map)
@@ -474,7 +478,7 @@ class XMController extends BaseController
         $this->assign('relativePath',$relativePath);
         $this->assign('ds_menu', json_encode($menu));
         $this->assign('showlable', $xmdata["xm_createuser"]."(".$xmdata["xm_company"].")".$xmdata["xm_code"]."_".$xmdata["xm_name"]);
-        $this->display();
+        $this->display('listindex');
     }
 
     /**

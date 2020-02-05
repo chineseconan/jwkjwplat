@@ -1,87 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="__PUBLIC__/css/tablepublic.css">
-    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
-    <link rel="stylesheet" href="__PUBLIC__/css/public.css">
-    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
-    <title>创建项目</title>
-    <style>
-        .content select{
-            width: 130px;
-            height: 26px;
-            font-size: 16px;
-            border-radius: 2px;
-            margin-right: 30px;
-        }
-        .content select option{
-            height: 26px;
-            line-height: 26px;
-            font-size: 17px;
-        }
-        .chosen-select{
-            width: 280px!important;
-        }
-        .confirm{
-            margin-right: 50px;
-        }
-        #confirm,#cancel{
-            padding: 6px 36px;
-        }
-        .alternative,.selected{
-            width: 50%;
-        }
-        #participants .chosen-container-single{
-            width: 175px!important;
-        }
-        #judges .chosen-container-single{
-            width: 150px!important;
-        }
-        .alternative>div{
-            margin-bottom: 20px;
-        }
-        .personneltype {
-            margin-bottom: 8px;
-            color:blue;
-            font-weight: bold;
-        }
-        #alternativeTable,#selectedTable{
-            table-layout: fixed;
-            width: 500px;
-        }
-        #alterjudges,#seljudges{
-            table-layout: fixed;
-            width: 420px;
-        }
-        span i{
-            font-size: 20px;
-        }
-        .form{
-            margin-top: 30px;
-        }
-        .tab-content{
-            padding-top: 10px;
-            margin-left: 10px;
-            box-sizing: border-box;
-        }
-        .tab-content span{
-            display: block;
-            margin-bottom: 10px;
-        }
-        .personnel{
-            margin: 10px 0 0 0;
-        }
-    </style>
-</head>
+<include file="Public:tableheader" />
+<link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+<link rel="stylesheet" href="__PUBLIC__/css/public.css">
+<style>
+    .content select{
+        width: 130px;
+        height: 26px;
+        font-size: 16px;
+        border-radius: 2px;
+        margin-right: 30px;
+    }
+    .content select option{
+        height: 26px;
+        line-height: 26px;
+        font-size: 17px;
+    }
+    .chosen-select{
+        width: 280px!important;
+    }
+    .confirm{
+        margin-right: 50px;
+    }
+    #confirm,#cancel{
+        padding: 6px 36px;
+    }
+    .alternative,.selected{
+        width: 50%;
+    }
+    #participants .chosen-container-single{
+        width: 175px!important;
+    }
+    #judges .chosen-container-single{
+        width: 150px!important;
+    }
+    .alternative>div{
+        margin-bottom: 20px;
+    }
+    .personneltype {
+        margin-bottom: 8px;
+        color:blue;
+        font-weight: bold;
+    }
+    #alternativeTable,#selectedTable{
+        table-layout: fixed;
+        width: 500px;
+    }
+    #alterjudges,#seljudges{
+        table-layout: fixed;
+        width: 420px;
+    }
+    span i{
+        font-size: 20px;
+    }
+    .form{
+        margin-top: 30px;
+    }
+    .tab-content{
+        padding-top: 10px;
+        margin-left: 10px;
+        box-sizing: border-box;
+    }
+    .tab-content span{
+        display: block;
+        margin-bottom: 10px;
+    }
+    .personnel{
+        margin: 10px 0 0 0;
+    }
+</style>
 <body>
-<input type="hidden" value="{$xmId}" id="xmId"/>
+<input type="hidden" value="{$userId}" id="userId"/>
 <div class="dialog">
     <div class="body">
         <div>
@@ -90,13 +77,13 @@
                 <div id="participants">
                     <div class="personnel cb">
                         <div class="alternative fl">
-                            <span class="db personneltype" style="margin-top: -8px">备选人员</span>
+                            <span class="db personneltype" style="margin-top: -8px">备选项目</span>
                             <div>
-                                <label>专&emsp;&emsp;家:</label>
+                                <label>项目编号:</label>
                                 <select id="alternative_name" class="chosen-select sbInfoName" style="height: 30px;width:175px;border-radius: 3px">
                                     <option value="">&nbsp;</option>
-                                    <foreach name="userdata" item="item">
-                                        <option value="{$item.user_realusername}">{$item.user_realusername}</option>
+                                    <foreach name="xmdata" item="item">
+                                        <option value="{$item.xm_code}">{$item.xm_name}({$item.xm_code})</option>
                                     </foreach>
                                 </select>
                                 <label style="margin-left:5px;">分组:</label>
@@ -109,12 +96,13 @@
                             </div>
                         </div>
                         <div class="selected fl">
-                            <span class="db personneltype">已选人员</span>
-                            <label>专&emsp;&emsp;家:</label>
+                            <span class="db personneltype">已选项目</span>
+                            <label>项目编号:</label>
+                            <!--<input type="text"  id="selected_name"  class='sbInfoName' style="height: 30px;width:175px!important;border-radius: 3px">-->
                             <select id="selected_name" class="chosen-select sbInfoName" style="height: 30px;width:175px;border-radius: 3px">
                                 <option value="">&nbsp;</option>
-                                <foreach name="userdata" item="item">
-                                    <option value="{$item.user_realusername}">{$item.user_realusername}</option>
+                                <foreach name="xmdata" item="item">
+                                    <option value="{$item.xm_code}">{$item.xm_name}({$item.xm_code})</option>
                                 </foreach>
                             </select>
                         </div>
@@ -123,7 +111,7 @@
                         <div class="alterBox fl" >
                             <table id="alternativeTable" data-height="360"></table>
                         </div>
-                        <div class="fl" style="width: 60px;margin-top:113px;">
+                        <div class="fl" style="width: 60px;margin-top: 113px;">
                             <div class="tc">
                                 <button class="btn btn-warning" id="addAlternative">添加</button><br>
                                 <i class="fa fa-long-arrow-right"></i>
@@ -146,19 +134,13 @@
         </div>
     </div>
 </div>
-<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
-<script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
-<script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
-<script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
 <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
-<script type="text/javascript" src="__PUBLIC__/vendor/ie8/jquery.form.js"></script>
-<script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
 <script>
-    // 已选评委列表(最后提交保存的评委信息)
+    // 已选项目列表(最后提交保存的项目)
     var selectedDataStart = $.parseJSON('{$data}');
     $(function(){
         $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true});
-//        备选评委
+//        备选项目
         var TableObj_alternative = {
             oTableInit:function(){
                 $('#alternativeTable').bootstrapTable({
@@ -175,7 +157,7 @@
                     showRefresh: false,                  //是否显示刷新按钮
                     minimumCountColumns: 2,             //最少允许的列数
                     clickToSelect: true,                //是否启用点击选中行
-                    uniqueId: "user_id",                     //每一行的唯一标识，一般为主键列
+                    uniqueId: "xm_id",                     //每一行的唯一标识，一般为主键列
                     showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
                     cardView: false,                    //是否显示详细视图
                     showExport:true,
@@ -183,9 +165,9 @@
                     columns: [
                         [
                             {checkbox: true},
-                            {field: 'user_realusername', title: '专家',width: 80},
-                            {field: 'user_class', title: '分组',width: 80},
-                            {field: 'user_orgid', title: '单位',width: 80}
+                            {field: 'xm_code', title: '项目编号',width: 80},
+                            {field: 'xm_class', title: '分组',width: 80},
+                            {field: 'xm_company', title: '单位',width: 80}
                         ]
                     ],
                     onDblClickRow:function(row){
@@ -201,20 +183,20 @@
                         $('#selectedTable').bootstrapTable("insertRow", data);
                         selectedDataStart.push(row);
                         $('#alternativeTable').bootstrapTable("remove", {
-                            field:'user_id',
-                            values:[row['user_id']]
+                            field:'xm_id',
+                            values:[row['xm_id']]
                         });
                     },
                     onPostBody:function(){
                         var selectedData = $('#selectedTable').bootstrapTable("getData");
                         var selectedLen  = selectedData.length;
                         if(selectedLen>0){
-                            if(typeof(selectedData[0]['user_realusername']) != 'undefined'){
+                            if(typeof(selectedData[0]['xm_id']) != 'undefined'){
                                 for(var i=0;i<selectedLen;i++){
-                                    var user_id = selectedData[i]['user_id'];
+                                    var xm_id = selectedData[i]['xm_id'];
                                     $('#alternativeTable').bootstrapTable('remove',{
-                                       field:'user_id',
-                                        values:[user_id]
+                                        field:'xm_id',
+                                        values:[xm_id]
                                     });
                                 }
                             }
@@ -225,9 +207,9 @@
         };
         function queryParams_alternative(params){
             return {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
-                'class': $("#search_class").val(),
+                'class':$("#search_class").val(),
                 name: $("#alternative_name").val(),
-                xmId:$("#xmId").val()
+                userId:$("#userId").val(),
             };
         }
         $(".sbInfoName").on("change",function(){
@@ -238,7 +220,7 @@
                 if(selected_name != ''){
                     var tableData = new Array();
                     for(var i=0;i<selectedDataStart.length;i++){
-                        if(selectedDataStart[i]['user_realusername'] == selected_name){
+                        if(selectedDataStart[i]['xm_code'] == selected_name){
                             tableData[0] = selectedDataStart[i];
                         }
                     }
@@ -253,15 +235,16 @@
         $("#search_class").on("change",function(){
             $('#alternativeTable').bootstrapTable("refresh");
         });
+
 //        已选评委
         var TableObj_selected = {
             oTableInit:function(){
                 $('#selectedTable').bootstrapTable({
                     data:$.parseJSON('{$data}'),
-//                    url: '__CONTROLLER__/selectedData',         //请求后台的URL（*）
+                    // url: '__CONTROLLER__/selectedData',         //请求后台的URL（*）
                     method: 'post',                      //请求方式（*）
                     striped: true,                      //是否显示行间隔色
-                    cache: true,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
                     pagination: false,                   //是否显示分页（*）
                     iconSize: 'outline',
                     sortable: true,                     //是否启用排序
@@ -271,7 +254,7 @@
                     showRefresh: false,                  //是否显示刷新按钮
                     minimumCountColumns: 2,             //最少允许的列数
                     clickToSelect: true,                //是否启用点击选中行
-                    uniqueId: "user_id",                     //每一行的唯一标识，一般为主键列
+                    uniqueId: "xm_id",                     //每一行的唯一标识，一般为主键列
                     showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
                     cardView: false,                    //是否显示详细视图
                     showExport:true,
@@ -279,9 +262,9 @@
                     columns: [
                         [
                             {checkbox: true},
-                            {field: 'user_realusername', title: '专家',width: 80},
-                            {field: 'user_class', title: '分组',width: 80},
-                            {field: 'user_orgid', title: '单位',width: 80}
+                            {field: 'xm_code', title: '项目编号',width: 80},
+                            {field: 'xm_class', title: '分组',width: 80},
+                            {field: 'xm_company', title: '单位',width: 80}
                         ]
                     ],
                     onDblClickRow:function(row){
@@ -291,28 +274,28 @@
                             row: row
                         };
                         $('#selectedTable').bootstrapTable("remove",{
-                            field:'user_id',
-                            values:[row['user_id']]
+                            field:'xm_id',
+                            values:[row['xm_id']]
                         });
 
-                        unsetSelected(row['user_id']);
-                        // 如果用户的分组不包含筛选的分组，则不将用户插入备选评委列表
-                        if(($("#search_class").val() == '') || (row['user_class'] == $("#search_class").val())){
+                        unsetSelected(row['xm_id']);
+                        // 如果项目的分组不包含筛选的分组，则不将用户插入备选项目列表
+                        if(($("#search_class").val() == '') || (row['xm_class'] == $("#search_class").val())){
                             $('#alternativeTable').bootstrapTable("insertRow", data);
                         }
                     }
                 });
             }
         };
-        TableObj_selected.oTableInit();
         TableObj_alternative.oTableInit();
+        TableObj_selected.oTableInit();
         function queryParams_selected(params){
             return {
                 name: $("#selected_name").val(),
-                xmId:$("#xmId").val()
+                userId:$("#userId").val()
             };
         }
-        // 添加专家
+        // 添加项目
         $("#addAlternative").on("click",function(){
             var alternativeData = $('#alternativeTable').bootstrapTable("getAllSelections");
             var len = alternativeData.length;
@@ -321,28 +304,28 @@
             }else{
                 var ids = [];
                 for (var i = 0; i < len; i++) {
-                    ids.push(alternativeData[i]['user_id']);
+                    ids.push(alternativeData[i]['xm_id']);
                     selectedDataStart.push(alternativeData[i]);
                 }
                 $('#alternativeTable').bootstrapTable("remove", {
-                    field:'user_id',
+                    field:'xm_id',
                     values:ids
                 });
                 $('#selectedTable').bootstrapTable("append",alternativeData);
             }
             return false;
         });
-        // 移除专家
+        // 移除项目
         $("#removeSelected").on("click",function(){
             var selectedData = $('#selectedTable').bootstrapTable("getAllSelections");
             var len          = selectedData.length;
             var ids          = [];
             for (var i = 0; i < len; i++) {
-                ids.push(selectedData[i]['user_id']);
-                unsetSelected(selectedData[i]['user_id']);
+                ids.push(selectedData[i]['xm_id']);
+                unsetSelected(selectedData[i]['xm_id']);
             }
             $('#selectedTable').bootstrapTable("remove",{
-                field:'user_id',
+                field:'xm_id',
                 values:ids
             });
             $('#alternativeTable').bootstrapTable("append",selectedData);
@@ -350,10 +333,11 @@
         });
     });
 
-    function unsetSelected(userid){
+
+    function unsetSelected(xmid){
         var newSelected = [];
         for(var i=0;i<selectedDataStart.length;i++){
-            if(selectedDataStart[i]['user_id'] != userid){
+            if(selectedDataStart[i]['xm_id'] != xmid){
                 newSelected.push(selectedDataStart[i]);
             }
         }
@@ -363,14 +347,14 @@
     function saveData(){
         var selectedData = selectedDataStart;
         var len =selectedData.length;
-        var userid = [];
+        var xmid = [];
         for(var i=0;i<len;i++){
-            userid.push(selectedData[i]['user_id']);
+            xmid.push(selectedData[i]['xm_id']);
         }
         var data = {};
-        data['userid'] = userid;
-        data['xm_id']  = $("#xmId").val();
-        $.post("__CONTROLLER__/saveXMData",data,function(rep){
+        data['xmid'] = xmid;
+        data['user_id']  = $("#userId").val();
+        $.post("__CONTROLLER__/saveZhuanjiaData",data,function(rep){
             if(rep.code == 0){
                 parent.layer.msg(rep.message);
                 var index = parent.layer.getFrameIndex(window.name);
@@ -385,7 +369,7 @@
         parent.$('#information').bootstrapTable('refresh');
     });
 
-//    取消按钮点击退出
+    //    取消按钮点击退出
     $('#cancel').on('click',function(){
         var index = parent.layer.getFrameIndex(window.name);
         parent.layer.close(index);

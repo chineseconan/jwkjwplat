@@ -1,174 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="__PUBLIC__/css/tablepublic.css">
-    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
-    <link rel="stylesheet" href="__PUBLIC__/css/public.css">
-    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
-    <title>创建项目</title>
-    <style>
-        .content select{
-            width: 130px;
-            height: 26px;
-            font-size: 16px;
-            border-radius: 2px;
-            margin-right: 30px;
-        }
-        .content select option{
-            height: 26px;
-            line-height: 26px;
-            font-size: 17px;
-        }
-        .confirm{
-            margin-right: 50px;
-        }
-        #confirm,#cancel{
-            padding: 6px 36px;
-        }
-        span i{
-            font-size: 20px;
-        }
-        .form{
-            margin-top: 30px;
-        }
-        .tab-content{
-            padding-top: 10px;
-            margin-left: 10px;
-            box-sizing: border-box;
-        }
-        .tab-content span{
-            display: block;
-            margin-bottom: 10px;
-        }
-        label{
-            width: 19%;
-            margin-left: 30px;
-            text-align: right;
-            margin-right:10px;
-        }
-        .fl{
-            margin-left:20px;
-            width:400px;
-        }
-        .cb{
-            margin-top: 20px;
-            width: 97%;
-        }
-        input{
-            width: 250px;
-            height: 32px;
-            border-radius: 4px;
-        }
-        .cb>.fl>input{
-            width: 250px;height: 32px;border-radius: 4px;display: inline-block;
-        }
-    </style>
-</head>
+<include file="Public:header"/>
+<style>
+    .content select{
+        width: 130px;
+        height: 26px;
+        font-size: 16px;
+        border-radius: 2px;
+        margin-right: 30px;
+    }
+    .content select option{
+        height: 26px;
+        line-height: 26px;
+        font-size: 17px;
+    }
+    .confirm{
+        margin-right: 50px;
+    }
+    #confirm,#cancel{
+        padding: 6px 36px;
+    }
+    span i{
+        font-size: 20px;
+    }
+    .form{
+        margin-top: 30px;
+    }
+    .tab-content{
+        padding-top: 10px;
+        margin-left: 10px;
+        box-sizing: border-box;
+    }
+    .tab-content span{
+        display: block;
+        margin-bottom: 10px;
+    }
+    label{
+        width: 19%;
+        margin-left: 30px;
+        text-align: right;
+        margin-right:10px;
+    }
+    .fl{
+        margin-left:20px;
+        width:400px;
+    }
+    .cb{
+        margin-top: 20px;
+        width: 97%;
+    }
+    input{
+        width: 250px;
+        height: 32px;
+        border-radius: 4px;
+    }
+    .cb>.fl>input{
+        width: 250px;height: 32px;border-radius: 4px;display: inline-block;
+    }
+</style>
 <body>
-<div class="dialog">
-    <div class="content">
-        <form class="form" id="xm" name="xm">
-            <input type="hidden" value="{$xmId}" name="xm_id" id="xm_id"/>
-            <div class="cb">
-                <div class="fl">
-                    <label>分组：</label>
-                    <input type="text" id="xm_class" name="xm_class" class="form-control" value="{$xmData.xm_class}">
-                </div>
-                <div class="fl">
-                    <label>类别：</label>
-                    <input type="text" id="xm_type" name="xm_type" class="form-control" value="{$xmData.xm_type}"/>
-
-                </div>
+<div class="content">
+    <form class="form" id="xm" name="xm">
+        <input type="hidden" value="{$xmId}" name="xm_id" id="xm_id"/>
+        <div class="cb">
+            <div class="fl">
+                <label>分组：</label>
+                <input type="text" id="xm_class" name="xm_class" class="form-control" value="{$xmData.xm_class}">
             </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>技术方向：</label>
-                    <input type="text" id="xm_group" name="xm_group" class="form-control" value="{$xmData.xm_group}">
-                </div>
-                <div class="fl">
-                    <label>答辩顺序：</label>
-                    <input type="text" id="xm_ordernum" name="xm_ordernum" class="form-control" value="{$xmData.xm_ordernum}">
-                </div>
-            </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>项目名称：</label>
-                    <input type="text" id="xm_name" name="xm_name" class="form-control" value="{$xmData.xm_name}">
-                </div>
-                <div class="fl">
-                    <label>项目编号：</label>
-                    <input type="text" id="xm_code" name="xm_code" class="form-control" value="{$xmData.xm_code}">
-                </div>
-            </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>申请人：</label>
-                    <input type="text" id="xm_createuser" name="xm_createuser" class="form-control" value="{$xmData.xm_createuser}">
-                </div>
-                <div class="fl">
-                    <label>依托单位：</label>
-                    <input type="text" id="xm_company" name="xm_company" class="form-control" value="{$xmData.xm_company}">
-                </div>
-            </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>推荐方式：</label>
-                    <input type="text" id="xm_tmfs" name="xm_tmfs" class="form-control" value="{$xmData.xm_tmfs}">
-                </div>
-                <div class="fl">
-                    <label>研究目标：</label>
-                    <input type="text" id="xm_target" name="xm_target" class="form-control" value="{$xmData.xm_target}">
-                </div>
-            </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>预期成果：</label>
-                    <input type="text" id="xm_expect" name="xm_expect" class="form-control" value="{$xmData.xm_expect}">
-                </div>
-                <div class="fl">
-                    <label>研究周期：</label>
-                    <input type="text" id="xm_cycle" name="xm_cycle" class="form-control" value="{$xmData.xm_cycle}">
-                </div>
-            </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>经费概算：</label>
-                    <input type="text" id="xm_funds" name="xm_funds" class="form-control" value="{$xmData.xm_funds}">
-                </div>
-                <div class="fl">
-                    <label>备注：</label>
-                    <input type="text" id="xm_remark" name="xm_remark" class="form-control" value="{$xmData.xm_remark}">
-                </div>
-            </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>初审分组：</label>
-                    <input type="text" id="xm_oldfenzu" name="xm_oldfenzu" class="form-control" value="{$xmData.xm_oldfenzu}">
-                </div>
-                <div class="fl">
-                    <label>初审得分：</label>
-                    <input type="text" id="xm_oldscore" name="xm_oldscore" class="form-control" value="{$xmData.xm_oldscore}">
-                </div>
-            </div>
-            <div class="cb">
-                <div class="fl">
-                    <label>初审排名：</label>
-                    <input type="text" id="xm_oldrank" name="xm_oldrank" class="form-control" value="{$xmData.xm_oldrank}">
-                </div>
+            <div class="fl">
+                <label>类别：</label>
+                <input type="text" id="xm_type" name="xm_type" class="form-control" value="{$xmData.xm_type}"/>
 
             </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>技术方向：</label>
+                <input type="text" id="xm_group" name="xm_group" class="form-control" value="{$xmData.xm_group}">
+            </div>
+            <div class="fl">
+                <label>答辩顺序：</label>
+                <input type="text" id="xm_ordernum" name="xm_ordernum" class="form-control" value="{$xmData.xm_ordernum}">
+            </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>项目名称：</label>
+                <input type="text" id="xm_name" name="xm_name" class="form-control" value="{$xmData.xm_name}">
+            </div>
+            <div class="fl">
+                <label>项目编号：</label>
+                <input type="text" id="xm_code" name="xm_code" class="form-control" value="{$xmData.xm_code}">
+            </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>申请人：</label>
+                <input type="text" id="xm_createuser" name="xm_createuser" class="form-control" value="{$xmData.xm_createuser}">
+            </div>
+            <div class="fl">
+                <label>依托单位：</label>
+                <input type="text" id="xm_company" name="xm_company" class="form-control" value="{$xmData.xm_company}">
+            </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>推荐方式：</label>
+                <input type="text" id="xm_tmfs" name="xm_tmfs" class="form-control" value="{$xmData.xm_tmfs}">
+            </div>
+            <div class="fl">
+                <label>研究目标：</label>
+                <input type="text" id="xm_target" name="xm_target" class="form-control" value="{$xmData.xm_target}">
+            </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>预期成果：</label>
+                <input type="text" id="xm_expect" name="xm_expect" class="form-control" value="{$xmData.xm_expect}">
+            </div>
+            <div class="fl">
+                <label>研究周期：</label>
+                <input type="text" id="xm_cycle" name="xm_cycle" class="form-control" value="{$xmData.xm_cycle}">
+            </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>经费概算：</label>
+                <input type="text" id="xm_funds" name="xm_funds" class="form-control" value="{$xmData.xm_funds}">
+            </div>
+            <div class="fl">
+                <label>备注：</label>
+                <input type="text" id="xm_remark" name="xm_remark" class="form-control" value="{$xmData.xm_remark}">
+            </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>初审分组：</label>
+                <input type="text" id="xm_oldfenzu" name="xm_oldfenzu" class="form-control" value="{$xmData.xm_oldfenzu}">
+            </div>
+            <div class="fl">
+                <label>初审得分：</label>
+                <input type="text" id="xm_oldscore" name="xm_oldscore" class="form-control" value="{$xmData.xm_oldscore}">
+            </div>
+        </div>
+        <div class="cb">
+            <div class="fl">
+                <label>初审排名：</label>
+                <input type="text" id="xm_oldrank" name="xm_oldrank" class="form-control" value="{$xmData.xm_oldrank}">
+            </div>
+
+        </div>
         </form>
         <div class="tc" style="height:40px;margin-top: 30px">
             <a class="btn btn-success confirm" id="confirm">确定</a>
             <a class="btn btn-primary" id="cancel">取消</a>
         </div>
-    </div>
 </div>
 <script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
 <script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
@@ -180,7 +164,7 @@
 <script>
     layui.use('layer', function() {
         layer = layui.layer;
-    })
+    });
     $(function() {
         $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true,width:'250px'});
         $("#confirm").on("click", saveData);
@@ -188,14 +172,10 @@
             var year          = $("#xm_year").val();
             var company       = $("#xm_company").val();
             var group         = $("#xm_class").val();
-            var name          = $("#xm_name").val();
             var xm_code       = $("#xm_code").val();
             var createuser    = $("#xm_createuser").val();
             var tmfs          = $('#xm_tmfs').val();
             var xm_ordernum   = $('#xm_ordernum').val();
-            var xm_oldfenzu   = $('#xm_oldfenzu').val();
-            var xm_oldscore   = $('#xm_oldscore').val();
-            var xm_oldrank    = $('#xm_oldrank').val();
             var xm_type       = $('#xm_type').val();
             var xm_group      = $('#xm_group').val();
             if (year == "") {
