@@ -5,7 +5,6 @@ use Think\Controller;
 
 class BaseController extends Controller
 {
-
     public function __construct()
     {
         parent::__construct();
@@ -75,5 +74,31 @@ class BaseController extends Controller
         $data['opl_logcode']=md5($data['opl_id'].$data['opl_user'].$data['opl_ip'].$data['opl_time'].$data['opl_logtype'].$data['opl_object'].$data['opl_firstcontent'].$data['opl_result']);
         $res = $model->add($data);
         return $res;
+    }
+
+
+    /**
+     * 获取分组、项目类别信息
+     */
+    protected function getDic()
+    {
+        $xmInfo = M("xmps_xm")->field("xm_class,xm_type")->select();
+        $xmClass = array_unique(removeArrKey($xmInfo,'xm_class'));
+        $xmType  = array_unique(removeArrKey($xmInfo,'xm_type'));
+        $this->assign("xmClass", $xmClass);
+        $this->assign("xmType", $xmType);
+    }
+
+    /**
+     * 获取全部评分字段
+     */
+    function getAllMarkField(){
+        $allMarkField = [];
+        $markInfo     = C('mark.REMARK_OPTION');//[$queryParam['xm_type']]['评价内容']
+        foreach ($markInfo as $key=>$value){
+            $markField = array_keys($value['评价内容']);
+            $allMarkField = array_unique(array_merge($allMarkField,$markField));
+        }
+        return $allMarkField;
     }
 }

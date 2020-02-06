@@ -22,18 +22,6 @@ class XMController extends BaseController
     }
 
     /**
-     * 获取分组、项目类别信息
-     */
-    private function getDic()
-    {
-        $xmInfo = M("xmps_xm")->field("xm_class,xm_type")->select();
-        $xmClass = array_unique(removeArrKey($xmInfo,'xm_class'));
-        $xmType  = array_unique(removeArrKey($xmInfo,'xm_type'));
-        $this->assign("xmClass", $xmClass);
-        $this->assign("xmType", $xmType);
-    }
-
-    /**
      * 项目新增编辑页面
      */
     public function editXm()
