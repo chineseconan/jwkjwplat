@@ -1,7 +1,8 @@
 ﻿<include file="Public:tableheader" />
 <style>
-    th{
+    #atpbiztable th{
         text-align: center;
+        vertical-align: middle;
     }
     .wrapper .wrapper-content{
         padding-bottom: 0;
@@ -12,6 +13,9 @@
     }
     table{
         table-layout: fixed;
+    }
+    .ibox {
+        margin-bottom: 0px;
     }
 </style>
 <body class="gray-bg" style="font-family: 微软雅黑;">
@@ -43,7 +47,7 @@
 
                         <label class="control-label" style="margin-left:15px;">分&nbsp;&nbsp;组：</label>
                         <select id="xm_class" class="chosen-select">
-                            <option value="">全部</option>
+                            <option value="">&nbsp;</option>
                             <foreach name="xmClass" item="val">
                                 <option>{$val}</option>
                             </foreach>
@@ -122,11 +126,7 @@
                     }
                 }
             },
-            columns: tableColumn(),
-            onLoadSuccess:function(){
-                // 表格内部文字垂直居中
-                $('#atpbiztable th').css('vertical-align','middle');
-            }
+            columns: tableColumn()
         });
     $('#sys_refresh').on('click',function() {
         $('#atpbiztable').bootstrapTable('refresh')

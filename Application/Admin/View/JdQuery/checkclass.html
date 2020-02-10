@@ -1,0 +1,137 @@
+<include file="Public:header" />
+<link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+<link href="__PUBLIC__/css/style.css?v=4.0.0" rel="stylesheet">
+<style>
+    body{
+        height:auto;
+    }
+    .content select{
+        width: 130px;
+        height: 26px;
+        font-size: 16px;
+        border-radius: 2px;
+        margin-right: 30px;
+    }
+    .content select option{
+        height: 26px;
+        line-height: 26px;
+        font-size: 17px;
+    }
+    .chosen-select{
+        width: 280px!important;
+    }
+    #participants .chosen-container-single{
+        width: 175px!important;
+    }
+    #judges .chosen-container-single{
+        width: 150px!important;
+    }
+    .alternative>div{
+        margin-bottom: 20px;
+    }
+    span i{
+        font-size: 20px;
+    }
+    .form{
+        margin-top: 40px;
+    }
+    .tab-content span{
+        display: block;
+        margin-bottom: 10px;
+    }
+    .fl{
+        margin: 0 auto;
+        float: none;
+    }
+</style>
+<body>
+<div class="content">
+    <div id="basicInfo" class="tab-pane fade active in">
+        <form class="form">
+            <div class="cb">
+                <div class="fl" style="text-align:center;">
+                    <label class="control-label">分&emsp;&emsp;组：</label>
+                    <select id="xm_class" class="chosen-select">
+                        <option value="">&nbsp;</option>
+                        <foreach name="xmClass" item="item">
+                            <option value="{$item}"<?php if(count($xmClass) == 1) echo "selected";?>>{$item}</option>
+                        </foreach>
+                    </select>
+                </div>
+                <div class="fl" style="text-align:center;margin-top:25px;">
+                    <label class="control-label">课题分类：</label>
+                    <select id="xm_type" class="chosen-select">
+                        <option value="">&nbsp;</option>
+                        <foreach name="xmType" item="item">
+                            <option value="{$item}"<?php if(count($xmType) == 1) echo "selected";?>>{$item}</option>
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group clearfix" style="margin-top: 25px;margin-left: 90px" id="class">
+            </div>
+        </form>
+    </div>
+    <div class="tc" style="height:50px;margin-top: 50px">
+        <a class="btn btn-success" id="sys_dlg_submit">确定</a>
+    </div>
+</div>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+</body>
+</html>
+<script>
+    $(function () {
+        $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '180px'});
+        $("#sys_dlg_submit").on("click", saveData);
+        function saveData() {
+            var name = $("#xm_class").val();
+            if (name == "") {
+                alert("请选择分组");
+                return false;
+            }
+            var xmType = $("#xm_type").val();
+            if (xmType == "") {
+                alert("请选择课题分类");
+                return false;
+            }
+            // 若当前选择的分组下是否有未提交的专家则不许导出
+            $.ajax({
+                type:'post',
+                url:'__CONTROLLER__/checkResultExportFinish',
+                data:{
+                    xm_class:name,
+                    xm_type:xmType
+                },
+                success:function(res){
+//                    console.log(res);return ;
+                    if(res.code > 0){
+                        alert(res.message);
+                        return true;
+                    }else{
+                        var t = "__CONTROLLER__/resultexport";
+                        t = encodeURI(t);
+                        $.ajax({
+                            type:'post',
+                            url: t,
+                            data:{xm_class:name,xm_type:xmType},
+                            dataType:'json',
+                            success:function(data){
+                                if(data.code > 0){
+                                    location.href = data.message;
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    parent.layer.close(index);
+                                }else{
+                                    layer.msg(data.message);
+                                }
+                            },
+                        });
+//                        window.open('__CONTROLLER__/resultexport?xm_class='+name+'&xm_type='+xmType);
+                    }
+                },
+                dataType:'json'
+            });
+
+        }
+    });
+</script>
+</html>

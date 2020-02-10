@@ -1,0 +1,152 @@
+﻿<include file="Public:tableheader" />
+<style>
+    #detailtable th{
+        text-align: center;
+        vertical-align: middle;
+    }
+    .wrapper .wrapper-content{
+        padding-bottom: 0;
+    }
+    .control-label{
+        font-size: 16px!important;
+    }
+</style>
+<body class="gray-bg">
+<div class="wrapper wrapper-content " style="overflow: hidden">
+    <div class="ibox-content">
+        <table id="detailtable" ></table>
+    </div>
+</div>
+<script>
+    $('#detailtable').bootstrapTable({
+            url: '__CONTROLLER__/getpingshendata',         //请求后台的URL（*）
+            method: 'post',                      //请求方式（*）
+            // toolbar: '#atpbiztoolbar',                //工具按钮用哪个容器
+            striped: true,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            pagination: false,                   //是否显示分页（*）
+            iconSize: 'outline',
+            sortable: false,                     //是否启用排序
+            sortName:"u_account",
+            sortOrder: "asc",                   //排序方式
+            queryParams: queryParams,//传递参数（*）
+            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 10,                       //每页的记录行数（*）
+            pageList: [5,10, 25, 50, 100],        //可供选择的每页的行数（*）
+            minimumCountColumns: 2,             //最少允许的列数
+            clickToSelect: true,                //是否启用点击选中行
+//            height: 600,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+            uniqueId: "xr_id",                     //每一行的唯一标识，一般为主键列
+            detailView: false,                   //是否显示父子表
+            columns: [
+                    {title: '序号', width: 40,
+                        formatter: function (value, row, index)
+                        {
+                            var option =  $('#detailtable').bootstrapTable("getOptions");
+                            return option.pageSize * (option.pageNumber - 1) + index + 1;
+                        }
+                    },
+                {field: 'user_realusername', title: '评审专家', sortable: true,width:70},
+                {field: 'xr_status', title: '状态', sortable: true,width:60},
+                {field: 'ps_total', title: '总分', sortable: true,width:60,formatter:function(value,row){
+                    var ishuibi = row.ishuibi;
+                    if(ishuibi == '1'){
+                        return '回避';
+                    }else {
+                        return value;
+                    }
+                }
+                },
+            <?php if(!empty($markOption)){
+                foreach($markOption as $key=>$val){
+            ?>
+                {field: '{$val.field}', title: '{$val.title}', sortable: true,
+                    formatter:function(value,row){
+                        var ishuibi = row.ishuibi;
+                        if(ishuibi == '1'){
+                            return '回避';
+                        }else {
+                            return value;
+                        }
+                    },width:80},
+            <?php }
+             }?>
+                {field: 'vote4', title: '与战斗力<br/>关联程度', sortable: true,visible:false,formatter:function(value,row){
+                    var ishuibi = row.ishuibi;
+                    if(ishuibi == '1'){
+                        return '回避';
+                    }else {
+                        return value;
+                    }
+                },width:80},
+                {field: 'vote1', title: '第一轮<br/>投票', sortable: true,visible:false,formatter:function(value,row){
+                    var ishuibi = row.ishuibi;
+                    if(ishuibi == '1'){
+                        return '回避';
+                    }else if(value == 1){
+                        return '支持';
+                    }else if(value == -1){
+                        return '不支持';
+                    }else {
+                        return value;
+                    }
+                },width:60},
+                {field: 'vote1rate', title: '第一轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false},
+                {field: 'vote2', title: '第二轮<br/>投票', sortable: true,visible:false,formatter:function(value,row){
+                    var ishuibi = row.ishuibi;
+                    if(ishuibi == '1'){
+                        return '回避';
+                    }else if(value == 1){
+                        return '支持';
+                    }else if(value == -1){
+                        return '不支持';
+                    }else {
+                        return value;
+                    }
+                },width:60},
+                {field: 'vote2rate', title: '第二轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false},
+                {field: 'vote3', title: '第三轮<br/>投票', sortable: true,visible:false,formatter:function(value,row){
+                    var ishuibi = row.ishuibi;
+                    if(ishuibi == '1'){
+                        return '回避';
+                    }else if(value == 1){
+                        return '支持';
+                    }else if(value == -1){
+                        return '不支持';
+                    }else {
+                        return value;
+                    }
+                },width:60},
+                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false}
+            ],
+            onLoadSuccess:function(){ 
+                if("{$Think.config.isZD}" == 1){
+                    $('#detailtable').bootstrapTable('showColumn','vote4');
+                }
+                if("{$type}" != ''){
+                    $('#detailtable').bootstrapTable('showColumn','vote1');
+                    $('#detailtable').bootstrapTable('showColumn','vote2');
+                    $('#detailtable').bootstrapTable('showColumn','vote3');
+                    $('#detailtable').bootstrapTable('showColumn','vote1rate');
+                    $('#detailtable').bootstrapTable('showColumn','vote2rate');
+                    $('#detailtable').bootstrapTable('showColumn','vote3rate');
+                }
+            }
+        });
+    function queryParams(params) {  //配置参数
+        var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+            xm_id:"{$xm_id}",//排位命令（desc，asc）
+            status:"{$status}",
+            type:"{$type}"
+        };
+        return temp;
+    }
+</script>
+</body>
+
+</html>
+
+
+
+

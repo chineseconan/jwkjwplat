@@ -1,0 +1,129 @@
+<include file="Public:header" />
+<link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+<link href="__PUBLIC__/css/style.css?v=4.0.0" rel="stylesheet">
+<style>
+    body{
+        height:auto;
+    }
+    .content select{
+        width: 130px;
+        height: 26px;
+        font-size: 16px;
+        border-radius: 2px;
+        margin-right: 30px;
+    }
+    .content select option{
+        height: 26px;
+        line-height: 26px;
+        font-size: 17px;
+    }
+    .chosen-select{
+        width: 280px!important;
+    }
+    #participants .chosen-container-single{
+        width: 175px!important;
+    }
+    #judges .chosen-container-single{
+        width: 150px!important;
+    }
+    .alternative>div{
+        margin-bottom: 20px;
+    }
+    span i{
+        font-size: 20px;
+    }
+    .form{
+        margin-top: 40px;
+    }
+    .tab-content span{
+        display: block;
+        margin-bottom: 10px;
+    }
+    .fl{
+        margin: 0 auto;
+        float: none;
+    }
+</style>
+<body>
+<div class="content">
+    <div id="basicInfo" class="tab-pane fade active in">
+        <form class="form">
+            <div class="cb">
+                <div class="fl" style="text-align:center;">
+                    <label class="control-label">专&emsp;&emsp;家：</label>
+                    <select id="xm_user" class="chosen-select">
+                        <option value="">&nbsp;</option>
+                        <foreach name="user" item="userItem">
+                            <option value="{$userItem.user_id}">{$userItem.user_realusername}({$userItem.user_name})</option>
+                        </foreach>
+                    </select>
+                </div>
+                <div class="fl" style="text-align:center;margin-top:25px;">
+                    <label class="control-label">课题分类：</label>
+                    <select id="xm_type" class="chosen-select">
+                        <option value="">&nbsp;</option>
+                        <foreach name="xmType" item="item">
+                            <option value="{$item}"<?php if(count($xmType) == 1) echo "selected";?>>{$item}</option>
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="tc" style="height:50px;margin-top: 50px">
+        <a class="btn btn-success" onclick="saveData('')">打分回退</a>
+<!--        <br/><br/>-->
+        <a class="btn btn-success" onclick="saveData('vote1')">第一轮投票回退</a>
+        <a class="btn btn-success" onclick="saveData('vote2')">第二轮投票回退</a>
+        <a class="btn btn-success" onclick="saveData('vote3')">第三轮投票回退</a>
+    </div>
+</div>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+
+</body>
+</html>
+<script>
+    $(function () {
+        $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '180px'});
+        // 当一个专家有多个分组时
+        // $("#xm_user").on('change',function(){
+        //     var name = $("#xm_user").val();
+        //     $.post("__CONTROLLER__/getClass", {user_id: name}, function (rep) {
+        //         var classdata=$.parseJSON(rep);
+        //         var htmltemp="分组：";
+        //         for(var i=0;i<classdata.length;i++){
+        //             htmltemp+='&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="classid" value="'+classdata[i]+'" ';
+        //             if(i==0){
+        //                 htmltemp+=' checked';
+        //             }
+        //             htmltemp+='/>'+classdata[i];
+        //         }
+        //         $("#class").html(htmltemp);
+        //     });
+        // });
+    });
+    function saveData(type) {
+        var name = $("#xm_user").val();
+        if (name == "") {
+            alert("请选择专家");
+            return false;
+        }
+        var xmType = $("#xm_type").val();
+        if (xmType == "") {
+            alert("请选择课题分类");
+            return false;
+        }
+        // var classid = $("input[name='classid']:checked").val();
+        $.post("__CONTROLLER__/huituiSubmit", {user_id: name,xmType:xmType,type:type}, function (rep) {
+            if (rep.code == '0') {
+                alert("操作成功！");
+            } else {
+                alert(rep.message);
+            }
+            parent.$('#atpbiztable').bootstrapTable('refresh');
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+        },'json');
+    }
+</script>
+</html>
