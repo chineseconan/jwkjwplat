@@ -1,0 +1,339 @@
+﻿<?php showViewsByPower() ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
+    <link href="__PUBLIC__/vendor/switchery/switchery.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
+    <link href="__PUBLIC__/css/style.css?v=4.0.0" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet" >
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+
+    <script src="__PUBLIC__/vendor/bootstrap-table/jquery.min.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="__PUBLIC__/vendor/switchery/switchery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen/chosen.order.jquery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
+
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/js/bootstrap-editable.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/extensions/editable/bootstrap-table-editable.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
+    <script src="__PUBLIC__/vendor/ie8/respond.min.js"></script>
+
+    <style>
+        th{
+            text-align: center;
+        }
+        .form-control{
+            display: inline-block;
+            width: 250px;
+        }
+        #vote table thead{
+            background: #6CC0DB;
+            font-size: 16px;
+            color: #fff;
+        }
+        .wrapper .wrapper-content{
+            padding-bottom: 0;
+        }
+        .control-label{
+            font-size: 16px!important;
+        }
+        .editableform .input-sm{
+            width: 70px!important;
+            padding-right: 0!important;
+             margin-top: 0px;
+        }
+        .round{
+            width: 65%;
+            float: left;
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: 25px;
+            margin-bottom:20px;
+            color: #084477;
+        }
+        table thead{
+            background: #4096C7;
+            font-size: 16px;
+            color: #fff;
+        }
+        .tips{
+            text-align: left;
+            text-indent: 2em;
+            font-size: 13px;
+            /*font-weight: bold;*/
+            margin-left: 2px;
+            margin-bottom:15px;
+            color: #2f4050;
+            margin-top: -12px;
+        }
+        .tip{
+            text-align: left;
+            text-indent: 2em;
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 10px;
+            margin-bottom:15px;
+            color: #2f4050;
+        }
+        .btn-hanping{
+            background-color: #ea9d49;
+			height: 30px;
+			line-height: 19px;
+			padding: 6px;
+			border-color: #cac3bb;
+			color: #ffffff;
+			font-size: 14px;
+			background-color: #5fb878;
+        }
+		.btn-hanping:hover{
+			color: #ffffff;
+		}
+        .ibox-content table td{
+            border-color:rgb(221, 221, 221);
+        }
+        .chosen-container-single .chosen-single {
+            min-height: inherit;
+            height: 37px!important;
+            line-height: 32px;
+        }
+        .active-result,.chosen-single{
+            text-align: left;
+        }
+    	.ibox {
+        		margin-bottom: 0px;
+    	}
+        /*.fixed-table-container thead th .th-inner{
+            padding:2px 8px!important;
+        }*/
+        table{
+            /*table-layout: auto!important;*/
+        }
+		.nopadding>.th-inner {
+			padding:8px 0px!important;
+		}
+		.btn-green{
+			 background-color: #5ab85a!important;
+			 border-color: #5ab85a!important;
+		}
+    </style>
+</head>
+<body class="gray-bg" style="font-family: 微软雅黑;" >
+<!--<div class=" " style="overflow: hidden">-->
+    <div class="ibox float-e-margins">
+        <div class="ibox-content" style="padding-bottom: 15px;">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div>
+                        <div class="_box" style="text-align: right;position:relative;">
+                            <div style="background-color: bisque;padding: 8px 10px 2px 7px;;margin-bottom:5px;width:94%;float:left;">
+                                <p class="tip">评审要点及打分标准：</p>
+                                {$markRule}
+                            </div>
+                            <div style="width: 6%;float: left;position: absolute;top: 159px;right: 12px;">
+                                <input type="hidden" name="xr_status" id="xr_status" value="完成"/>
+                                <button class="btn btn-info btn-green" style="margin-left: 12px;float:right;" type="button" id="sys_refresh"><i class="fa fa-refresh "></i>&nbsp;刷新</button>
+                                <input type="hidden" id="xm_type" name="xm_type" value="{$xmType}"/>
+                            </div>
+                        </div>
+                        <table id="atpbiztable" style="font-size:15px;"></table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    <!--</div>-->
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+	var h = $(window).height()-40;
+	$('table').attr('data-height',h);
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '200px;margin:6px 34px 0 0;height:34px'});
+    offset="{$offset}"?"{$offset}":1;
+    limit="{$limit}"?"{$limit}":10;
+    $('#atpbiztable').bootstrapTable({
+        url: '__CONTROLLER__/getData',         //请求后台的URL（*）
+        method: 'post',                      //请求方式（*）
+        striped: true,                      //是否显示行间隔色
+        cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+        pagination: false,                   //是否显示分页（*）
+        iconSize: 'outline',
+        sortable: true,
+		sortName:"xm_ordernum",
+        sortOrder: "asc", 
+        queryParams: queryParams,//传递参数（*）
+        sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+        pageNumber: eval(offset),                       //初始化加载第一页，默认第一页
+        pageSize: eval(limit),                       //每页的记录行数（*）
+        pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+        minimumCountColumns: 2,             //最少允许的列数
+        clickToSelect: true,                //是否启用点击选中行
+        uniqueId: "xr_id",                     //每一行的唯一标识，一般为主键列
+        detailView: false,                   //是否显示父子表
+        detailFormatter: "detailFormatter",                   //是否显示父子表
+        columns: tableColumn(),
+        onLoadSuccess:function(){
+            if("{$Think.config.isZD}" == 1){
+                $('#atpbiztable').bootstrapTable('showColumn','vote4');
+            }
+        }
+    });
+    function tableColumn(){
+        var column = [
+            {field: 'xm_ordernum',title: '答辩<br/>顺序', width: 50,sortable:true,
+                /*,
+                 formatter: function (value, row, index)
+                 {
+                 var option =  $('#atpbiztable').bootstrapTable("getOptions");
+                 return option.pageSize * (option.pageNumber - 1) + index + 1;
+                 }*/
+            },
+            {field: 'xm_code', title: '项目编号',width:80},
+            {field: 'xm_name', title: '项目名称',width:80,align:'left'},
+            {field: 'xm_company', title: '依托单位',width:80,align:'left'},
+            {field: 'xm_createuser', title: '申请人',width:50},
+//            {field: 'xm_id', title: '初审成绩', sortable: false,visible:true,width:80,
+//                formatter: function (value, row, index) {
+//                    var a = '<a  class="btn btn-hanping detail-icon">初审成绩</a>';
+//                    return a;
+//                }
+//            },
+        <?php if(!empty($markOption)){
+            foreach($markOption as $key=>$val){
+                ?>
+                {field: '{$val.field}', title: '{$val.title}<br/>({$val.minVal}-{$val.maxVal})', sortable: true,width:100,
+				<?php if(!empty($val['nopadding'])){
+					echo "class:'nopadding',";
+					}?>
+                    formatter:function(value, row, index){
+                        var ishuibi = row.ishuibi;
+                        if(ishuibi == '1'){
+                            return '回避';
+                        }else{
+                            return fomatInt(value);
+                        }
+                    }
+                },
+            <?php }
+        }?>
+            {field: 'vote4', title: '与战斗力<br/>关联程度',width:80,visible:false,
+                formatter:function(value, row, index){
+                    var ishuibi = row.ishuibi;
+                    if(ishuibi == '1'){
+                        return '回避';
+                    }else{
+                        return value;
+                    }
+                }
+            },
+            {field: 'ps_total', title: '总分',width:50,sortable:true,
+                formatter:function(value, row, index){
+                    var ishuibi = row.ishuibi;
+                    if(ishuibi == '1'){
+                        return '回避';
+                    }else{
+                        return fomatInt(value);
+                    }
+                }},
+            {field: 'xm_id', title: '操作',width:70,
+                formatter:function(value, row, index){
+                    var inp     = "'" + value + "'";
+                    var a = '';
+                    a += '<a class="btn btn-info btn-xs" onclick="XMlook(' + inp + ')">查看材料</a>';
+                    return a;
+                }
+            }
+        ];
+        return column;
+    }
+    function queryParams(params) {  //配置参数
+        var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+            limit: params.limit,   //页面大小
+            offset: params.offset,  //页码
+            sort: params.sort,  //排序列名
+            sortOrder: params.order,//排位命令（desc，asc）
+            xr_status:$("#xr_status").val(),
+            xm_type:$("#xm_type").val()
+        };
+        return temp;
+    }
+    // 表格内部文字垂直居中
+    $('#atpbiztable th').css('vertical-align','middle');
+    $('#votetable th').css('vertical-align','middle');
+
+    // 输入字母，文字，‘-’等无法输入
+    $('body').on('focus','#atpbiztable .editable-input input',function(){
+        var preg = /[^\d]+/g;
+        var val  = $(this).val();
+        if(val.match(preg) != null){
+            $(this).val($(this).val().replace(preg,''));
+        }
+    });
+    $('body').on('keyup','#atpbiztable .editable-input input',function(){
+        var preg = /[^\d]+/g;
+        var val  = $(this).val();
+        if(val.match(preg) != null){
+            $(this).val($(this).val().replace(preg,''));
+        }
+    });
+
+    $('#sys_refresh').on('click',function() {
+        $('#atpbiztable').bootstrapTable('refresh');
+    });
+
+    function detailFormatter(index, row) {
+        var html = [];
+        html.push("<div class='ibox-content'>");
+        html.push("<table class='table'border='1' style='border:1px solid rgb(221, 221, 221) !important;color:white'>");
+        html.push("<tbody><tr>");
+        html.push("<td style='background-color: #16B5A5;'><b>初审分组</b></td><td style='background-color: #d1ead1;color:#000000;'>" + row['xm_oldfenzu'] + "</td>");//<td><b>推荐方式</b></td><td>"+row['xm_tmfs']+"</td>
+        html.push("<td style='background-color: #16B5A5;'><b>初审小组排名</b></td><td style='background-color: #d1ead1;color:#000000;'>" + row['xm_oldrank'] + "</td><td style='background-color: #16B5A5;'><b>初审平均分</b></td><td style='background-color: #d1ead1;color:#000000;'>" + row['xm_oldscore'] + "</td>");
+        // html.push("<td><b>资助意见</b></td><td>" + row['xm_oldcommand'] + "</td>");
+        html.push("</tr></tbody>");
+        html.push("</table>");
+        html.push("</div>");
+        return html.join('').replace(/null/g, "").replace(/undefined/g, "");
+    }
+
+    /**
+     * 格式化为整数
+     */
+    function fomatInt(number){
+        if(isNaN(number) || (number == '') || (number == null)){
+            return parseInt(0);
+        }
+        var f  = parseInt(number);
+        return f;
+    }
+    function XMlook(id){
+        window.open("__MODULE__/ZQXM/listindex?id="+id);
+    }
+</script>
+</body>
+
+</html>
+
+
+
+

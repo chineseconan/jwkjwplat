@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <!--<link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">-->
+    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >-->
+    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >-->
+    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet" >-->
+    <title>专家工作台专家打分</title>
+    <style>
+        .btns{
+            padding: 10px 120px 10px 10px;
+            width:100%;
+            height:20px;
+        }
+        .btns .btn{
+            margin: 0 6px;
+            padding: 8px 20px;
+            box-sizing: border-box;
+        }
+        .title{
+            text-align:center;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        table{
+            text-align:center;
+            border: 2px solid #dddddd!important;
+            table-layout: fixed;
+        }
+        table tr{
+            height:30px;
+        }
+        table td{
+            width:14%;
+            border-left: 1px solid #dddddd!important;
+        }
+        table p{
+            margin:0px;
+        }
+    </style>
+</head>
+<body  style="font-family: 微软雅黑;">
+    <div class="btns">
+        <a class="btn btn-danger"  id="back" style="float:right;" >返回项目列表</a>
+        <button class="btn btn-success" id="fileshow" style="float:right;">查看申报材料</button>
+    </div>
+    <div style="margin:30px 0px 0px 150px;width:80%;font-size: 18px;">
+        <p class="title">国防科技卓越青年科学基金项目通讯评审专家评审表</p>
+        <p style="margin-left:100px;font-weight: bold;">注意事项:</p><p style="margin-left:100px;">1.如果您对项目研究内容不熟悉，或因为其他原因不便进行评审，请及时联系工作人员；</p>
+        <p style="margin-left:100px;">2.评审结果将综合参考打分分数和资助意见。</p>
+        <table class="table" data-toggle="table" data-height="600" style="font-size: 18px;">
+            <thead>
+            <tr>
+                <td colspan="1" style="width: 60px;vertical-align: middle;"><p style="font-weight: bold;">项目编号</p></td>
+                <td colspan="1" style="width: 5%;vertical-align: middle;">{$data.xm_code}</td>
+                <td colspan="2" style="width:60px;vertical-align: middle;"><p style="font-weight: bold;">项目名称</p></td>
+                <td colspan="4" style="width: 20%;vertical-align: middle;">{$data.xm_name}</td>
+            </tr>
+            <tr>
+                <td colspan="1" style="vertical-align: middle;"><p style="font-weight: bold;">申请人</p></td>
+                <td colspan="1" style="vertical-align: middle;">{$data.xm_createuser}</td>
+                <td colspan="2" style="vertical-align: middle;"><p style="font-weight: bold;">依托单位</p></td>
+                <td colspan="4" style="vertical-align: middle;" >{$data.xm_company}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="vertical-align: middle;"><p style="font-weight: bold;">评价要点</p></td>
+                <td colspan="3" style="vertical-align: middle;"><p style="font-weight: bold;">打分标准</p></td>
+                <td><p style="font-weight: bold;vertical-align: middle;">打分</p></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left;vertical-align: middle;">1.申请人已取得的成绩和对国防科技的贡献</td>
+                <td colspan="3" style="vertical-align: middle;">优(18-20)良(16-17)中(14-15)差(0-13)</td>
+                <td style="vertical-align: middle;">{$data.ps_cj}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left;vertical-align: middle;">2.申请人的发展潜力</td>
+                <td colspan="3" style="vertical-align: middle;">优(27-30)良(24-26)中(21-23)差(0-20)</td>
+                <td style="vertical-align: middle;">{$data.ps_ql}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left;vertical-align: middle">3.研究项目的科学价值和军事价值</td>
+                <td colspan="3" style="vertical-align: middle;">优(27-30)良(24-26)中(21-23)差(0-20)</td>
+                <td style="vertical-align: middle;">{$data.ps_jz}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left;vertical-align: middle;">4.研究项目的创新性和原理可行性</td>
+                <td colspan="3" style="vertical-align: middle;">优(18-20)良(16-17)中(14-15)差(0-13)</td>
+                <td style="vertical-align: middle;">{$data.ps_cx}</td>
+            </tr>
+            <tr style="height:20px;">
+                <td colspan="7" style="vertical-align: middle;"><p style="float:right;font-weight: bold;">总分&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td  style="vertical-align: middle;">
+                    <label id="total">{$data.ps_total}</label>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;font-weight:bold;vertical-align: middle;">资助意见</td>
+                <td colspan="7"  style="vertical-align: middle;">
+                    <select id="ps_zz" style="width:240px;" disabled>
+                        <option value="" >请选择</option>
+                        <option value="A" <if condition="('A' eq $data[ps_zz])">selected</if>>A(优先资助)</option>
+                        <option value="B" <if condition="('B' eq $data[ps_zz])">selected</if>>B(可资助)</option>
+                        <option value="C" <if condition="('C' eq $data[ps_zz])">selected</if>>C(不资助)</option>
+                    </select>
+                    <p style="font-weight: bold;float:right;">(选择“不资助”也要打分和填写评议意见)</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle;"><p style="font-weight:bold">评审意见</p>
+				<span style="font-size:17px" >(请从已取得的成绩和贡献、拟开展的研究工作、申请人的创新能力及发展潜力三个方面撰写评审意见)</span></td>
+                <td colspan="7" style="height:280px;text-align: left;">{$data.ps_detail}</td>
+            </tr>
+            </thead>
+        </table>
+        <input type="hidden" id="xr_id" value="{$data.xr_id}" />
+        <input type="hidden" id="xm_id" value="{$data.xm_id}" />
+    </div>
+    <script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+    <script>
+//        返回
+        $("#back").on("click",function(){
+            location.href="__CONTROLLER__/index?offset={$offset}&limit={$limit}";
+        });
+        $("#fileshow").on("click",function(){
+            window.open('__CONTROLLER__/listindex?id=' + $("#xm_id").val());
+        });
+    </script>
+
+</body>
+</html>

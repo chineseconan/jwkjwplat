@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <!--<link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">-->
+    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >-->
+    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >-->
+    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet" >-->
+    <title>专家工作台专家打分</title>
+    <style>
+        .btns{
+            padding: 10px 120px 10px 10px;
+            width:100%;
+            height:20px;
+        }
+        .btns .btn{
+            margin: 0 6px;
+            padding: 8px 20px;
+            box-sizing: border-box;
+        }
+        .title{
+            text-align:center;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        table{
+            text-align:center;
+            border: 2px solid #dddddd!important;
+            table-layout: fixed;
+        }
+        table tr{
+            height:30px;
+            line-height: 30px;
+        }
+        table td{
+            width:14%;
+            border-left: 1px solid #dddddd!important;
+        }
+        table p{
+            margin:0px;
+        }
+    </style>
+</head>
+<body  style="font-family: 微软雅黑;">
+    <div class="btns">
+        <a class="btn btn-danger"  id="back" style="float:right;">返回项目列表</a>
+        <button class="btn btn-warning" id="submit" style="float:right;">保存</button>
+        <button class="btn btn-success" id="fileshow" style="float:right;">查看申报材料</button>
+    </div>
+    <div style=''>
+        <div style="margin:30px 10% 0px 10%;width:80%;font-size: 18px;">
+        <p class="title">国防科技卓越青年科学基金项目通讯评审专家评审表</p>
+            <p style="margin-left:100px;font-weight: bold;">注意事项:</p><p style="margin-left:100px;">1.如果您对项目研究内容不熟悉，或因为其他原因不便进行评审，请及时联系工作人员；</p>
+            <p style="margin-left:100px;">2.评审结果将综合参考打分分数和资助意见。</p>
+        <table class="table" data-toggle="table" data-height="600" style="font-size: 18px;">
+            <thead>
+            <tr>
+                <td colspan="1" style="width: 60px;vertical-align: middle;"><p style="font-weight: bold;">项目编号</p></td>
+                <td colspan="1" style="width: 5%;vertical-align: middle;">{$data.xm_code}</td>
+                <td colspan="2" style="width:60px;vertical-align: middle;"><p style="font-weight: bold;">项目名称</p></td>
+                <td colspan="4" style="width: 20%;vertical-align: middle;">{$data.xm_name}</td>
+            </tr>
+            <tr>
+                <td colspan="1" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">申请人</p></td>
+                <td colspan="1" style="text-align: center;vertical-align: middle;">{$data.xm_createuser}</td>
+                <td colspan="2" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">依托单位</p></td>
+                <td colspan="4" style="text-align: center;vertical-align: middle;">{$data.xm_company}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">评价要点</p></td>
+                <td colspan="3" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">打分标准</p></td>
+                <td style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">打分</p></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: left;vertical-align: middle;">1.申请人已取得的成绩和对国防科技的贡献</td>
+                <td colspan="3" style="text-align: center;vertical-align: middle;">优(18-20)良(16-17)中(14-15)差(0-13)</td>
+                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_cj"  value="{$data.ps_cj}" defaultvalue="{$data.ps_cj}"/></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: left;vertical-align: middle;">2.申请人的发展潜力</td>
+                <td colspan="3" style="text-align: center;vertical-align: middle;">优(27-30)良(24-26)中(21-23)差(0-20)</td>
+                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_ql"   value="{$data.ps_ql}" defaultvalue="{$data.ps_ql}"/></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: left;vertical-align: middle;">3.研究项目的科学价值和军事意义</td>
+                <td colspan="3" style="text-align: center;vertical-align: middle;">优(27-30)良(24-26)中(21-23)差(0-20)</td>
+                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_jz"  value="{$data.ps_jz}" defaultvalue="{$data.ps_jz}"/></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: left;vertical-align: middle;">4.研究项目的创新性和原理可行性</td>
+                <td colspan="3" style="text-align: center;vertical-align: middle;" >优(18-20)良(16-17)中(14-15)差(0-13)</td>
+                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_cx"  value="{$data.ps_cx}" defaultvalue="{$data.ps_cx}"/></td>
+            </tr>
+            <tr style="height:20px;">
+                <td colspan="7" style="text-align: center;vertical-align: middle;"><p style="float:right;font-weight: bold;">总分&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td >
+                    <label id="total" style="text-align: center;vertical-align: middle;">{$data.ps_total}</label>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;vertical-align: middle;font-weight:bold;">资助意见</td>
+                <td colspan="7" style="vertical-align: middle;">
+                    <select id="ps_zz" style="width:240px;" defaultvalue="{$data.ps_zz}">
+                        <option value="" >请选择</option>
+                        <option value="A" <if condition="('A' eq $data[ps_zz])">selected</if>>A(优先资助)</option>
+                        <option value="B" <if condition="('B' eq $data[ps_zz])">selected</if>>B(可资助)</option>
+                        <option value="C" <if condition="('C' eq $data[ps_zz])">selected</if>>C(不资助)</option>
+                    </select>
+                    <p style="font-weight: bold;float:right;vertical-align: middle;">(选择“不资助”也要打分和填写评议意见)</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle;"><p style="font-weight:bold">评审意见</p>
+				<span style="font-size:17px" >(请从已取得的成绩和贡献、拟开展的研究工作、申请人的创新能力及发展潜力三个方面撰写评审意见)</span></td>
+                <td colspan="7" style="height:280px">
+                    <textarea style="width:98%;height:280px;"  id="ps_detail" defaultvalue="{$data.ps_detail}">{$data.ps_detail}</textarea>
+                </td>
+            </tr>
+            </thead>
+        </table>
+        <input type="hidden" id="xr_id" value="{$data.xr_id}" />
+        <input type="hidden" id="xm_id" value="{$data.xm_id}" />
+    </div>
+    </div>
+    <div class="btns">
+        <a class="btn btn-danger"  id="back1" style="float:right;" >返回项目列表</a>
+        <button class="btn btn-warning" id="submit1" style="float:right;" >保存</button>
+    </div>
+    <script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+    <script>
+
+        var panduan=/^[0-9]{1,2}$/;
+        var abc=/^[A-C]{1}$/;
+        $("input").blur(function(){
+            var ss=$(this);
+            var defaulttval = ss.attr('default');
+            var inputid=ss.attr('id');
+            var value=ss.val();
+            if(value!="") {
+                if (inputid == "ps_cj" || inputid == "ps_cx") {
+                    if (!panduan.test(value) || value > 20 || value < 0) {
+                        ss.val("");
+                        alert("输入数值不在打分范围内。");
+                        return;
+                    }
+                } else if (inputid == "ps_ql" || inputid == "ps_jz") {
+                    if (!panduan.test(value) || value > 30 || value < 0) {
+                        ss.val("");
+                        alert("输入数值不在打分范围内。");
+                        return;
+                    }
+                }
+            }
+            $("#total").html($("#ps_cj").val()*1+$("#ps_ql").val()*1+$("#ps_jz").val()*1+ $("#ps_cx").val()*1);
+        });
+//        提交
+        $("#submit").on("click",function() {
+            var data={
+                ps_cj: $("#ps_cj").val(),
+                ps_ql: $("#ps_ql").val(),
+                ps_jz: $("#ps_jz").val(),
+                ps_cx: $("#ps_cx").val(),
+                ps_zz: $("#ps_zz").val(),
+                ps_detail: $("#ps_detail").val(),
+                xr_id: $("#xr_id").val()
+            };
+            $("#ps_cj").attr("defaultvalue",$("#ps_cj").val());
+            $("#ps_ql").attr("defaultvalue",$("#ps_ql").val());
+            $("#ps_jz").attr("defaultvalue",$("#ps_jz").val());
+            $("#ps_cx").attr("defaultvalue",$("#ps_cx").val());
+            $("#ps_zz").attr("defaultvalue",$("#ps_zz").val());
+            $("#ps_detail").attr("defaultvalue",$("#ps_detail").val());
+            $.post('__CONTROLLER__/saveps',data, function (rep, status) {
+                if (rep == "ok") {
+                    alert("保存成功！");
+                }
+            });
+        });
+//        返回
+        $("#back").on("click",function(){
+            if($("#ps_cj").attr("defaultvalue")!=$("#ps_cj").val()||
+            $("#ps_ql").attr("defaultvalue")!=$("#ps_ql").val()||
+            $("#ps_jz").attr("defaultvalue")!=$("#ps_jz").val()||
+            $("#ps_cx").attr("defaultvalue")!=$("#ps_cx").val()||
+            $("#ps_zz").attr("defaultvalue")!=$("#ps_zz").val()||
+            $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val()) {
+                if (confirm("有评审项尚未保存，是否保存？")) {
+                    $("#submit").click();
+                }
+            }
+            location.href = "__CONTROLLER__/index?offset={$offset}&limit={$limit}";
+        });
+        $("#back1").on("click",function(){
+            $("#back").click();
+        });
+        $("#submit1").on("click",function(){
+            $("#submit").click();
+        });
+
+        $("#fileshow").on("click",function(){
+            window.open('__CONTROLLER__/listindex?id=' + $("#xm_id").val());
+        });
+    </script>
+
+</body>
+</html>
