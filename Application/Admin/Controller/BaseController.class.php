@@ -96,7 +96,7 @@ class BaseController extends Controller
         $allMarkField = [];
         $markInfo     = C('mark.REMARK_OPTION');//[$queryParam['xm_type']]['评价内容']
         foreach ($markInfo as $key=>$value){
-            $markField = array_keys($value['评价内容']);
+            $markField = removeArrKey($value['评价内容'],'field');
             $allMarkField = array_unique(array_merge($allMarkField,$markField));
         }
         return $allMarkField;

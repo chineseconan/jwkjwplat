@@ -1,0 +1,250 @@
+﻿<?php showViewsByPower() ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
+    <link href="__PUBLIC__/vendor/switchery/switchery.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
+    <link href="__PUBLIC__/css/style.css?v=4.0.0" rel="stylesheet">
+
+    <script src="__PUBLIC__/vendor/bootstrap-table/jquery.min.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="__PUBLIC__/vendor/switchery/switchery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen/chosen.order.jquery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
+
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
+    <script src="__PUBLIC__/vendor/ie8/respond.min.js"></script>
+    <style>
+        th{
+            text-align: center;
+        }
+        .form-control{
+            display: inline-block;
+            width: 250px;
+        }
+        .wrapper .wrapper-content{
+            padding-bottom: 0;
+        }
+        .control-label{
+            font-size: 16px!important;
+        }
+        #totalNum{
+            color: cornflowerblue;
+            font-weight: bolder;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body class="gray-bg" style="font-family: 微软雅黑;" >
+<div class="wrapper wrapper-content " style="overflow: hidden">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div >
+                        <p class="name"  style="text-align: left;font-size:  22px;background-color:;border-left:5px solid green;padding-left: 10px;font-family: 微软雅黑;">待评审项目列表</p>
+                    </div>
+                    <div class="_box" style="margin-top: -5px;">
+                        <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-search"></i>刷新</button>
+                        <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_wancheng"><i class="fa fa-plus"></i>提交</button>
+                        <span style="float:right;font-size: 18px;">
+                            共 <span id="totalNum"></span> 个项目
+                        </span>
+                    </div>
+                    <table id="atpbiztable" style="font-size:15px;"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    })
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '300px'});
+    offset="{$offset}"?"{$offset}":1;
+    limit="{$limit}"?"{$limit}":10;
+    $('#atpbiztable').bootstrapTable({
+            url: '__CONTROLLER__/getData',         //请求后台的URL（*）
+            method: 'post',                      //请求方式（*）
+            toolbar: '#atpbiztoolbar',                //工具按钮用哪个容器
+            striped: true,                      //是否显示行间隔色
+            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+            pagination: true,                   //是否显示分页（*）
+            iconSize: 'outline',
+            sortable: true,                     //是否启用排序
+            sortName:"xm_ordernum",
+            sortOrder: "asc",                   //排序方式
+            queryParams: queryParams,//传递参数（*）
+            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+            pageNumber: eval(offset),                       //初始化加载第一页，默认第一页
+            pageSize: eval(limit),                       //每页的记录行数（*）
+            pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+            minimumCountColumns: 2,             //最少允许的列数
+            clickToSelect: true,                //是否启用点击选中行
+            uniqueId: "xr_id",                     //每一行的唯一标识，一般为主键列
+            detailView: false,                   //是否显示父子表
+            rowStyle:function(row,index){
+                return style = {
+                    css:{
+                        'font-size':'15px'
+                    }
+                }
+            },
+            columns: [
+                {field: 'xm_ordernum', title: '序号', width:70,sortable: true},
+                {field: 'xm_code', title: '项目编号', sortable: true,width:180},
+                {field: 'xm_name', title: '项目名称', sortable: true,width:220,
+                    cellStyle:{
+                     css:{"text-align":"left"}
+                    }
+                },
+                {field: 'xm_company', title: '依托单位', sortable: true,width:180,
+                    cellStyle:{
+                        css:{"text-align":"left"}
+                    }},
+                {field: 'xm_createuser', title: '申请人', sortable: true,width:80},
+                {field: 'xm_class', title: '分组', sortable: true,width:60,visible:false},
+//                {field: 'xm_tmfs', title: '推荐方式', sortable: true,width:90},
+                {field: 'xm_type', title: '申报类别', sortable: true,width:90,visible:false},
+                {field: 'ps_zz', title: '定性评价', sortable: true,width:90,visible:false},
+                {field: 'ps_total', title: '总分', sortable: true,width:60},
+                {field: 'ishuibi', title: '是否回避', sortable: true,width:90,
+                    formatter: function (value, row, index) {
+                        if (value != "1") {
+                            return '否';
+                        }else{
+                            return '回避';
+                        }
+                    }},
+                {field: 'xr_id', title: '操作', sortable: false,width:90,
+                    formatter: function (value, row, index) {
+                        var inp = "'" + value + "'";
+                        var a = "";
+                        if (row["xr_status"] != "完成") {
+                            if(row['ishuibi'] == 1){
+                                a += '<a  class="btn btn-info btn-xs" onclick="showInRow(' + inp + ')" style="margin-right:5px;">查看</a>';
+                                a += '<a  class="btn btn-info btn-xs" onclick="setHuibi(' + inp + ',0,'+index+')" style="background-color: darkolivegreen;border-color: darkolivegreen;">取消回避</a>';
+                            }else{
+                                a += '<a  class="btn btn-info btn-xs" onclick="updateInRow(' + inp + ')" style="margin-right:5px;">评审';
+                                a += '<a  class="btn btn-info btn-xs" onclick="setHuibi(' + inp + ',1,'+index+')" style="background-color: darkolivegreen;border-color: darkolivegreen;">回避';
+                            }
+                        }else{
+                            a += '<a  class="btn btn-info btn-xs" onclick="showInRow(' + inp + ')">查看</a><br>';
+                        }
+                        return a;
+                    }
+                }
+            ],
+            onLoadSuccess:function(data){
+                $("#totalNum").text(data.total);
+                if("{$Think.config.isXmType}" == 1){
+                    $('#atpbiztable').bootstrapTable('showColumn','xm_type');
+                }
+                if("{$Think.config.isZZ}" == 1){
+                    $('#atpbiztable').bootstrapTable('showColumn','ps_zz');
+                }
+            }
+        });
+
+    function queryParams(params) {  //配置参数
+        var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+            limit: params.limit,   //页面大小
+            offset: params.offset,  //页码
+            sort: params.sort,  //排序列名
+            sortOrder: params.order,//排位命令（desc，asc）
+        };
+        return temp;
+    }
+    function updateInRow(id){
+        var option =  $('#atpbiztable').bootstrapTable("getOptions");
+        window.location.href="__CONTROLLER__/marking?id="+id+"&offset="+option.pageNumber+"&limit="+option.pageSize;
+    }
+    function showInRow(id){
+        var option =  $('#atpbiztable').bootstrapTable("getOptions");
+        window.location.href="__CONTROLLER__/showmarking?id="+id+"&offset="+option.pageNumber+"&limit="+option.pageSize;
+    }
+    function setHuibi(xrid,ishuibi,index){
+        $.post('__CONTROLLER__/setHuibi',{xrid:xrid,ishuibi:ishuibi},function(rep){
+            if(rep.code !='0'){
+                layer.alert(rep.message);
+            }else{
+                var data = $('#atpbiztable').bootstrapTable("getRowByUniqueId",xrid);
+                data['ps_zz']    = null;
+                data['ps_total'] = null;
+                data['ishuibi']  = ishuibi;
+                $('#atpbiztable').bootstrapTable("updateRow",{
+                    index:index,
+                    row:data
+                });
+            }
+        },'json');
+    }
+    $('#sys_refresh').on('click',function() {
+        $('#atpbiztable').bootstrapTable('refresh');
+    });
+    $('#sys_wancheng').on('click',function() {
+
+        $.post('__CONTROLLER__/panduanpswancheng', function (rep, status) {
+            if (rep == "ok") {
+                if(confirm("确认提交评审吗？")) {
+                    $.post('__CONTROLLER__/savepswancheng', function (rep, status) {
+                        if (rep == "ok") {
+                            layer.msg("提交成功");
+                            $('#atpbiztable').bootstrapTable('refresh');
+                        }else{
+                            layer.msg("提交失败，请稍候重试！");
+                        }
+                    });
+                }
+            }else{
+                layer.open({
+                    type:1,
+                    content:"<div style='padding: 5px 15px 5px 15px;font-size:20px;word-break:break-all;'>"+rep+"</div>",
+                    skin:'layer-ext-moon',
+                    area:["800px","500px"],
+                    btn:["确定"]
+                });
+            }
+
+        });
+    });
+
+    $('#sys_add').on('click',function(){
+        var dic_type = $('#search_type').val();
+        layer.open({
+            title:'字典编辑',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content: '__CONTROLLER__/add?dic_type='+dic_type,
+            area: ['800px', '375px']
+        });
+    });
+
+</script>
+</body>
+
+</html>
+
+
+
+

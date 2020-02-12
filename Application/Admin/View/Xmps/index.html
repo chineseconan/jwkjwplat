@@ -1,146 +1,102 @@
-﻿<?php showViewsByPower() ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
-    <link href="__PUBLIC__/vendor/switchery/switchery.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
-    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
-
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
-    <link href="__PUBLIC__/css/style.css?v=4.0.0" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet" >
-    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
-
-    <script src="__PUBLIC__/vendor/bootstrap-table/jquery.min.js"></script>
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap/js/bootstrap.min.js"></script>
-
-    <script src="__PUBLIC__/vendor/switchery/switchery.js"></script>
-    <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
-    <script src="__PUBLIC__/vendor/chosen/chosen.order.jquery.js"></script>
-    <script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
-
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/js/bootstrap-editable.js"></script>
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/extensions/editable/bootstrap-table-editable.js"></script>
-    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
-    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
-    <script src="__PUBLIC__/vendor/ie8/respond.min.js"></script>
-
-    <style>
-        th{
-            text-align: center;
-        }
-        .form-control{
-            display: inline-block;
-            width: 250px;
-        }
-        #vote table thead{
-            background: #6CC0DB;
-            font-size: 16px;
-            color: #fff;
-        }
-        .wrapper .wrapper-content{
-            padding-bottom: 0;
-        }
-        .control-label{
-            font-size: 16px!important;
-        }
-        .editableform .input-sm{
-            width: 70px!important;
-            padding-right: 0!important;
-             margin-top: 0px;
-        }
-        .round{
-            width: 65%;
-            float: left;
-            font-size: 18px;
-            font-weight: bold;
-            margin-left: 25px;
-            margin-bottom:20px;
-            color: #084477;
-        }
-        table thead{
-            background: #4096C7;
-            font-size: 16px;
-            color: #fff;
-        }
-        .tips{
-            text-align: left;
-            text-indent: 2em;
-            font-size: 13px;
-            /*font-weight: bold;*/
-            margin-left: 2px;
-            margin-bottom:15px;
-            color: #2f4050;
-            margin-top: -12px;
-        }
-        .tip{
-            text-align: left;
-            text-indent: 2em;
-            font-size: 16px;
-            font-weight: bold;
-            margin-left: 10px;
-            margin-bottom:15px;
-            color: #2f4050;
-        }
-        .btn-hanping{
-            background-color: #ea9d49;
-			height: 30px;
-			line-height: 19px;
-			padding: 6px;
-			border-color: #cac3bb;
-			color: #ffffff;
-			font-size: 14px;
-			background-color: #5fb878;
-        }
-		.btn-hanping:hover{
-			color: #ffffff;
-		}
-        .ibox-content table td{
-            border-color:rgb(221, 221, 221);
-        }
-        .chosen-container-single .chosen-single {
-            min-height: inherit;
-            height: 37px!important;
-            line-height: 32px;
-        }
-        .active-result,.chosen-single{
-            text-align: left;
-        }
-    	.ibox {
-        		margin-bottom: 0px;
-    	}
-        /*.fixed-table-container thead th .th-inner{
-            padding:2px 8px!important;
-        }*/
-        table{
-            /*table-layout: auto!important;*/
-        }
-		.nopadding>.th-inner {
-			padding:8px 0px!important;
-		}
-		.btn-green{
-			 background-color: #5ab85a!important;
-			 border-color: #5ab85a!important;
-		}
-    </style>
-</head>
+﻿<include file="Public:tableheader" />
+<style>
+    th{
+        text-align: center;
+    }
+    #vote table thead{
+        background: #6CC0DB;
+        font-size: 16px;
+        color: #fff;
+    }
+    .wrapper .wrapper-content{
+        padding-bottom: 0;
+    }
+    .editableform .input-sm{
+        width: 70px!important;
+        padding-right: 0!important;
+         margin-top: 0px;
+    }
+    .round{
+        width: 65%;
+        float: left;
+        font-size: 18px;
+        font-weight: bold;
+        margin-left: 25px;
+        margin-bottom:20px;
+        color: #084477;
+    }
+    table thead{
+        background: #4096C7;
+        font-size: 16px;
+        color: #fff;
+    }
+    .tips{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 13px;
+        /*font-weight: bold;*/
+        margin-left: 2px;
+        margin-bottom:15px;
+        color: #2f4050;
+        margin-top: -12px;
+    }
+    .tip{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 16px;
+        font-weight: bold;
+        margin-left: 10px;
+        margin-bottom:15px;
+        color: #2f4050;
+    }
+    .btn-hanping{
+        background-color: #ea9d49;
+        height: 30px;
+        line-height: 19px;
+        padding: 6px;
+        border-color: #cac3bb;
+        color: #ffffff;
+        font-size: 14px;
+        background-color: #5fb878;
+    }
+    .btn-hanping:hover{
+        color: #ffffff;
+    }
+    .ibox-content table td{
+        border-color:rgb(221, 221, 221);
+    }
+    .chosen-container-single .chosen-single {
+        min-height: inherit;
+        height: 37px!important;
+        line-height: 32px;
+    }
+    .active-result,.chosen-single{
+        text-align: left;
+    }
+    .ibox {
+            margin-bottom: 0px;
+    }
+    /*.fixed-table-container thead th .th-inner{
+        padding:2px 8px!important;
+    }*/
+    table{
+        /*table-layout: auto!important;*/
+    }
+    .nopadding>.th-inner {
+        padding:8px 0px!important;
+    }
+    .btn-green{
+         background-color: #5ab85a!important;
+         border-color: #5ab85a!important;
+    }
+</style>
 <body class="gray-bg" style="font-family: 微软雅黑;" >
-<!--<div class=" " style="overflow: hidden">-->
     <div class="ibox float-e-margins">
         <div class="ibox-content" style="padding-bottom: 15px;">
             <div class="row">
                 <div class="col-sm-12">
-                    <div>
-                        <div class="_box" style="text-align: right;position:relative;">
+                    <div class="_box" style="text-align: right;position:relative;">
+                        <?php if(!empty($markRule)){  // 评审要点不为空时?>
                             <div style="background-color: bisque;padding: 8px 10px 2px 7px;;margin-bottom:5px;width:94%;float:left;">
                                 <p class="tip">评审要点及打分标准：</p>
                                 {$markRule}
@@ -150,28 +106,27 @@
                                 <button class="btn btn-info btn-green" style="margin-left: 12px;float:right;" type="button" id="sys_refresh"><i class="fa fa-refresh "></i>&nbsp;刷新</button>
                                 <input type="hidden" id="xm_type" name="xm_type" value="{$xmType}"/>
                             </div>
-                        </div>
-                        <table id="atpbiztable" style="font-size:15px;"></table>
+                        <?php }else{  // 评审要点为空时?>
+                            <div style="width: 20%;float: right;">
+                                <input type="hidden" name="xr_status" id="xr_status" value="完成"/>
+                                <button class="btn btn-info btn-green" style="margin-left: 12px;float:right;" type="button" id="sys_refresh"><i class="fa fa-refresh "></i>&nbsp;刷新</button>
+                                <input type="hidden" id="xm_type" name="xm_type" value="{$xmType}"/>
+                            </div>
+                        <?php }?>
                     </div>
-
+                    <table id="atpbiztable" style="font-size:15px;"></table>
                 </div>
             </div>
         </div>
-    <!--</div>-->
-</div>
+    </div>
 <div id="sys_dlg" role="dialog" class="modal fade "></div>
-<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
-<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
-
+<!--<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>-->
 <script>
     layui.use('layer', function() {
         layer = layui.layer;
     });
 	var h = $(window).height()-40;
 	$('table').attr('data-height',h);
-    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '200px;margin:6px 34px 0 0;height:34px'});
-    offset="{$offset}"?"{$offset}":1;
-    limit="{$limit}"?"{$limit}":10;
     $('#atpbiztable').bootstrapTable({
         url: '__CONTROLLER__/getData',         //请求后台的URL（*）
         method: 'post',                      //请求方式（*）
@@ -184,8 +139,6 @@
         sortOrder: "asc", 
         queryParams: queryParams,//传递参数（*）
         sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
-        pageNumber: eval(offset),                       //初始化加载第一页，默认第一页
-        pageSize: eval(limit),                       //每页的记录行数（*）
         pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
         minimumCountColumns: 2,             //最少允许的列数
         clickToSelect: true,                //是否启用点击选中行
@@ -195,7 +148,7 @@
         columns: tableColumn(),
         onLoadSuccess:function(){
             if("{$Think.config.isZD}" == 1){
-                $('#atpbiztable').bootstrapTable('showColumn','vote4');
+                $('#atpbiztable').bootstrapTable('showColumn','ps_detail');
             }
         }
     });
@@ -237,7 +190,7 @@
                 },
             <?php }
         }?>
-            {field: 'vote4', title: '与战斗力<br/>关联程度',width:80,visible:false,
+            {field: 'ps_detail', title: '与战斗力<br/>关联程度',width:80,visible:false,
                 formatter:function(value, row, index){
                     var ishuibi = row.ishuibi;
                     if(ishuibi == '1'){
@@ -269,8 +222,6 @@
     }
     function queryParams(params) {  //配置参数
         var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
-            limit: params.limit,   //页面大小
-            offset: params.offset,  //页码
             sort: params.sort,  //排序列名
             sortOrder: params.order,//排位命令（desc，asc）
             xr_status:$("#xr_status").val(),
@@ -327,7 +278,7 @@
         return f;
     }
     function XMlook(id){
-        window.open("__MODULE__/ZQXM/listindex?id="+id);
+        window.open("__MODULE__/XM/listindex?id="+id);
     }
 </script>
 </body>

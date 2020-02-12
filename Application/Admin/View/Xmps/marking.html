@@ -1,48 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <!--<link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">-->
-    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >-->
-    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >-->
-    <!--<link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet" >-->
-    <title>专家工作台专家打分</title>
-    <style>
-        .btns{
-            padding: 10px 120px 10px 10px;
-            width:100%;
-            height:20px;
-        }
-        .btns .btn{
-            margin: 0 6px;
-            padding: 8px 20px;
-            box-sizing: border-box;
-        }
-        .title{
-            text-align:center;
-            font-size: 26px;
-            font-weight: bold;
-        }
-        table{
-            text-align:center;
-            border: 2px solid #dddddd!important;
-            table-layout: fixed;
-        }
-        table tr{
-            height:30px;
-            line-height: 30px;
-        }
-        table td{
-            width:14%;
-            border-left: 1px solid #dddddd!important;
-        }
-        table p{
-            margin:0px;
-        }
-    </style>
-</head>
+<include file="Public:header" />
+<style>
+    .btns{
+        padding: 10px 120px 10px 10px;
+        width:100%;
+        height:20px;
+    }
+    .btns .btn{
+        margin: 0 6px;
+        padding: 8px 20px;
+        box-sizing: border-box;
+    }
+    .title{
+        text-align:center;
+        font-size: 26px;
+        font-weight: bold;
+    }
+    table{
+        text-align:center;
+        border: 2px solid #dddddd!important;
+        table-layout: fixed;
+    }
+    table tr{
+        height:30px;
+        line-height: 30px;
+    }
+    table td{
+        width:14%;
+        border-left: 1px solid #dddddd!important;
+    }
+    table p{
+        margin:0px;
+    }
+    .tips{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 13px;
+        /*font-weight: bold;*/
+        margin-left: 2px;
+        margin-bottom:15px;
+        color: #2f4050;
+        margin-top: -12px;
+    }
+    .tip{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 16px;
+        font-weight: bold;
+        margin-left: 10px;
+        margin-bottom:15px;
+        color: #2f4050;
+    }
+    .notice{
+        /*margin-left:100px;*/
+        background-color: bisque;
+        padding: 8px 10px 2px 7px;
+        margin-bottom:5px;
+        width:100%;
+        float:left;
+    }
+</style>
 <body  style="font-family: 微软雅黑;">
     <div class="btns">
         <a class="btn btn-danger"  id="back" style="float:right;">返回项目列表</a>
@@ -51,9 +67,13 @@
     </div>
     <div style=''>
         <div style="margin:30px 10% 0px 10%;width:80%;font-size: 18px;">
-        <p class="title">国防科技卓越青年科学基金项目通讯评审专家评审表</p>
-            <p style="margin-left:100px;font-weight: bold;">注意事项:</p><p style="margin-left:100px;">1.如果您对项目研究内容不熟悉，或因为其他原因不便进行评审，请及时联系工作人员；</p>
-            <p style="margin-left:100px;">2.评审结果将综合参考打分分数和资助意见。</p>
+        <p class="title">{$title}</p>
+            <?php if(!empty($notice)){ ?>
+            <div class="notice">
+                <p class="tip">注意事项:</p>
+                {$notice}
+            </div>
+            <?php }?>
         <table class="table" data-toggle="table" data-height="600" style="font-size: 18px;">
             <thead>
             <tr>
@@ -69,51 +89,42 @@
                 <td colspan="4" style="text-align: center;vertical-align: middle;">{$data.xm_company}</td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">评价要点</p></td>
-                <td colspan="3" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">打分标准</p></td>
+                <td colspan="2" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">评价要点</p></td>
+                <td colspan="5" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">评价内容</p></td>
                 <td style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">打分</p></td>
             </tr>
-            <tr>
-                <td colspan="4" style="text-align: left;vertical-align: middle;">1.申请人已取得的成绩和对国防科技的贡献</td>
-                <td colspan="3" style="text-align: center;vertical-align: middle;">优(18-20)良(16-17)中(14-15)差(0-13)</td>
-                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_cj"  value="{$data.ps_cj}" defaultvalue="{$data.ps_cj}"/></td>
-            </tr>
-            <tr>
-                <td colspan="4" style="text-align: left;vertical-align: middle;">2.申请人的发展潜力</td>
-                <td colspan="3" style="text-align: center;vertical-align: middle;">优(27-30)良(24-26)中(21-23)差(0-20)</td>
-                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_ql"   value="{$data.ps_ql}" defaultvalue="{$data.ps_ql}"/></td>
-            </tr>
-            <tr>
-                <td colspan="4" style="text-align: left;vertical-align: middle;">3.研究项目的科学价值和军事意义</td>
-                <td colspan="3" style="text-align: center;vertical-align: middle;">优(27-30)良(24-26)中(21-23)差(0-20)</td>
-                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_jz"  value="{$data.ps_jz}" defaultvalue="{$data.ps_jz}"/></td>
-            </tr>
-            <tr>
-                <td colspan="4" style="text-align: left;vertical-align: middle;">4.研究项目的创新性和原理可行性</td>
-                <td colspan="3" style="text-align: center;vertical-align: middle;" >优(18-20)良(16-17)中(14-15)差(0-13)</td>
-                <td style="text-align: center;vertical-align: middle;"><input style="width:50px;" type="text" id="ps_cx"  value="{$data.ps_cx}" defaultvalue="{$data.ps_cx}"/></td>
-            </tr>
+            <?php foreach($importants as $key=>$value){?>
+                <tr>
+                    <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $value;?></td>
+                    <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $standrad[$key]['content'];?></td>
+                    <td style="text-align: center;vertical-align: middle;">
+                        <input typt="text" class="ps_input" style="width:80%;" id="<?php echo $standrad[$key]['field'];?>" maxVal="<?php echo $standrad[$key]['maxVal'];?>" defaultvalue="<?php echo $data[$standrad[$key]['field']];?>" value="<?php echo $data[$standrad[$key]['field']];?>"/>
+                    </td>
+                </tr>
+            <?php }?>
             <tr style="height:20px;">
                 <td colspan="7" style="text-align: center;vertical-align: middle;"><p style="float:right;font-weight: bold;">总分&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                 <td >
                     <label id="total" style="text-align: center;vertical-align: middle;">{$data.ps_total}</label>
                 </td>
             </tr>
-            <tr>
-                <td style="text-align: center;vertical-align: middle;font-weight:bold;">资助意见</td>
-                <td colspan="7" style="vertical-align: middle;">
-                    <select id="ps_zz" style="width:240px;" defaultvalue="{$data.ps_zz}">
-                        <option value="" >请选择</option>
-                        <option value="A" <if condition="('A' eq $data[ps_zz])">selected</if>>A(优先资助)</option>
-                        <option value="B" <if condition="('B' eq $data[ps_zz])">selected</if>>B(可资助)</option>
-                        <option value="C" <if condition="('C' eq $data[ps_zz])">selected</if>>C(不资助)</option>
-                    </select>
-                    <p style="font-weight: bold;float:right;vertical-align: middle;">(选择“不资助”也要打分和填写评议意见)</p>
-                </td>
-            </tr>
+            <?php if($isZiZhu == 1){?>
+                <tr>
+                    <td style="text-align: center;font-weight:bold;vertical-align: middle;">定性评价</td>
+                    <td colspan="7"  style="vertical-align: middle;">
+                        <select id="ps_zz" style="width:240px;" defaultvalue="<?php echo $data[ps_zz];?>">
+                            <option value="" >请选择</option>
+                            <option value="强" <if condition="('强' eq $data[ps_zz])">selected</if>>强</option>
+                            <option value="中" <if condition="('中' eq $data[ps_zz])">selected</if>>中</option>
+                            <option value="弱" <if condition="('弱' eq $data[ps_zz])">selected</if>>弱</option>
+                        </select>
+                        <p style="font-weight: bold;float:right;">(定性评价主要考察项目的“创新性、前瞻性、颠覆性”，分“强、中、弱”三档给予评价。)</p>
+                    </td>
+                </tr>
+            <?php }?>
             <tr>
                 <td style="vertical-align: middle;"><p style="font-weight:bold">评审意见</p>
-				<span style="font-size:17px" >(请从已取得的成绩和贡献、拟开展的研究工作、申请人的创新能力及发展潜力三个方面撰写评审意见)</span></td>
+				<span style="font-size:17px" >{$advise}</span></td>
                 <td colspan="7" style="height:280px">
                     <textarea style="width:98%;height:280px;"  id="ps_detail" defaultvalue="{$data.ps_detail}">{$data.ps_detail}</textarea>
                 </td>
@@ -131,67 +142,95 @@
     <script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
     <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
     <script>
-
-        var panduan=/^[0-9]{1,2}$/;
-        var abc=/^[A-C]{1}$/;
-        $("input").blur(function(){
-            var ss=$(this);
-            var defaulttval = ss.attr('default');
-            var inputid=ss.attr('id');
-            var value=ss.val();
-            if(value!="") {
-                if (inputid == "ps_cj" || inputid == "ps_cx") {
-                    if (!panduan.test(value) || value > 20 || value < 0) {
-                        ss.val("");
-                        alert("输入数值不在打分范围内。");
-                        return;
-                    }
-                } else if (inputid == "ps_ql" || inputid == "ps_jz") {
-                    if (!panduan.test(value) || value > 30 || value < 0) {
-                        ss.val("");
-                        alert("输入数值不在打分范围内。");
-                        return;
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+    var panduan=/^[0-9]{1,2}(\.[0-9]{0,1})?$/;
+    var abc=/^[A-C]{1}$/;
+    $(".ps_input").change(function(){
+         var ss=$(this);
+         var defaulttval = ss.attr('default');
+         var inputid     = ss.attr('id');
+         var maxVal      = parseInt(ss.attr('maxVal'));
+         var value       = ss.val();
+         if(value!="") {
+             if (!panduan.test(value) || value > maxVal || value < 0) {
+                 ss.val("");
+                 layer.msg("输入数值必须在 0-"+  maxVal+'之间，且最多保留一位小数！');
+                 return;
+             }
+         }
+        var ps_total = 0;
+        var ps_cj     = ($("#ps_cj").length == 1)?$("#ps_cj").val():0;
+        var ps_ql     = ($("#ps_ql").length == 1)?$("#ps_ql").val():0;
+        var ps_jz     = ($("#ps_jz").length == 1)?$("#ps_jz").val():0;
+        var ps_cx     = ($("#ps_cx").length == 1)?$("#ps_cx").val():0;
+        $("#total").html((ps_cj*1+ps_ql*1+ps_jz*1+ps_cx*1).toFixed(1));
+    });
+//        提交
+        $("#submit").on("click",submitData);
+        function submitData() {
+            var ps_inputObj = $(".ps_input");
+            if(ps_inputObj.length>0){
+                for(var i=0;i<ps_inputObj.length;i++){
+                    var ss          = $(ps_inputObj[i]);
+                    var defaulttval = ss.attr('default');
+                    var inputid     = ss.attr('id');
+                    var maxVal      = parseInt(ss.attr('maxVal'));
+                    var value       = ss.val();
+                    if(value!="") {
+                        if (!panduan.test(value) || value > maxVal || value < 0) {
+                            ss.val("");
+                            layer.msg("输入数值不在打分范围内。");
+                            return false;
+                        }
                     }
                 }
             }
-            $("#total").html($("#ps_cj").val()*1+$("#ps_ql").val()*1+$("#ps_jz").val()*1+ $("#ps_cx").val()*1);
-        });
-//        提交
-        $("#submit").on("click",function() {
+            var ps_cj     = ($("#ps_cj").length == 1)?$("#ps_cj").val():null;
+            var ps_ql     = ($("#ps_ql").length == 1)?$("#ps_ql").val():null;
+            var ps_jz     = ($("#ps_jz").length == 1)?$("#ps_jz").val():null;
+            var ps_cx     = ($("#ps_cx").length == 1)?$("#ps_cx").val():null;
+            var ps_zz     = ($("#ps_zz").length == 1)?$("#ps_zz").val():null;
+            var ps_detail = ($("#ps_detail").length == 1)?$("#ps_detail").val():null;
+            var xr_id     = ($("#xr_id").length == 1)?$("#xr_id").val():null;
             var data={
-                ps_cj: $("#ps_cj").val(),
-                ps_ql: $("#ps_ql").val(),
-                ps_jz: $("#ps_jz").val(),
-                ps_cx: $("#ps_cx").val(),
-                ps_zz: $("#ps_zz").val(),
-                ps_detail: $("#ps_detail").val(),
-                xr_id: $("#xr_id").val()
+                ps_cj: ps_cj,
+                ps_ql: ps_ql,
+                ps_jz: ps_jz,
+                ps_cx: ps_cx,
+                ps_zz: ps_zz,
+                ps_detail: ps_detail,
+                xr_id: xr_id
             };
-            $("#ps_cj").attr("defaultvalue",$("#ps_cj").val());
-            $("#ps_ql").attr("defaultvalue",$("#ps_ql").val());
-            $("#ps_jz").attr("defaultvalue",$("#ps_jz").val());
-            $("#ps_cx").attr("defaultvalue",$("#ps_cx").val());
-            $("#ps_zz").attr("defaultvalue",$("#ps_zz").val());
-            $("#ps_detail").attr("defaultvalue",$("#ps_detail").val());
+            $("#ps_cj").attr("defaultvalue",ps_cj);
+            $("#ps_ql").attr("defaultvalue",ps_ql);
+            $("#ps_jz").attr("defaultvalue",ps_jz);
+            $("#ps_cx").attr("defaultvalue",ps_cx);
+            $("#ps_zz").attr("defaultvalue",ps_zz);
+            $("#ps_detail").attr("defaultvalue",ps_detail);
             $.post('__CONTROLLER__/saveps',data, function (rep, status) {
                 if (rep == "ok") {
-                    alert("保存成功！");
+                    layer.msg("保存成功！");
+                    return true;
                 }
             });
-        });
+        }
 //        返回
         $("#back").on("click",function(){
-            if($("#ps_cj").attr("defaultvalue")!=$("#ps_cj").val()||
-            $("#ps_ql").attr("defaultvalue")!=$("#ps_ql").val()||
-            $("#ps_jz").attr("defaultvalue")!=$("#ps_jz").val()||
-            $("#ps_cx").attr("defaultvalue")!=$("#ps_cx").val()||
-            $("#ps_zz").attr("defaultvalue")!=$("#ps_zz").val()||
-            $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val()) {
+            if(($("#ps_cj").length == 1 && $("#ps_cj").attr("defaultvalue")!=$("#ps_cj").val())||
+            ($("#ps_ql").length == 1 && $("#ps_ql").attr("defaultvalue")!=$("#ps_ql").val())||
+            ($("#ps_jz").length == 1 && $("#ps_jz").attr("defaultvalue")!=$("#ps_jz").val())||
+            ($("#ps_cx").length == 1 && $("#ps_cx").attr("defaultvalue")!=$("#ps_cx").val())||
+            ($("#ps_zz").length == 1 && $("#ps_zz").attr("defaultvalue")!=$("#ps_zz").val())||
+            ($("#ps_detail").length == 1 && $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val())) {
                 if (confirm("有评审项尚未保存，是否保存？")) {
-                    $("#submit").click();
+                    var res = submitData();
+                    if(res !== false) location.href = "__CONTROLLER__/index?offset={$offset}&limit={$limit}";
+                    return ;
                 }
             }
-            location.href = "__CONTROLLER__/index?offset={$offset}&limit={$limit}";
+            location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
         });
         $("#back1").on("click",function(){
             $("#back").click();
@@ -201,7 +240,7 @@
         });
 
         $("#fileshow").on("click",function(){
-            window.open('__CONTROLLER__/listindex?id=' + $("#xm_id").val());
+            window.open('__MODULE__/XM/listindex?xm_id=' + $("#xm_id").val());
         });
     </script>
 

@@ -18,11 +18,11 @@ return array(
                 '<b>5.研究思路和方案创新性强，科学合理；不过分强调研究路径的可行性和研究方案的完备性（20分）【优（17-20）；良（14-17）；中（10-13）；差（0-9）】。</b>'
             ],
             '评价内容'=>[
-                'ps_item1'=>['field'=>'ps_item1','title'=>'研究定位','brief'=>'研究定位','minVal'=>0,'maxVal'=>20],
-                'ps_item2'=>['field'=>'ps_item2','title'=>'研究内容<br/>技术支撑','brief'=>'研究内容技术支撑','minVal'=>0,'maxVal'=>20],
-                'ps_item3'=>['field'=>'ps_item3','title'=>'研究项目军事价<br/>值和科学价值','brief'=>'研究项目军事价值和科学价值','minVal'=>0,'maxVal'=>20],
-                'ps_item5'=>['field'=>'ps_item5','title'=>'研究单位及<br/>人员实力','brief'=>'研究单位及人员实力','minVal'=>0,'maxVal'=>20],
-                'ps_item4'=>['field'=>'ps_item4','title'=>'研究思路和方案<br/>创新性，可行性','brief'=>'研究思路和方案创新性，可行性','minVal'=>0,'maxVal'=>20]
+                'ps_item1'=>['field'=>'ps_item1','title'=>'研究定位','brief'=>'研究定位','minVal'=>0,'maxVal'=>20,'type'=>'text'],
+                'ps_item2'=>['field'=>'ps_item2','title'=>'研究内容<br/>技术支撑','brief'=>'研究内容技术支撑','minVal'=>0,'maxVal'=>20,'type'=>'text'],
+                'ps_item3'=>['field'=>'ps_item3','title'=>'研究项目军事价<br/>值和科学价值','brief'=>'研究项目军事价值和科学价值','minVal'=>0,'maxVal'=>20,'type'=>'text'],
+                'ps_item5'=>['field'=>'ps_item5','title'=>'研究单位及<br/>人员实力','brief'=>'研究单位及人员实力','minVal'=>0,'maxVal'=>20,'type'=>'text'],
+                'ps_item4'=>['field'=>'ps_item4','title'=>'研究思路和方案<br/>创新性，可行性','brief'=>'研究思路和方案创新性，可行性','minVal'=>0,'maxVal'=>20,'type'=>'select','source'=>[0,5,15,20]]
             ]
         ],
         '重点'=>[
@@ -36,10 +36,10 @@ return array(
             '注意事项'=>[    '<b>1.申请人取得成绩和对军事理论的贡献【优（26-30）；良（22-25）；中（18-21）；差（0-17）】。</b>已取得重要研究成果或者转化应用取得明显军事效益；担任过重点项目负责人；同行评价意见较好。',                    '<b>2.申请人的发展潜力【优（26-30）；良（22-25）；中（18-21）；差（0-17）】。</b>对本领域有较强研究积累，知识储备和科研经历丰富；勇于开拓创新，具有较好的洞察力、创造力；有良好团队背景和科研平台支撑；理技融合、战技结合型人才重点支持。',                    '<b>3.研究项目的科学价值和军事价值【优（17-20）；良（14-16）；中（11-13）；差（0-10）】。</b>基础理论类项目，着重评价其原创性、前沿性，以及潜在军事价值；应用理论类项目，着重评价其提升作战能力和军队建设质量效益的重要作用。',                    '<b>4.研究思路和方案的创新性、可行性【优（17-20）；良（14-16）；中（11-13）；差（0-10）】。</b>研究方案创新性强、科学合理。不过分强调研究路径的可行性和研究方案的完备性。'
             ],
             '评价内容'=>[
-                'ps_item1'=>['field'=>'ps_item1','title'=>'成绩贡献','brief'=>'成绩贡献','minVal'=>0,'maxVal'=>30],
-                'ps_item2'=>['field'=>'ps_item2','title'=>'发展潜力','brief'=>'发展潜力','minVal'=>0,'maxVal'=>30],
-                'ps_item3'=>['field'=>'ps_item3','title'=>'科学、军事价值','brief'=>'科学军事价值','minVal'=>0,'maxVal'=>20],
-                'ps_item4'=>['field'=>'ps_item4','title'=>'创新性','brief'=>'创新性','minVal'=>0,'maxVal'=>20]
+                'ps_item1'=>['field'=>'ps_item1','title'=>'成绩贡献','brief'=>'成绩贡献','minVal'=>0,'maxVal'=>30,'type'=>'text'],
+                'ps_item2'=>['field'=>'ps_item2','title'=>'发展潜力','brief'=>'发展潜力','minVal'=>0,'maxVal'=>30,'type'=>'text'],
+                'ps_item3'=>['field'=>'ps_item3','title'=>'科学、军事价值','brief'=>'科学军事价值','minVal'=>0,'maxVal'=>20,'type'=>'text'],
+                'ps_item4'=>['field'=>'ps_item4','title'=>'创新性','brief'=>'创新性','minVal'=>0,'maxVal'=>20,'type'=>'text']
             ]
         ],
 //        'ps_item1'=>['field'=>'ps_item1','title'=>'成绩贡献','brief'=>'成绩贡献','minVal'=>0,'maxVal'=>2],
