@@ -24,6 +24,6 @@ return array(
     'SESSION_PREFIX' => 'risks_',
     'COOKIE_PREFIX' => 'risks_',
     'COOKIE_DOMAIN' => '',
-    'LOAD_EXT_CONFIG'=>['mark'=>'mark_config'],
+    'LOAD_EXT_CONFIG'=>['mark'=>'mark_config_hanping'],
     'COOKIE_HTTPONLY' => ''
 );

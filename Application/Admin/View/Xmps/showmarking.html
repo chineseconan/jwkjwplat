@@ -71,11 +71,11 @@
                 <td colspan="5" style="vertical-align: middle;"><p style="font-weight: bold;">评价内容</p></td>
                 <td><p style="font-weight: bold;vertical-align: middle;">打分</p></td>
             </tr>
-            <?php foreach($importants as $key=>$value){?>
+            <?php foreach($standrad as $key=>$value){?>
             <tr>
-                <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $value;?></td>
-                <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $standrad[$key]['content'];?></td>
-                <td style="text-align: center;vertical-align: middle;"><?php echo $data[$standrad[$key]['field']];?></td>
+                <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $value['mainpoints'];?></td>
+                <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $value['content'];?></td>
+                <td style="text-align: center;vertical-align: middle;"><?php echo $data[$value['field']];?></td>
             </tr>
             <?php }?>
             <tr style="height:20px;">

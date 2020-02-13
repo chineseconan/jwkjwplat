@@ -93,12 +93,21 @@
                 <td colspan="5" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">评价内容</p></td>
                 <td style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">打分</p></td>
             </tr>
-            <?php foreach($importants as $key=>$value){?>
+            <?php foreach($standrad as $key=>$value){?>
                 <tr>
-                    <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $value;?></td>
-                    <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $standrad[$key]['content'];?></td>
+                    <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $value['mainpoints'];?></td>
+                    <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $value['content'];?></td>
                     <td style="text-align: center;vertical-align: middle;">
-                        <input typt="text" class="ps_input" style="width:80%;" id="<?php echo $standrad[$key]['field'];?>" maxVal="<?php echo $standrad[$key]['maxVal'];?>" defaultvalue="<?php echo $data[$standrad[$key]['field']];?>" value="<?php echo $data[$standrad[$key]['field']];?>"/>
+                        <?php if($value['type'] == 'select'){?>
+                            <select class="ps_input" style="width:80%;" id="<?php echo $value['field'];?>" defaultvalue="<?php echo $data[$value['field']];?>">
+<!--                                <option value=""></option>-->
+                                <?php foreach($value['source'] as $optionval){?>
+                                    <option <?php if($optionval == $data[$value['field']]) echo "selected";?>><?php echo $optionval;?></option>
+                                <?php }?>
+                            </select>
+                        <?php }else{?>
+                            <input typt="text" class="ps_input" style="width:80%;" id="<?php echo $value['field'];?>" maxVal="<?php echo $value['maxVal'];?>" defaultvalue="<?php echo $data[$value['field']];?>" decimalpoint="<?php echo isset($value['decimalpoint'])?intval($value['decimalpoint']):0;?>" value="<?php echo $data[$value['field']];?>"/>
+                        <?php }?>
                     </td>
                 </tr>
             <?php }?>
@@ -132,7 +141,7 @@
             </thead>
         </table>
         <input type="hidden" id="xr_id" value="{$data.xr_id}" />
-        <input type="hidden" id="xm_id" value="{$data.xm_id}" />
+        <input type="hidden" id="xm_type" value="{$data.xm_type}" />
     </div>
     </div>
     <div class="btns">
@@ -145,92 +154,115 @@
     layui.use('layer', function() {
         layer = layui.layer;
     });
-    var panduan=/^[0-9]{1,2}(\.[0-9]{0,1})?$/;
-    var abc=/^[A-C]{1}$/;
+    var markField = eval('{$markField}'); // 打分字段
     $(".ps_input").change(function(){
-         var ss=$(this);
-         var defaulttval = ss.attr('default');
-         var inputid     = ss.attr('id');
-         var maxVal      = parseInt(ss.attr('maxVal'));
-         var value       = ss.val();
-         if(value!="") {
-             if (!panduan.test(value) || value > maxVal || value < 0) {
-                 ss.val("");
-                 layer.msg("输入数值必须在 0-"+  maxVal+'之间，且最多保留一位小数！');
-                 return;
-             }
-         }
+        var ss           = $(this);
+        if(ss[0].type == 'text'){
+            var decimalpoint = ss.attr('decimalpoint');
+            var maxVal       = parseInt(ss.attr('maxVal'));
+            var value        = ss.val();
+
+            if(value != "" && value != 0) {
+                var preg = /[^\d\.]+/g;
+                var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
+                if(value.match(preg) != null){ // 1.先去掉不是数字的部分
+                    $(this).val($(this).val().replace(preg,""));
+                    value = 0;
+                }
+                if(!preg1.test(value)){ // 2.再判断小数点
+                    var f  = parseFloat(value);
+                    $(this).val(f.toFixed(decimalpoint));
+                }
+                if (value > maxVal || value < 0) { // 3.最后判断最大值
+                    ss.val("");
+                    layer.msg("输入数值必须在 0-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
+                    return;
+                }
+            }
+        }
         var ps_total = 0;
-        var ps_cj     = ($("#ps_cj").length == 1)?$("#ps_cj").val():0;
-        var ps_ql     = ($("#ps_ql").length == 1)?$("#ps_ql").val():0;
-        var ps_jz     = ($("#ps_jz").length == 1)?$("#ps_jz").val():0;
-        var ps_cx     = ($("#ps_cx").length == 1)?$("#ps_cx").val():0;
-        $("#total").html((ps_cj*1+ps_ql*1+ps_jz*1+ps_cx*1).toFixed(1));
+        for(var i=0;i<markField.length;i++){
+            var temp = ($("#"+markField[i]).length == 1)?$("#"+markField[i]).val():0;
+            ps_total += temp*1;
+        }
+        ps_total =  Math.round(ps_total*100000)/100000;
+        $("#total").html(ps_total);
     });
-//        提交
+//        保存
         $("#submit").on("click",submitData);
         function submitData() {
             var ps_inputObj = $(".ps_input");
             if(ps_inputObj.length>0){
                 for(var i=0;i<ps_inputObj.length;i++){
-                    var ss          = $(ps_inputObj[i]);
-                    var defaulttval = ss.attr('default');
-                    var inputid     = ss.attr('id');
-                    var maxVal      = parseInt(ss.attr('maxVal'));
-                    var value       = ss.val();
-                    if(value!="") {
-                        if (!panduan.test(value) || value > maxVal || value < 0) {
+                    var ss           = $(ps_inputObj[i]);
+                    var decimalpoint = ss.attr('decimalpoint');
+                    var maxVal       = parseInt(ss.attr('maxVal'));
+                    var value        = ss.val();
+
+                    if(value != "" && value != 0) {
+                        var preg = /[^\d\.]+/g;
+                        var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
+                        if(value.match(preg) != null){ // 1.先去掉不是数字的部分
+                            ss.val(ss.val().replace(preg,""));
+                            value = 0;
+                        }
+                        if(!preg1.test(value)){ // 2.再判断小数点
+                            var f  = parseFloat(value);
+                            ss.val(f.toFixed(decimalpoint));
+                        }
+                        if (value > maxVal || value < 0) { // 3.最后判断最大值
                             ss.val("");
-                            layer.msg("输入数值不在打分范围内。");
-                            return false;
+                            layer.msg("输入数值必须在 0-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
+                            return;
                         }
                     }
                 }
             }
-            var ps_cj     = ($("#ps_cj").length == 1)?$("#ps_cj").val():null;
-            var ps_ql     = ($("#ps_ql").length == 1)?$("#ps_ql").val():null;
-            var ps_jz     = ($("#ps_jz").length == 1)?$("#ps_jz").val():null;
-            var ps_cx     = ($("#ps_cx").length == 1)?$("#ps_cx").val():null;
             var ps_zz     = ($("#ps_zz").length == 1)?$("#ps_zz").val():null;
             var ps_detail = ($("#ps_detail").length == 1)?$("#ps_detail").val():null;
-            var xr_id     = ($("#xr_id").length == 1)?$("#xr_id").val():null;
-            var data={
-                ps_cj: ps_cj,
-                ps_ql: ps_ql,
-                ps_jz: ps_jz,
-                ps_cx: ps_cx,
+            var xr_id     = $("#xr_id").val();
+            var xm_type   = $("#xm_type").val();
+            var data      = {
                 ps_zz: ps_zz,
                 ps_detail: ps_detail,
-                xr_id: xr_id
+                xr_id: xr_id,
+                xm_type: xm_type
             };
-            $("#ps_cj").attr("defaultvalue",ps_cj);
-            $("#ps_ql").attr("defaultvalue",ps_ql);
-            $("#ps_jz").attr("defaultvalue",ps_jz);
-            $("#ps_cx").attr("defaultvalue",ps_cx);
+            for(var i=0;i<markField.length;i++){
+                var temp  = ($("#"+markField[i]).length == 1)?$("#"+markField[i]).val():null;
+                data[markField[i]] = temp;
+                $("#"+markField[i]).attr("defaultvalue",temp);
+            }
+            // console.log(data);return ;
             $("#ps_zz").attr("defaultvalue",ps_zz);
             $("#ps_detail").attr("defaultvalue",ps_detail);
-            $.post('__CONTROLLER__/saveps',data, function (rep, status) {
-                if (rep == "ok") {
+            $.post('__CONTROLLER__/saveps',data, function (rep) {
+                if (rep.code == 0) {
                     layer.msg("保存成功！");
                     return true;
                 }
-            });
+            },'json');
         }
-//        返回
+//        返回（验证是否有未保存数据）
         $("#back").on("click",function(){
-            if(($("#ps_cj").length == 1 && $("#ps_cj").attr("defaultvalue")!=$("#ps_cj").val())||
-            ($("#ps_ql").length == 1 && $("#ps_ql").attr("defaultvalue")!=$("#ps_ql").val())||
-            ($("#ps_jz").length == 1 && $("#ps_jz").attr("defaultvalue")!=$("#ps_jz").val())||
-            ($("#ps_cx").length == 1 && $("#ps_cx").attr("defaultvalue")!=$("#ps_cx").val())||
-            ($("#ps_zz").length == 1 && $("#ps_zz").attr("defaultvalue")!=$("#ps_zz").val())||
-            ($("#ps_detail").length == 1 && $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val())) {
-                if (confirm("有评审项尚未保存，是否保存？")) {
-                    var res = submitData();
-                    if(res !== false) location.href = "__CONTROLLER__/index?offset={$offset}&limit={$limit}";
-                    return ;
+            var check = false;
+            for(var i=0;i<markField.length;i++){
+                if($("#"+markField[i]).length == 1 && $("#"+markField[i]).attr("defaultvalue")!=$("#"+markField[i]).val()){
+                    // console.log($("#"+markField[i]).attr("defaultvalue")+"---"+$("#"+markField[i]).val());
+                    check = true;
                 }
             }
-            location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
+            if(check ||
+            ($("#ps_zz").length == 1 && $("#ps_zz").attr("defaultvalue")!=$("#ps_zz").val())||
+            ($("#ps_detail").length == 1 && $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val())) {
+                layer.confirm("有评审项尚未保存，是否保存？", function () {
+                    var res = submitData();
+                    if (res !== false) location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
+                    return ;
+                });
+            }else{
+                location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
+            }
         });
         $("#back1").on("click",function(){
             $("#back").click();

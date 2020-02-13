@@ -4,7 +4,7 @@ use Think\Controller;
 class XmpsController extends BaseController {
 
     /**
-     * 专家打分页面(总)
+     * 专家打分页面(会评)
      */
     public function index(){
         $model = M('xmps_xmrelation');
@@ -48,7 +48,7 @@ class XmpsController extends BaseController {
     }
 
     /**
-     * 专家打分页面(分)
+     * 专家打分页面（函评）
      */
     public function markIndex(){
         $this->display();
@@ -131,45 +131,64 @@ class XmpsController extends BaseController {
         }else{ // 函评页面方式
             $markField  = $this->getAllMarkField();
         }
-        $markField   = implode(",",$markField);
+        $markFields   = implode(",",$markField);
 
         $where['xr_user_id'] = array('eq' ,session("user_id"));
         $model = M('xmps_xm');
-        $data = $model->field('xm_id,xm_ordernum,xm_tmfs,xm_code,ishuibi,xm_name,'.$markField.',xm_company,xm_createuser,xm_class,xm_oldfenzu,xm_oldrank,xm_oldscore,xm_oldcommand,xr_id,xr_status,ps_zz,ps_total,xm_type,xm_group')
-            ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
+        $data = $model->field('xm_id,xm_ordernum,xm_tmfs,xm_code,ishuibi,xm_name,'.$markFields.',xm_company,xm_createuser,xm_class,xm_oldfenzu,xm_oldrank,xm_oldscore,xm_oldcommand,xr_id,xr_status,ps_zz,ps_total,xm_type,xm_group')
+            ->join('xmps_xmrelation on xr_xm_id = xmps_xm.xm_id')
             ->where($where)
             ->order($queryParam['sort']." ".$queryParam['sortOrder'])
             ->limit($queryParam['offset'], $queryParam['limit'])
             ->select();
-//        echo $model->_sql();die;
+        // 会评没有小数点
+//        foreach ($data as $key=>$val){
+//            foreach ($markField as $field){
+//                $data[$key][$field] = round($val[$field]);
+//            }
+//        }
         $count = $model->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')->where($where)->count();
         echo json_encode(array( 'total' => $count,'rows' => $data));
     }
 
     /**
-     * 项目打分页面（每个项目分开打分）
+     * 项目打分页面（函评）
      */
     public function marking(){
-        $id    = I("get.id");
-        $model = M('xmps_xm');
+        $id         = I("get.id");
+        $model      = M('xmps_xm');
         $markField  = $this->getAllMarkField();
-        $markField   = implode(",",$markField);
+        $markField  = implode(",",$markField);
         $data  = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xr_id,'.$markField.',ps_zz,ps_detail,ps_total')
             ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->where("xr_id='".$id."'")
             ->find();
+//        echo $model->_sql();die;
         if($data['xm_type']){
             $xm_type = trim($data['xm_type']);
             $remarkConfig = C('mark.REMARK_OPTION')[$xm_type];
             if($remarkConfig){
                 $this->assign("title",$remarkConfig['title']);// 标题
-                $this->assign("importants",$remarkConfig['评价要点']);// 评价要点
                 $this->assign("standrad",$remarkConfig['评价内容']);// 评价内容
-                // $this->assign("notice",implode("",$remarkConfig['注意事项']));// 注意事项
+                // 打分字段
+                $markField = removeArrKey($remarkConfig['评价内容'],'field');
+                $this->assign('markField',json_encode($markField));
+
                 $this->assign("notice","<p>".implode("</p><p>",$remarkConfig['注意事项'])."</p>");// 注意事项
                 $this->assign("advise",$remarkConfig['评审意见']);// 评审意见
                 $ziZhu = empty($remarkConfig['定性评价'])?0:1;
                 $this->assign("isZiZhu",$remarkConfig['定性评价']);// 定性评价
+                // 过滤数据取小数点
+                $ps_total = 0;
+                foreach($remarkConfig['评价内容'] as $key=>$val){
+                    if($val['type'] == 'input' && $data[$val['field']] != null){
+                        $decimalpoint = isset($val['decimalpoint'])?intval($val['decimalpoint']):0;
+                        $data[$val['field']] = round($data[$val['field']],$decimalpoint);
+                        $ps_total += $data[$val['field']];
+                    }
+                }
+                $data['ps_total'] = $ps_total;
+//                dump($remarkConfig['评价内容']);die;
             }
         }
         $this->assign("data",$data);
@@ -177,8 +196,9 @@ class XmpsController extends BaseController {
         $this->assign("limit",I("get.limit"));
         $this->display();
     }
+
     /**
-     * 项目打分页面查看结果（每个项目分开打分）
+     * 项目打分页面查看结果（函评）
      */
     public function showmarking(){
         $id    = I("get.id");
@@ -195,12 +215,21 @@ class XmpsController extends BaseController {
 //            dump($remarkConfig);die;
             if($remarkConfig){
                 $this->assign("title",$remarkConfig['title']);// 标题
-                $this->assign("importants",$remarkConfig['评价要点']);// 评价要点
                 $this->assign("standrad",$remarkConfig['评价内容']);// 评价内容
                 $this->assign("notice","<p>".implode("</p><p>",$remarkConfig['注意事项'])."</p>");// 注意事项
                 $this->assign("advise",$remarkConfig['评审意见']);// 评审意见
                 $ziZhu = empty($remarkConfig['定性评价'])?0:1;
                 $this->assign("isZiZhu",$remarkConfig['定性评价']);// 定性评价
+                // 过滤数据取小数点
+                $ps_total = 0;
+                foreach($remarkConfig['评价内容'] as $key=>$val){
+                    if($val['type'] == 'input' && $data[$val['field']] != null){
+                        $decimalpoint = isset($val['decimalpoint'])?intval($val['decimalpoint']):0;
+                        $data[$val['field']] = round($data[$val['field']],$decimalpoint);
+                        $ps_total += $data[$val['field']];
+                    }
+                }
+                $data['ps_total'] = $ps_total;
             }
         }
 //        $data["ps_detail"]=str_replace("$","\n",$data["ps_detail"]);
@@ -210,25 +239,60 @@ class XmpsController extends BaseController {
         $this->display();
     }
 
+    /**
+     * 保存评审结果（函评）
+     */
     public function saveps(){
-        $data=I("post.");
+        $data = I("post.");
         foreach($data as $key=>$d) {
             if ($d == "")
                 $data[$key] = null;
         }
-        $data["ps_total"]=$data["ps_item2"]+$data["ps_item3"]+$data["ps_item5"];
-        $data["ps_time"]=time();
+        // 获取所有打分字段求和
+        $remarkConfig = C('mark.REMARK_OPTION')[trim($data['xm_type'])]['评价内容'];
+        $markField = removeArrKey($remarkConfig,'field');
+        $ps_total = 0;
+        foreach($markField as $field){
+            if(!isset($data[$field])) $data[$field] = 0;
+            $ps_total += $data[$field];
+        }
+        $data["ps_total"] = $ps_total;
+        $data["ps_time"]  = time();
         try {
             $model = M('xmps_xmrelation');
             $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
-            echo "ok";
+            exit(makeStandResult(0,''));
         }catch (Exception $e){
-            echo "error";
+            exit(makeStandResult(1,'错误信息'.$e));
         }
     }
 
     /**
-     * 打分逐条保存
+     * 设置回避项目（函评）
+     */
+    public function setHuibi(){
+        $xr_id  = I('post.xrid');
+        $xmType = I('post.xmType');
+        if(empty($xr_id)) exit(makeStandResult(1,'参数缺失，请刷新重试！'));
+        $xr_status = M('xmps_xmrelation')->where("xr_id='".$xr_id."'")->getField('xr_status');
+        if($xr_status == '完成') exit(makeStandResult(2,'该项目已提交，请刷新页面！'));
+        // 获取所有打分字段
+        $remarkConfig = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
+        $markField    = removeArrKey($remarkConfig,'field');
+        $data              = [];
+        foreach($markField as $field){
+            $data[$field] = null;
+        }
+        $data['ps_zz']     = null;
+        $data['ps_total']  = null;
+        $data['ps_detail'] = null;
+        $data['ishuibi']   = I('post.ishuibi',0);
+        M('xmps_xmrelation')->where("xr_id='".$xr_id."'")->setField($data);
+        exit(makeStandResult(0,''));
+    }
+
+    /**
+     * 打分逐条保存(会评)
      */
     public function saveScore(){
         $data        = I("post.data");
@@ -352,7 +416,7 @@ class XmpsController extends BaseController {
     }
 
     /**
-     * 判断某一课题分类下专家打分是否已完成
+     * 判断某一课题分类下专家打分是否已完成（会评）
      */
     public function panduanpswancheng()
     {
@@ -389,7 +453,72 @@ class XmpsController extends BaseController {
     }
 
     /**
-     * 专家打分提交（改状态）
+     * 判断专家打分是否已完成（函评）
+     */
+    public function panduanpswanchenghan()
+    {
+        $model = M('xmps_xmrelation');
+        $relationdata = $model
+            ->alias('t')
+            ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
+            ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中' and ishuibi != 1")
+            ->select();
+        $data         = [];
+        $remarkConfig = C('mark.REMARK_OPTION');
+        $str          = "";
+        foreach ($relationdata as $rd) {
+            $markField = [];
+            $xm_type   = $rd['xm_type'];
+            if(C('mark.REMARK_OPTION')[$xm_type]['评价内容']){
+                $markField = C('mark.REMARK_OPTION')[$xm_type]['评价内容'];
+                $markField = array_column($markField, 'field');
+            }else{
+                exit(makeStandResult(1,$xm_type."类型下评价内容缺失"));
+            }
+            $isZiZhu   = empty(C('mark.REMARK_OPTION')[$xm_type]['定性评价'])?0:1;
+            if($isZiZhu) array_push($markField,'ps_zz');
+            array_push($markField,'ps_detail');
+            foreach($markField as $field){
+                if($rd[$field] == ""){
+                    $str .='<li>'.$rd['xm_code'] . '</li>';
+                    break;
+                }
+            }
+        }
+        $str = rtrim($str, ',');
+        if ($str != "") {
+            exit(makeStandResult(2,'<p>以下项目尚未评审完毕，请评审完毕后再提交</p><ul>'.$str .'</ul>'));
+        }
+        exit(makeStandResult(0,''));
+    }
+    /**
+     * 专家打分提交（改状态）(函评)
+     */
+    public function savepswanchenghan()
+    {
+        $model = M('xmps_xmrelation');
+        $model->startTrans();
+        try {
+            $relationdata = $model
+                ->alias('t')
+                ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
+                ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中'")
+                ->select();
+            foreach ($relationdata as $rd) {
+                $data["xr_status"] = "完成";
+                $data["xr_id"]     = $rd["xr_id"];
+                $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+            }
+            $model->commit();
+            exit(makeStandResult(0,''));
+        } catch (Exception $e) {
+            $model->rollback();
+            exit(makeStandResult(1,'错误信息'.$e));
+        }
+    }
+
+    /**
+     * 专家打分提交（改状态）（会评）
      */
     public function savepswancheng()
     {
