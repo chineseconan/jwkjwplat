@@ -101,4 +101,21 @@ class BaseController extends Controller
         }
         return $allMarkField;
     }
+
+    /**
+     * 获取全部评分字段
+     */
+    function getAllMarkFieldFormat(){
+        $allMarkField = [];
+        $markInfo     = C('mark.REMARK_OPTION');//[$queryParam['xm_type']]['评价内容']
+        foreach ($markInfo as $key=>$value){
+            $markField = removeArrKey($value['评价内容'],'field');
+            $allMarkField = array_unique(array_merge($allMarkField,$markField));
+        }
+        // 去掉小数点后面的多余的尾0
+        foreach($allMarkField as $key=>$val){
+            $allMarkField[$key] = "0+cast(".$val." as char) as ".$val;
+        }
+        return $allMarkField;
+    }
 }

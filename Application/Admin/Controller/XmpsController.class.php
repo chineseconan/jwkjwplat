@@ -129,18 +129,19 @@ class XmpsController extends BaseController {
             $markOption  = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['评价内容'];
             $markField   = removeArrKey($markOption,'field');
         }else{ // 函评页面方式
-            $markField  = $this->getAllMarkField();
+            $markField  = $this->getAllMarkFieldFormat();
         }
         $markFields   = implode(",",$markField);
 
         $where['xr_user_id'] = array('eq' ,session("user_id"));
         $model = M('xmps_xm');
-        $data = $model->field('xm_id,xm_ordernum,xm_tmfs,xm_code,ishuibi,xm_name,'.$markFields.',xm_company,xm_createuser,xm_class,xm_oldfenzu,xm_oldrank,xm_oldscore,xm_oldcommand,xr_id,xr_status,ps_zz,ps_total,xm_type,xm_group')
+        $data = $model->field('xm_id,xm_ordernum,xm_tmfs,xm_code,ishuibi,xm_name,'.$markFields.',xm_company,xm_createuser,xm_class,xm_oldfenzu,xm_oldrank,xm_oldscore,xm_oldcommand,xr_id,xr_status,ps_zz,xm_type,xm_group,0+cast(ps_total as char) as ps_total')
             ->join('xmps_xmrelation on xr_xm_id = xmps_xm.xm_id')
             ->where($where)
             ->order($queryParam['sort']." ".$queryParam['sortOrder'])
             ->limit($queryParam['offset'], $queryParam['limit'])
             ->select();
+//        echo $model->_sql();die;
         // 会评没有小数点
 //        foreach ($data as $key=>$val){
 //            foreach ($markField as $field){
@@ -157,13 +158,12 @@ class XmpsController extends BaseController {
     public function marking(){
         $id         = I("get.id");
         $model      = M('xmps_xm');
-        $markField  = $this->getAllMarkField();
+        $markField  = $this->getAllMarkFieldFormat();
         $markField  = implode(",",$markField);
-        $data  = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xr_id,'.$markField.',ps_zz,ps_detail,ps_total')
+        $data  = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xr_id,'.$markField.',ps_zz,ps_detail,0+cast(ps_total as char) as ps_total')
             ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->where("xr_id='".$id."'")
             ->find();
-//        echo $model->_sql();die;
         if($data['xm_type']){
             $xm_type = trim($data['xm_type']);
             $remarkConfig = C('mark.REMARK_OPTION')[$xm_type];
@@ -178,16 +178,6 @@ class XmpsController extends BaseController {
                 $this->assign("advise",$remarkConfig['评审意见']);// 评审意见
                 $ziZhu = empty($remarkConfig['定性评价'])?0:1;
                 $this->assign("isZiZhu",$remarkConfig['定性评价']);// 定性评价
-                // 过滤数据取小数点
-                $ps_total = 0;
-                foreach($remarkConfig['评价内容'] as $key=>$val){
-                    if($val['type'] == 'input' && $data[$val['field']] != null){
-                        $decimalpoint = isset($val['decimalpoint'])?intval($val['decimalpoint']):0;
-                        $data[$val['field']] = round($data[$val['field']],$decimalpoint);
-                        $ps_total += $data[$val['field']];
-                    }
-                }
-                $data['ps_total'] = $ps_total;
 //                dump($remarkConfig['评价内容']);die;
             }
         }
@@ -203,9 +193,9 @@ class XmpsController extends BaseController {
     public function showmarking(){
         $id    = I("get.id");
         $model = M('xmps_xm');
-        $markField  = $this->getAllMarkField();
+        $markField  = $this->getAllMarkFieldFormat();
         $markField  = implode(",",$markField);
-        $data = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xr_id,'.$markField.',ps_zz,ps_detail,ps_total,ishuibi')
+        $data = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xr_id,'.$markField.',ps_zz,ps_detail,ishuibi,0+cast(ps_total as char) as ps_total')
             ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->where("xr_id='".$id."'")
             ->find();
@@ -253,7 +243,7 @@ class XmpsController extends BaseController {
         $markField = removeArrKey($remarkConfig,'field');
         $ps_total = 0;
         foreach($markField as $field){
-            if(!isset($data[$field])) $data[$field] = 0;
+            if(!isset($data[$field])) continue;
             $ps_total += $data[$field];
         }
         $data["ps_total"] = $ps_total;
@@ -476,8 +466,9 @@ class XmpsController extends BaseController {
                 exit(makeStandResult(1,$xm_type."类型下评价内容缺失"));
             }
             $isZiZhu   = empty(C('mark.REMARK_OPTION')[$xm_type]['定性评价'])?0:1;
+            $isDetail  = C("isDetail");
             if($isZiZhu) array_push($markField,'ps_zz');
-            array_push($markField,'ps_detail');
+            if($isDetail) array_push($markField,'ps_detail');
             foreach($markField as $field){
                 if($rd[$field] == ""){
                     $str .='<li>'.$rd['xm_code'] . '</li>';

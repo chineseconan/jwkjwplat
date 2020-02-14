@@ -100,9 +100,9 @@
                     <td style="text-align: center;vertical-align: middle;">
                         <?php if($value['type'] == 'select'){?>
                             <select class="ps_input" style="width:80%;" id="<?php echo $value['field'];?>" defaultvalue="<?php echo $data[$value['field']];?>">
-<!--                                <option value=""></option>-->
+                                <option value=""></option>
                                 <?php foreach($value['source'] as $optionval){?>
-                                    <option <?php if($optionval == $data[$value['field']]) echo "selected";?>><?php echo $optionval;?></option>
+                                    <option <?php if($optionval == $data[$value['field']] && $data[$value['field']] != '') echo "selected";?>><?php echo $optionval;?></option>
                                 <?php }?>
                             </select>
                         <?php }else{?>
@@ -259,6 +259,8 @@
                     var res = submitData();
                     if (res !== false) location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
                     return ;
+                },function(){
+                    location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
                 });
             }else{
                 location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";

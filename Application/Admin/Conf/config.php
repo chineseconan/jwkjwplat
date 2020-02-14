@@ -10,6 +10,12 @@ return array(
     'DB_CHARSET'=>'utf8',// 数据库字符集
     'URL_CASE_INSENSITIVE' => false,
 
+    'SESSION_PREFIX' => 'jwkjw_',
+    'COOKIE_PREFIX' => 'jwkjw_',
+    'COOKIE_DOMAIN' => '',
+    'LOAD_EXT_CONFIG'=>['mark'=>'mark_config_hanping'],
+    'COOKIE_HTTPONLY' => '',
+
     'COMMONUSERID'=> 'T30E9CC5E140D43A6B0E448B8', //‘普通用户’的角色id
     'PROFESSERID'=> 'TCAAB0FF33F1D45348204EB46', //‘专家’的角色id
     'VIEWUSERID'=> 'TC0956A46AAEB448DB04EE0C0', //‘浏览专家’的角色id
@@ -28,5 +34,7 @@ return array(
         '<b>注：初审成绩仅供参考</b>'
     ],
     // 与战斗力关联程度设置（0，1）
-    "isZD"=>"0"
+    "isZD"=>"0",
+    // 评审意见是否必填（0，1）
+    "isDetail"=>"0"
 );
