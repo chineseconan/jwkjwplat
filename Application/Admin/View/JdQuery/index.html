@@ -137,7 +137,7 @@
                     }
                 },
                 {field: 'num', title: '已评<br/>平均分', sortable: true, width:60 ,align:'center'},
-                {field: '', title: '第一轮<br/>投票进度', sortable: false,width:60,align:'center',
+                {field: 'wanchengvote1count', title: '第一轮<br/>投票进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
                         var all=row["allcount"];
@@ -152,7 +152,7 @@
                     }
                 },
                 {field: 'vote1rate', title: '第一轮<br/>得票率', sortable: true, width:55 ,align:'center'},
-                {field: '', title: '第二轮<br/>投票进度', sortable: false,width:60,align:'center',
+                {field: 'wanchengvote2count', title: '第二轮<br/>投票进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
                         var all=row["allcount"];
@@ -167,7 +167,7 @@
                     }
                 },
                 {field: 'vote2rate', title: '第二轮<br/>得票率', sortable: true, width:55 ,align:'center'},
-                {field: '', title: '第三轮<br/>投票进度', sortable: false,width:60,align:'center',
+                {field: 'wanchengvote3count', title: '第三轮<br/>投票进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
                         var all=row["allcount"];
@@ -188,6 +188,15 @@
             onLoadSuccess:function(){
                 if("{$Think.config.isZD}" == 1){
                     $('#detailtable').bootstrapTable('showColumn','vote4');
+                }
+                // 是否显示投票字段
+                if('{$TOUPIAO}' != '1'){
+                    $('#atpbiztable').bootstrapTable('hideColumn','wanchengvote1count');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote1rate');
+                    $('#atpbiztable').bootstrapTable('hideColumn','wanchengvote2count');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote2rate');
+                    $('#atpbiztable').bootstrapTable('hideColumn','wanchengvote3count');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote3rate');
                 }
             }
         });

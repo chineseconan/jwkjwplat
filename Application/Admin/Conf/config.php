@@ -13,8 +13,11 @@ return array(
     'SESSION_PREFIX' => 'jwkjw_',
     'COOKIE_PREFIX' => 'jwkjw_',
     'COOKIE_DOMAIN' => '',
-    'LOAD_EXT_CONFIG'=>['mark'=>'mark_config_hanping'],
-    'COOKIE_HTTPONLY' => '',
+    // 1.函评，['mark'=>'mark_config_hanping']
+    // 2.会评，['mark'=>'mark_config']
+    'LOAD_EXT_CONFIG'=>['mark'=>'mark_config'],
+    // 3.会评情况下，是否投票(1为投票，0为不需要投票)
+    'TOUPIAO'=>'1',
 
     'COMMONUSERID'=> 'T30E9CC5E140D43A6B0E448B8', //‘普通用户’的角色id
     'PROFESSERID'=> 'TCAAB0FF33F1D45348204EB46', //‘专家’的角色id
@@ -34,7 +37,7 @@ return array(
         '<b>注：初审成绩仅供参考</b>'
     ],
     // 与战斗力关联程度设置（0，1）
-    "isZD"=>"0",
+    "isZD"=>"1",
     // 评审意见是否必填（0，1）
     "isDetail"=>"0"
 );

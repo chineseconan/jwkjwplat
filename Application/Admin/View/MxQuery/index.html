@@ -98,6 +98,11 @@
     layui.use('layer', function() {
         layer = layui.layer;
     });
+    if('{$psType}' == 'huiping'){
+        var zzTitle = '与战斗力<br/>关联程度';
+    }else{
+        var zzTitle = '定性评价';
+    }
     $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '120px'});
     $('#atpbiztable').bootstrapTable({
             url: '__CONTROLLER__/getData',
@@ -126,7 +131,22 @@
                     }
                 }
             },
-            columns: tableColumn()
+            columns: tableColumn(),
+            onLoadSuccess:function(){
+                // 是否显示与战斗关联
+                if('{$psType}' == 'huiping' && '{$Think.config.isZD}' != '1'){
+                    $('#atpbiztable').bootstrapTable('hideColumn','ps_zz');
+                }
+                // 是否显示投票字段
+                if('{$TOUPIAO}' != '1'){
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote1');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote1status');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote2');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote2status');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote3');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote3status');
+                }
+            }
         });
     $('#sys_refresh').on('click',function() {
         $('#atpbiztable').bootstrapTable('refresh')
@@ -205,24 +225,20 @@
                     },
                 <?php }
             }?>
-            <?php
-                if(C('isZD') == '1'){?>
-                    {
-                        field: 'vote4',
-                        title: '与战斗力<br/>关联程度',
-                        sortable: true,
-                        align:'center',
-                        width:80,
-                        formatter:function(value, row, index){
-                            if(row.ishuibi == 1){
-                                return '回避'
-                            }else{
-                                return value;
-                            }
-                        }
-                    },
-            <?php     }
-            ?>
+            {
+                field: 'ps_zz',
+                title: zzTitle,
+                sortable: true,
+                align:'center',
+                width:95,
+                formatter:function(value, row, index){
+                    if(row.ishuibi == 1){
+                        return '回避'
+                    }else{
+                        return value;
+                    }
+                }
+            },
             {
                 field: 'xr_status',
                 title: '打分状态',

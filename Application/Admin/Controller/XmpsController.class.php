@@ -1,6 +1,8 @@
 <?php
 namespace Admin\Controller;
 use Think\Controller;
+use Think\Exception;
+
 class XmpsController extends BaseController {
 
     /**
@@ -121,13 +123,16 @@ class XmpsController extends BaseController {
     public function getData(){
         $queryParam = json_decode(file_get_contents( "php://input"), true);
         $where = [];
-//        $where['xm_status'] = ['neq','删除'];
 //        $where['xm_class']  =['eq',session('classid')];
         if($queryParam['xr_status']) $where['xr_status'] = ['eq',$queryParam['xr_status']];
         if($queryParam['xm_type']){ // 会评表格列表方式
             $where['xm_type']  = ['eq',$queryParam['xm_type']];
             $markOption  = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['评价内容'];
             $markField   = removeArrKey($markOption,'field');
+            // 去掉小数点后面的多余的尾0
+            foreach($markField as $key=>$val){
+                $markField[$key] = "0+cast(".$val." as char) as ".$val;
+            }
         }else{ // 函评页面方式
             $markField  = $this->getAllMarkFieldFormat();
         }
@@ -240,7 +245,7 @@ class XmpsController extends BaseController {
         }
         // 获取所有打分字段求和
         $remarkConfig = C('mark.REMARK_OPTION')[trim($data['xm_type'])]['评价内容'];
-        $markField = removeArrKey($remarkConfig,'field');
+        $markField    = removeArrKey($remarkConfig,'field');
         $ps_total = 0;
         foreach($markField as $field){
             if(!isset($data[$field])) continue;
@@ -251,6 +256,21 @@ class XmpsController extends BaseController {
         try {
             $model = M('xmps_xmrelation');
             $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+            // 求平均
+            $xmid    = $data["xm_id"];
+            $xmtotal = $model->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0")->order("ps_total")->select();
+//            echo $model->_sql();
+//            dump($xmtotal);die;
+            $xmcount = count($xmtotal);
+            if($xmcount>2) {
+                unset($xmtotal[0]);
+                unset($xmtotal[$xmcount - 1]);
+                $total = 0;
+                foreach ($xmtotal as $t) {
+                    $total += floatval($t["ps_total"]);
+                }
+                $model->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
+            }
             exit(makeStandResult(0,''));
         }catch (Exception $e){
             exit(makeStandResult(1,'错误信息'.$e));
@@ -290,59 +310,89 @@ class XmpsController extends BaseController {
         $quxiaohuibi = I('post.quxiaohuibi','0');
         $markOption  = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
         $markField   = removeArrKey($markOption,'field');
-        $M      = M('xmps_xmrelation');
-        $res    = $M->where($data)->count();
-        if($res>0){
-            exit(makeStandResult(0,'数据已保存'));
-        }
-        if($quxiaohuibi == 1){
-            foreach($markField as $field){
-                $data[$field] = null;
+        $M           = M('xmps_xmrelation');
+        try{
+            $M->startTrans();
+            $res = $M->where($data)->count();
+            if($res>0){
+                exit(makeStandResult(0,'数据已保存'));
             }
-//            dump($data);die;
-            $data['ps_total']  = null;
-            $data['ps_detail'] = null;
-            $data['vote1']     = null;
-            $data['vote2']     = null;
-            $data['vote3']     = null;
-        }else if($data['ishuibi'] == 1){
-            foreach($markField as $field){
-                $data[$field] = -1;
-            }
-            $data['ps_total']  = -1;
-            $data['ps_detail'] = -1;
-            $data['vote1']     = -1;
-            $data['vote2']     = -1;
-            $data['vote3']     = -1;
-        }else{
-            if(empty($xmType)) exit(makeStandResult(3,'参数缺失，请刷新页面重试！'));
-            $markOption     = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
-            $allRemarkField = $this->getAllMarkField();
-            $markField      = removeArrKey($markOption,'field');
-            $total          = 0;
-            foreach($allRemarkField as $field){
-                // 不存在的字段销毁
-                if(!in_array($field,$markField) && $data[$field] == ''){
-                    unset($data[$field]);
+            if($quxiaohuibi == 1){
+                foreach($markField as $field){
+                    $data[$field] = null;
                 }
-                if(in_array($field,$markField) && $data['ishuibi'] != 1){
-                    // 计算total值
-                    $total += round($data[$field]);
-                    // 判断范围
-                    if($data[$field] == '' || round($data[$field])>round($markOption[$field]['maxVal']) || round($data[$field])<round($markOption[$field]['minVal'])){
-                        exit(makeStandResult(2,'项目'.$data['xm_name']."：".$markOption[$field]['title'].'（分数值：'.$data[$field].'）<br/>不在取值范围内（'.$markOption[$field]['minVal'].'-'.$markOption[$field]['maxVal'].'），请刷新页面重新填写！'));
+                $data['ps_total']  = null;
+                $data['ps_detail'] = null;
+                $data['ps_zz']     = null;
+                $data['vote1']     = null;
+                $data['vote2']     = null;
+                $data['vote3']     = null;
+            }else if($data['ishuibi'] == 1){
+                foreach($markField as $field){
+                    $data[$field] = -1;
+                }
+                $data['ps_total']  = -1;
+                $data['ps_detail'] = -1;
+                $data['ps_zz']     = -1;
+                $data['vote1']     = -1;
+                $data['vote2']     = -1;
+                $data['vote3']     = -1;
+            }else{
+                if(empty($xmType)) exit(makeStandResult(3,'参数缺失，请刷新页面重试！'));
+                $markOption     = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
+                $allRemarkField = $this->getAllMarkField();
+                $markField      = removeArrKey($markOption,'field');
+                $total          = 0;
+                foreach($allRemarkField as $field){
+                    // 不存在的字段销毁
+                    if(!in_array($field,$markField) && $data[$field] == ''){
+                        unset($data[$field]);
+                    }
+                    if(in_array($field,$markField) && $data['ishuibi'] != 1){
+                        // 计算total值
+                        $total += round($data[$field]);
+                        // 判断范围
+                        if($data[$field] == '' || round($data[$field])>round($markOption[$field]['maxVal']) || round($data[$field])<round($markOption[$field]['minVal'])){
+                            exit(makeStandResult(2,'项目'.$data['xm_name']."：".$markOption[$field]['title'].'（分数值：'.$data[$field].'）<br/>不在取值范围内（'.$markOption[$field]['minVal'].'-'.$markOption[$field]['maxVal'].'），请刷新页面重新填写！'));
+                        }
                     }
                 }
+                if($total != $data['ps_total'] && $data['ps_total'] != -1){ // 验证总分
+                    exit(makeStandResult(1,'项目'.$data['xm_name'].'总分计算有误，请刷新页面重试！'.$total."---".$data['ps_total']));
+                }
             }
-            if($total != $data['ps_total'] && $data['ps_total'] != -1){
-                exit(makeStandResult(1,'项目'.$data['xm_name'].'总分计算有误，请刷新页面重试！'.$total."---".$data['ps_total']));
-//                $data['ps_total'] = $total;
+            // 保存
+            $M->where("xr_id='".$data['xr_id']."'")->save($data);
+            // 写入平均分
+            $xmid    = $data["xm_id"];
+            $xmtotal = $M->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0")->order("ps_total")->select();
+            $xmcount = count($xmtotal);
+            if($xmcount>2) {
+                unset($xmtotal[0]);
+                unset($xmtotal[$xmcount - 1]);
+                $total = 0;
+                foreach ($xmtotal as $t) {
+                    $total += intval($t["ps_total"]);
+                }
+                $M->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
             }
-        }
-        $re = $M->where("xr_id='".$data['xr_id']."'")->save($data);
-        if($re!=false){
+            // 将是否与战斗关联写入ps_detail
+            if(C('isZD') != 0){
+                $ps_zz = $M->field('ps_zz')->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->order('ps_zz asc')->select();
+                $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
+                $ps_detail = implode('',$ps_zz);
+                if(!empty($ps_zz)){
+                    $M->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->setField("ps_detail",  $ps_detail);
+//                    echo $M->_sql();die;
+                }
+            }
+            $M->commit();
             exit(makeStandResult(0,'保存成功'));
+        }catch (Exception $e){
+            exit(makeStandResult(9,'保存失败，错误详情：'.$e));
+            $M->rollback();
         }
+
     }
 
     /**
@@ -371,11 +421,12 @@ class XmpsController extends BaseController {
                     }
                     $data['ps_total']  = -1;
                     $data['ps_detail'] = -1;
+                    $data['ps_zz']     = -1;
                     $data['vote1']     = -1;
                     $data['vote2']     = -1;
                     $data['vote3']     = -1;
                 }else{
-                    $total          = 0;
+                    $total = 0;
                     foreach($allRemarkField as $field){
                         // 不存在的字段销毁
                         if(!in_array($field,$markField) && $data[$field] == ''){
@@ -395,6 +446,28 @@ class XmpsController extends BaseController {
                     }
                 }
                 $M->where("xr_id='".$data['xr_id']."'")->save($data);
+                // 写入平均分
+                $xmid    = $data["xm_id"];
+                $xmtotal = $M->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0")->order("ps_total")->select();
+                $xmcount = count($xmtotal);
+                if($xmcount>2) {
+                    unset($xmtotal[0]);
+                    unset($xmtotal[$xmcount - 1]);
+                    $total = 0;
+                    foreach ($xmtotal as $t) {
+                        $total += intval($t["ps_total"]);
+                    }
+                    $M->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
+                }
+                // 将是否与战斗关联写入ps_detail
+                if(C('isZD') != 0){
+                    $ps_zz = $M->field('ps_zz')->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->order('ps_zz asc')->select();
+                    $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
+                    $ps_detail = implode('',$ps_zz);
+                    if(!empty($ps_zz)){
+                        $M->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->setField("ps_detail",  $ps_detail);
+                    }
+                }
 //            echo $M->_sql();die;
             }
             $M->commit();
@@ -495,11 +568,9 @@ class XmpsController extends BaseController {
                 ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
                 ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中'")
                 ->select();
-            foreach ($relationdata as $rd) {
-                $data["xr_status"] = "完成";
-                $data["xr_id"]     = $rd["xr_id"];
-                $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
-            }
+            $xr_ids = removeArrKey($relationdata,'xr_id');
+            $data["xr_status"] = "完成";
+            $model->where(["xr_id"=>['in',$xr_ids]])->save($data);
             $model->commit();
             exit(makeStandResult(0,''));
         } catch (Exception $e) {
@@ -525,33 +596,9 @@ class XmpsController extends BaseController {
                 ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
                 ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中' and m.xm_type = '$xmType'")
                 ->select();
-            foreach ($relationdata as $rd) {
-                $data["xr_status"] = "完成";
-                $xr_id              = $rd["xr_id"];
-                $model->where("xr_id='" . $xr_id . "'")->save($data);
-                // 写入平均分
-                $xmid    = $rd["xr_xm_id"];
-                $xmtotal = $model->join("inner join sysuser u on u.user_id = xmps_xmrelation.xr_user_id")->where("xr_xm_id='".$xmid."' and xr_status='完成' and ishuibi=0 and u.user_isdelete != '1'")->order("ps_total")->select();
-//                echo  $model->_sql();
-//                dump($xmtotal);die;
-                $xmcount = count($xmtotal);
-                if($xmcount>2) {
-                    unset($xmtotal[0]);
-                    unset($xmtotal[$xmcount - 1]);
-                    $total = 0;
-                    foreach ($xmtotal as $t) {
-                        $total += intval($t["ps_total"]);
-                    }
-                    $model->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
-                }
-                // 将是否与战斗关联写入ps_detail
-//                $ps_detail = $model->field('ps_detail')->where("xr_xm_id='".$xmid."' and xr_status='完成' and ishuibi=0 ")->order('ps_detail asc')->select();
-//                $ps_detail = removeArrKey($ps_detail,'ps_detail',false);
-//                $ps_detail = implode('',$ps_detail);
-//                if(!empty($ps_detail)){
-//                    $model->where("xr_xm_id='".$xmid."'")->setField("ps_detail",  $ps_detail);
-//                }
-            }
+            $xr_ids = removeArrKey($relationdata,'xr_id');
+            $data["xr_status"] = "完成";
+            $model->where(["xr_id"=>['in',$xr_ids]])->save($data);
             $model->commit();
             exit(makeStandResult(0,''));
         } catch (Exception $e) {

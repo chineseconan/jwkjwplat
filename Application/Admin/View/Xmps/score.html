@@ -1,8 +1,9 @@
 ﻿<include file="Public:tableheader" />
 <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet" />
 <style>
-    th{
+    .bootstrap-table .table > thead > tr > th{
         text-align: center;
+        vertical-align: middle;
     }
     .wrapper .wrapper-content{
         padding-bottom: 0;
@@ -211,7 +212,7 @@
         },
         onLoadSuccess:function(){
             if("{$Think.config.isZD}" == 1){
-                $('#atpbiztable').bootstrapTable('showColumn','ps_detail');
+                $('#atpbiztable').bootstrapTable('showColumn','ps_zz');
             }
         },
         onEditableShown: function(field, row, $el, editable){
@@ -284,7 +285,7 @@
                 $count ++;
             }
     }?>
-            {field: 'ps_detail', title: '与战斗力<br/>关联程度', sortable: true,width:80,visible:false,
+            {field: 'ps_zz', title: '与战斗力<br/>关联程度', sortable: true,width:80,visible:false,
                 formatter:function(value, row, index){
                     var ishuibi = row.ishuibi;
                     if(ishuibi == '1'){
@@ -392,7 +393,7 @@
                 }
             }
             if('{$Think.config.isZD}' == '1'){
-                if(data['ps_detail']=='' || data['ps_detail']==null){
+                if(data['ps_zz']=='' || data['ps_zz']==null){
                     layer.alert('请选择与战斗力关联程度');
                     return false;
                 }
@@ -432,8 +433,8 @@
 			data['vote1']     = -1;
 			data['vote2']     = -1;
 			data['vote3']     = -1;
-			data['ps_detail'] = -1;
-			data['notsave'] = null;
+			data['ps_zz']     = -1;
+			data['notsave']   = null;
 			$.post('__CONTROLLER__/saveScore',{data:data,xmType:'{$xmType}'},function(rep){
 				if(rep.code !='0'){
 					layer.alert('保存失败，请重试');
@@ -455,7 +456,7 @@
             for(var j=0;j<markFieldJson.length;j++){
                 data[markFieldJson[j]] = null;
             }
-			data['ps_detail'] = null;
+			data['ps_zz']     = null;
 			data['ps_total']  = '0';
 			data['ishuibi']   = 0;
 			data['vote1']     = '';
@@ -693,7 +694,7 @@
         return f;
     }
     function XMlook(id){
-        window.open("__MODULE__/XM/listindex?id="+id);
+        window.open("__MODULE__/XM/listindex?xm_id="+id);
     }
 </script>
 </body>

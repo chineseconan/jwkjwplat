@@ -1,7 +1,8 @@
 ﻿<include file="Public:tableheader" />
 <style>
-    th{
+    .bootstrap-table .table > thead > tr > th{
         text-align: center;
+        vertical-align: middle;
     }
     #vote table thead{
         background: #6CC0DB;
@@ -148,7 +149,7 @@
         columns: tableColumn(),
         onLoadSuccess:function(){
             if("{$Think.config.isZD}" == 1){
-                $('#atpbiztable').bootstrapTable('showColumn','ps_detail');
+                $('#atpbiztable').bootstrapTable('showColumn','ps_zz');
             }
         }
     });
@@ -190,7 +191,7 @@
                 },
             <?php }
         }?>
-            {field: 'ps_detail', title: '与战斗力<br/>关联程度',width:80,visible:false,
+            {field: 'ps_zz', title: '与战斗力<br/>关联程度',width:80,visible:false,
                 formatter:function(value, row, index){
                     var ishuibi = row.ishuibi;
                     if(ishuibi == '1'){
@@ -278,7 +279,7 @@
         return f;
     }
     function XMlook(id){
-        window.open("__MODULE__/XM/listindex?id="+id);
+        window.open("__MODULE__/XM/listindex?xm_id="+id);
     }
 </script>
 </body>

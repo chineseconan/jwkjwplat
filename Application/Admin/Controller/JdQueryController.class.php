@@ -51,7 +51,7 @@ class JdQueryController extends BaseController
         xm_type,
         case when wanchengcount is null then 0 else wanchengcount end wanchengcount,
         case when allcount is null then 0 else allcount end allcount,
-        num,
+        0+cast(num as char) as num,
         ps_detail
         /* 投票字段*/
         ,case when wanchengvote1count is null then 0 else wanchengvote1count end wanchengvote1count,
@@ -188,6 +188,7 @@ class JdQueryController extends BaseController
 
         $markOption = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
         $this->assign('markOption',$markOption);
+        $this->getDic();
         $this->display("pingshendetail");
     }
 
@@ -211,7 +212,7 @@ class JdQueryController extends BaseController
         }
         $model = M('xmps_xmrelation');
         $field = ["user_realusername","xr_id","ps_zz","ps_detail","ps_total","xr_status","ishuibi"];
-        $allMarkField = $this->getAllMarkField();
+        $allMarkField = $this->getAllMarkFieldFormat();
         $field = array_merge($field,$allMarkField);
         if($type != ''){
             $field = array_merge($field,['vote1','vote2','vote3','vote1rate','vote2rate','vote3rate']);
@@ -318,8 +319,10 @@ class JdQueryController extends BaseController
             $where['xm_class']  = ['eq', $queryParam["xm_class"]];
             $where['xm_type']   = ['eq', $queryParam["xm_type"]];
             $model = M('xmps_xm');
-            $data = $model->field('xm_code,xm_name,xm_company,xm_createuser,avgvalue')
-                ->join("left join (select xr_xm_id,max(avgvalue) as avgvalue from xmps_xmrelation where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
+            $field = "xm_code,xm_name,xm_company,xm_createuser,avgvalue";
+            if(C('isZD') == 1) $field .= ",ps_detail";
+            $data = $model->field($field)
+                ->join("left join (select xr_xm_id,max(avgvalue) as avgvalue,max(ps_detail) as ps_detail from xmps_xmrelation where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
                 ->where($where)
                 ->order('avgvalue desc')
                 ->select();
@@ -394,7 +397,11 @@ class JdQueryController extends BaseController
             $excel->getActiveSheet()->getStyle('E2:G2')->applyFromArray($titleStyle);
             $excel->getActiveSheet()->getStyle('E2:G2')->getFont()->setName("楷体")->setSize(13);
             // 第三行表头样式设置，显示值设置
-            $title = array("序号", "项目编号", "项目名称", "依托单位", "申请人", "平均分", "备注");
+            $title = array("序号", "项目编号", "项目名称", "依托单位", "申请人", "平均分");
+            if(C('isZD') == 1){
+                array_push($title,'与战斗力相关程度');
+            }
+            array_push($title,'备注');
             $index = 0;
             for ($index; $index < 7; $index++) {
                 $excel->getActiveSheet()->setCellValue($letter[$index] . '3', $title[$index]);
@@ -402,7 +409,11 @@ class JdQueryController extends BaseController
                 $excel->getActiveSheet()->getStyle($letter[$index] . '3')->getFont()->setBold(true);
             }
             $key = 4;
-            $column = array('xm_code', 'xm_name', 'xm_company', 'xm_createuser', 'avgvalue','avgvalue2');
+            $column = array('xm_code', 'xm_name', 'xm_company', 'xm_createuser', 'avgvalue');
+            if(C('isZD') == 1){
+                array_push($column,'ps_detail');
+            }
+            array_push($column,'remark');
             $titlecount = count($title);
             foreach ($data as $d) {
                 if ($d["num"] == null)

@@ -13,10 +13,11 @@ class MxQueryController extends BaseController
         $this->assign("xmcode", $xmcode);
         $model = M('xmps_xm');
 
+        // 项目信息
         $where = [];
         $data = $model->field('xm_id,xm_name,xm_code')->where($where)->order("xm_code asc")->select();
         $this->assign("xmdata", $data);
-
+        // 用户信息
         $userModel = M("sysuser");
         $where = [];
         $where['user_isdelete'] = ['eq', '0'];
@@ -57,8 +58,8 @@ class MxQueryController extends BaseController
             $where['xm_code'] = ['eq', $queryParam['xm_code']];
         }
         $model = M('xmps_xm');
-        $field = "xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_class,xm_type,xr_id,xr_status,ps_zz,ps_detail,ps_total,user_realusername,vote1,vote2,vote3,vote1status,vote2status,vote3status";
-        $allMarkField = $this->getAllMarkField();
+        $field = "xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_class,xm_type,xr_id,xr_status,ps_zz,ps_detail,0+cast(ps_total as char) as ps_total,user_realusername,vote1,vote2,vote3,vote1status,vote2status,vote3status";
+        $allMarkField = $this->getAllMarkFieldFormat();
         $allMarkField = implode(",",$allMarkField);
         $field       .= ",".$allMarkField;
 //        dump($allMarkField);die;

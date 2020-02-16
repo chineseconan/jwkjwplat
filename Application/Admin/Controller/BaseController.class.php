@@ -87,6 +87,19 @@ class BaseController extends Controller
         $xmType  = array_unique(removeArrKey($xmInfo,'xm_type'));
         $this->assign("xmClass", $xmClass);
         $this->assign("xmType", $xmType);
+        // 评审类型
+        $pingshenType = C('LOAD_EXT_CONFIG')['mark'];
+        if($pingshenType == 'mark_config_hanping'){
+            $this->assign('psType','hanping');
+            $this->assign('TOUPIAO',0);
+        }else if($pingshenType == 'mark_config'){
+            $this->assign('psType','huiping');
+            if(C('TOUPIAO') == 0){
+                $this->assign('TOUPIAO',0);
+            }else{
+                $this->assign('TOUPIAO',1);
+            }
+        }
     }
 
     /**

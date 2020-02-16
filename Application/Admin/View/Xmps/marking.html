@@ -95,7 +95,7 @@
             </tr>
             <?php foreach($standrad as $key=>$value){?>
                 <tr>
-                    <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $value['mainpoints'];?></td>
+                    <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo ($key+1).".".$value['mainpoints'];?></td>
                     <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $value['content'];?></td>
                     <td style="text-align: center;vertical-align: middle;">
                         <?php if($value['type'] == 'select'){?>
@@ -141,6 +141,7 @@
             </thead>
         </table>
         <input type="hidden" id="xr_id" value="{$data.xr_id}" />
+        <input type="hidden" id="xm_id" value="{$data.xm_id}" />
         <input type="hidden" id="xm_type" value="{$data.xm_type}" />
     </div>
     </div>
@@ -221,11 +222,13 @@
             var ps_zz     = ($("#ps_zz").length == 1)?$("#ps_zz").val():null;
             var ps_detail = ($("#ps_detail").length == 1)?$("#ps_detail").val():null;
             var xr_id     = $("#xr_id").val();
+            var xm_id     = $("#xm_id").val();
             var xm_type   = $("#xm_type").val();
             var data      = {
                 ps_zz: ps_zz,
                 ps_detail: ps_detail,
                 xr_id: xr_id,
+                xm_id: xm_id,
                 xm_type: xm_type
             };
             for(var i=0;i<markField.length;i++){
