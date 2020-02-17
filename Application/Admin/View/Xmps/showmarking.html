@@ -73,7 +73,7 @@
             </tr>
             <?php foreach($standrad as $key=>$value){?>
             <tr>
-                <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo ($key+1).".".$value['mainpoints'];?></td>
+                <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo ($key+1).".".$value['mainpoints']."（0-".$value['maxVal']."分）";?></td>
                 <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $value['content'];?></td>
                 <td style="text-align: center;vertical-align: middle;"><?php echo $data[$value['field']];?></td>
             </tr>

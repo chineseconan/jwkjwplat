@@ -113,7 +113,12 @@
                         $.ajax({
                             type:'post',
                             url: t,
-                            data:{xm_class:name,xm_type:xmType},
+                            data:{
+                                xm_class:name,
+                                xm_type:xmType,
+                                psType:'{$psType}',
+                                TOUPIAO:'{$TOUPIAO}'
+                            },
                             dataType:'json',
                             success:function(data){
                                 if(data.code > 0){

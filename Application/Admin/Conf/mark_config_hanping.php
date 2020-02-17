@@ -2,7 +2,8 @@
 return array(
     "REMARK_OPTION"=>[
 		'重点'=>[
-            'title'=>'基础加强计划重点基础研究项目评审系统',
+            'title'=>'基础加强计划重点基础研究项目评审系统', // date("Y", time()) . "年度".$titleForExport."评审结果统计表" 为进度查询导出表头
+            'exportTitle'=>'基础加强计划重点基础研究项目专家评审汇总表',//明细查询导出表标题
             '评价内容'=>[
                 // field为数据库存储字段；
                 // mainpoints为评价要点；
@@ -10,10 +11,10 @@ return array(
                 // type为打分方式：
                 //      1.input     输入框，需设定保存小数点位数 decimalpoint（默认为0，最大为3，如需更大改数据库字段）
                 //      2.select    下拉框，需设定下拉列表值 source（格式为数组）
-                ['field'=>'ps_item1','mainpoints'=>'研究定位相符性（0-3分）','content'=>'主要考察项目是否符合基础加强计划重点项目定位、是否符合GF科技重点发展方向、对基础科学问题总结凝练的准确性等','maxVal'=>3,'type'=>'select','source'=>[0,1,2,3]],
-                ['field'=>'ps_item2','mainpoints'=>'项目策划合理性（0-3分）','content'=>'主要考察项目目标设定的科学性，项目课题设置、研究内容安排、研究阶段划分的合理性，经费预算安排的合规、合理性等','maxVal'=>3,'type'=>'input','decimalpoint'=>3],
-                ['field'=>'ps_item3','mainpoints'=>'综合效益显著性（0-2分）','content'=>'主要考察项目技术指标的先进性、预期成果JS价值及可检验性等','maxVal'=>2,'type'=>'input','decimalpoint'=>2],
-                ['field'=>'ps_item4','mainpoints'=>'团队实力匹配性（0-2分）','content'=>'主要考察研究团队基础、支撑平台、配套保障条件等','maxVal'=>2,'type'=>'input','decimalpoint'=>2]
+                ['field'=>'ps_item1','mainpoints'=>'研究定位相符性','content'=>'主要考察项目是否符合基础加强计划重点项目定位、是否符合GF科技重点发展方向、对基础科学问题总结凝练的准确性等','maxVal'=>3,'type'=>'select','source'=>[0,1,2,3]],
+                ['field'=>'ps_item2','mainpoints'=>'项目策划合理性','content'=>'主要考察项目目标设定的科学性，项目课题设置、研究内容安排、研究阶段划分的合理性，经费预算安排的合规、合理性等','maxVal'=>3,'type'=>'input','decimalpoint'=>3],
+                ['field'=>'ps_item3','mainpoints'=>'综合效益显著性','content'=>'主要考察项目技术指标的先进性、预期成果JS价值及可检验性等','maxVal'=>2,'type'=>'input','decimalpoint'=>2],
+                ['field'=>'ps_item4','mainpoints'=>'团队实力匹配性','content'=>'主要考察研究团队基础、支撑平台、配套保障条件等','maxVal'=>2,'type'=>'input','decimalpoint'=>2]
             ],
             '注意事项'=>[
                 '1.评审前请签署专家承诺书；',
@@ -24,6 +25,7 @@ return array(
         ],
 		'重大'=>[
             'title'=>'基础加强计划重点基础研究项目评审系统',
+            'exportTitle'=>'基础加强计划重点基础研究项目专家评审汇总表',//明细查询导出表标题
             '评价要点'=>[
                 '1.研究定位相符性（0-3分）',
                 '2.项目策划合理性（0-3分）',
@@ -31,10 +33,10 @@ return array(
                 '4.团队实力匹配性（0-2分）'
             ],
             '评价内容'=>[
-                ['field'=>'ps_item1','mainpoints'=>'研究定位相符性（0-3分）','content'=>'主要考察项目是否符合基础加强计划重点项目定位、是否符合GF科技重点发展方向、对基础科学问题总结凝练的准确性等','maxVal'=>3,'type'=>'select','source'=>[0,1,2,3]],
-                ['field'=>'ps_item2','mainpoints'=>'项目策划合理性（0-3分）','content'=>'主要考察项目目标设定的科学性，项目课题设置、研究内容安排、研究阶段划分的合理性，经费预算安排的合规、合理性等','maxVal'=>3,'type'=>'input','decimalpoint'=>2],
-                ['field'=>'ps_item3','mainpoints'=>'综合效益显著性（0-2分）','content'=>'主要考察项目技术指标的先进性、预期成果JS价值及可检验性等','maxVal'=>2,'type'=>'input','decimalpoint'=>2],
-                ['field'=>'ps_item4','mainpoints'=>'团队实力匹配性（0-2分）','content'=>'主要考察研究团队基础、支撑平台、配套保障条件等','maxVal'=>2,'type'=>'input','decimalpoint'=>2]
+                ['field'=>'ps_item1','mainpoints'=>'研究定位相符性','content'=>'主要考察项目是否符合基础加强计划重点项目定位、是否符合GF科技重点发展方向、对基础科学问题总结凝练的准确性等','maxVal'=>3,'type'=>'select','source'=>[0,1,2,3]],
+                ['field'=>'ps_item2','mainpoints'=>'项目策划合理性','content'=>'主要考察项目目标设定的科学性，项目课题设置、研究内容安排、研究阶段划分的合理性，经费预算安排的合规、合理性等','maxVal'=>3,'type'=>'input','decimalpoint'=>2],
+                ['field'=>'ps_item3','mainpoints'=>'综合效益显著性','content'=>'主要考察项目技术指标的先进性、预期成果JS价值及可检验性等','maxVal'=>2,'type'=>'input','decimalpoint'=>2],
+                ['field'=>'ps_item4','mainpoints'=>'团队实力匹配性','content'=>'主要考察研究团队基础、支撑平台、配套保障条件等','maxVal'=>2,'type'=>'input','decimalpoint'=>2]
             ],
             '注意事项'=>[
                 '1.评审前请签署专家承诺书；',

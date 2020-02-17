@@ -80,7 +80,7 @@ class MxQueryController extends BaseController
     public function export()
     {
         $queryParam = I('post.');
-        $xm_id = trim($queryParam['xm_id']);
+        $xm_id      = trim($queryParam['xm_id']);
         $where = [];
         if (!empty($xm_id)) {
             $where['xm_id'] = ['eq', $xm_id];
@@ -101,43 +101,60 @@ class MxQueryController extends BaseController
             $where['xm_group'] = ['like', '%'.$queryParam['xm_group'].'%'];
         }
         $model     = M('xmps_xm');
-        $isZD      = C('isZD');
+        $psType    = trim($queryParam['psType']);  // 投票类型
+        $TOUPIAO   = trim($queryParam['TOUPIAO']); // 是否投票
         $markInfo  = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['评价内容'];
-        $markTitle = removeArrKey($markInfo,'brief');
-        $markField = array_keys($markInfo);
-//        dump($markField);die;
+        $markField = removeArrKey($markInfo,'field');// 打分字段
+        if($psType == 'huiping'){
+            $zzTitle   = "与战斗力关联程度";
+            $isZD      = C('isZD');                    // 是否有与战斗力关联
+            $markTitle = removeArrKey($markInfo,'brief');
+        }else{
+            $zzTitle   = "定性评价";
+            $isZD      = 1;
+            $markTitle = removeArrKey($markInfo,'mainpoints');
+        }
+        // 查询字段
         $field = ['xm_code','xm_name','xm_class','user_realusername','ps_total'];
         $field = array_merge($field,$markField);
-        if($isZD == 1) array_push($field,'vote4');
+        // 导出表头
+        $header = ['项目编号','项目名称',"分组",'评审专家','总分'];
+        $header = array_merge($header,$markTitle);
+        // 导出宽度
+        $width = ["5","10","20","8","10","8"];
+        $width  = array_merge($width,array_fill(count($width),count($markTitle),'12'));
+        // 拼接是否与战斗力关联
+        if($isZD == 1){
+            array_push($field,'ps_detail');
+            array_push($header, $zzTitle);
+            array_push($width, '10');
+        }
+        // 拼接投票信息
+        if($TOUPIAO == 1){
+            $field = array_merge($field,["xr_status",
+                "case vote1 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote1 end vote1","vote1status",
+                "case vote2 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote2 end vote2", "vote2status",                       "case vote3 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote3 end vote3","vote3status"]);
+            $header = array_merge($header ,["打分状态","第1轮投票","第1轮状态","第2轮投票","第2轮状态","第3轮投票","第3轮状态"]);
+            $width  = array_merge($width ,['15','8','8','8','8','8','8']);
+        }else{
+            array_push($field,'xr_status');
+            array_push($header,'打分状态');
+            array_push($width,'15');
+        }
         // 拼接投票信息，不需要时直接注释
-        $field = array_merge($field,["xr_status",
-            "case vote1 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote1 end vote1","vote1status",
-            "case vote2 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote2 end vote2", "vote2status",           "case vote3 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote3 end vote3","vote3status"]);
-//        array_push($field,'xr_status');
         $data = $model->field($field)
             ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->join("sysuser on user_id=xmps_xmrelation.xr_user_id and user_isdelete='0'")
             ->where($where)
             ->order("xm_class,xm_ordernum,user_realusername")
             ->select();
+//        echo $model->_sql();die;
         foreach($data as $keys=>$item){
             if($item['ps_total'] == -1){
                 $data[$keys]['ps_total'] = '回避';
                 foreach($markField as $fields) $data[$keys][$fields] = '回避';
             }
         }
-        $header = ['项目编号','项目名称',"分组",'评审专家','总分'];
-        $width = ["5","10","20","8","10","8"];
-        $header = array_merge($header,$markTitle);
-        $width  = array_merge($width,array_fill(count($width),count($markTitle),'12'));
-        if($isZD == 1) {
-            array_push($header, '与战斗力关联程度');
-            array_push($width, '10');
-        }
-        // 拼接投票信息，不需要时直接注释
-        $header = array_merge($header ,["打分状态","第1轮投票","第1轮状态","第2轮投票","第2轮状态","第3轮投票","第3轮状态"]);
-        $width  = array_merge($width ,['15','8','8','8','8','8','8']);
-
         $title = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['exportTitle'];
         echo excelExport($header, $data, true,$width,true,true,true,$title);
     }

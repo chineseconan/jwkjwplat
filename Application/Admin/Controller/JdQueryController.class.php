@@ -314,13 +314,31 @@ class JdQueryController extends BaseController
      */
      public function resultexport()
     {
-        $queryParam =I("post.");
+        $queryParam = I("post.");
         if (!empty($queryParam['xm_class'])) {
+            $psType    = trim($queryParam['psType']);  // 投票类型
+            $TOUPIAO   = trim($queryParam['TOUPIAO']); // 是否打分
+            // 是否有与战斗力关联
+            if($psType == 'huiping'){
+                $zzTitle   = "与战斗力关联程度";
+                $isZD      = C('isZD');
+            }else{
+                $zzTitle   = "定性评价";
+                $isZD      = 1;
+            }
             $where['xm_class']  = ['eq', $queryParam["xm_class"]];
             $where['xm_type']   = ['eq', $queryParam["xm_type"]];
             $model = M('xmps_xm');
-            $field = "xm_code,xm_name,xm_company,xm_createuser,avgvalue";
-            if(C('isZD') == 1) $field .= ",ps_detail";
+            $field = ["xm_code","xm_name","xm_company","xm_createuser","avgvalue"];
+            $width = [7, 15, 25, 30, 15, 15];
+            $title = ["序号", "项目编号", "项目名称", "依托单位", "申请人", "平均分"];
+            if($isZD == 1){
+                array_push($field,'ps_detail');
+                array_push($title,$zzTitle);
+                array_push($width,15);
+            }
+            array_push($field,'null as remark');
+            array_push($title,'备注');
             $data = $model->field($field)
                 ->join("left join (select xr_xm_id,max(avgvalue) as avgvalue,max(ps_detail) as ps_detail from xmps_xmrelation where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
                 ->where($where)
@@ -373,13 +391,15 @@ class JdQueryController extends BaseController
                     'vertical' => \PHPExcel_Style_Alignment::VERTICAL_CENTER
                 )
             );
-            $letter = getEnglishLetter(); //获取excel列名
+            $letter    = getEnglishLetter(); //获取excel列名
+            $endLetter = $letter[count($field)-1];
+//            dump($field);
+//            dump($letter[count($field)-1]);die;
             // 标题行样式设置
-            $excel->getActiveSheet()->setCellValue('A1', $name)->mergeCells('A1:G1');
-            $excel->getActiveSheet()->getStyle('A1:G1')->applyFromArray($titleStyle);
-            $excel->getActiveSheet()->getStyle('A1:G1')->getFont()->setName("黑体")->setSize(16)->setBold(true);
+            $excel->getActiveSheet()->setCellValue('A1', $name)->mergeCells('A1:'.$endLetter.'1');
+            $excel->getActiveSheet()->getStyle('A1:'.$endLetter.'1')->applyFromArray($titleStyle);
+            $excel->getActiveSheet()->getStyle('A1:'.$endLetter.'1')->getFont()->setName("黑体")->setSize(16)->setBold(true);
             $excel->getActiveSheet()->getRowDimension(1)->setRowHeight(40);
-            $width = array(7, 15, 25, 30, 15, 15, 15);
             $index = 0;
             for ($index; $index < 8; $index++) {
                 $excel->getActiveSheet()->getStyle($letter[$index])->getAlignment()->setWrapText(true);
@@ -393,15 +413,10 @@ class JdQueryController extends BaseController
             $excel->getActiveSheet()->setCellValue('D2', "本组项目数：" . count($data) . "个");
             $excel->getActiveSheet()->getStyle('D2')->applyFromArray($titleStyle);
             $excel->getActiveSheet()->getStyle('D2')->getFont()->setName("楷体")->setSize(13);
-            $excel->getActiveSheet()->setCellValue('E2', "日期：" . date("Y-m-d", time()))->mergeCells('E2:G2');
-            $excel->getActiveSheet()->getStyle('E2:G2')->applyFromArray($titleStyle);
-            $excel->getActiveSheet()->getStyle('E2:G2')->getFont()->setName("楷体")->setSize(13);
+            $excel->getActiveSheet()->setCellValue('E2', "日期：" . date("Y-m-d", time()))->mergeCells('E2:'.$endLetter.'2');
+            $excel->getActiveSheet()->getStyle('E2:'.$endLetter.'2')->applyFromArray($titleStyle);
+            $excel->getActiveSheet()->getStyle('E2:'.$endLetter.'2')->getFont()->setName("楷体")->setSize(13);
             // 第三行表头样式设置，显示值设置
-            $title = array("序号", "项目编号", "项目名称", "依托单位", "申请人", "平均分");
-            if(C('isZD') == 1){
-                array_push($title,'与战斗力相关程度');
-            }
-            array_push($title,'备注');
             $index = 0;
             for ($index; $index < 7; $index++) {
                 $excel->getActiveSheet()->setCellValue($letter[$index] . '3', $title[$index]);
@@ -409,11 +424,11 @@ class JdQueryController extends BaseController
                 $excel->getActiveSheet()->getStyle($letter[$index] . '3')->getFont()->setBold(true);
             }
             $key = 4;
-            $column = array('xm_code', 'xm_name', 'xm_company', 'xm_createuser', 'avgvalue');
-            if(C('isZD') == 1){
-                array_push($column,'ps_detail');
-            }
-            array_push($column,'remark');
+//            $field = array('xm_code', 'xm_name', 'xm_company', 'xm_createuser', 'avgvalue');
+//            if(C('isZD') == 1){
+//                array_push($field,'ps_detail');
+//            }
+//            array_push($field,'remark');
             $titlecount = count($title);
             foreach ($data as $d) {
                 if ($d["num"] == null)
@@ -428,7 +443,7 @@ class JdQueryController extends BaseController
                 }
                 $index = 1;
                 for ($index; $index < $titlecount; $index++) {
-                    $excel->getActiveSheet()->setCellValue($letter[$index] . $key, $d[$column[$index - 1]]);
+                    $excel->getActiveSheet()->setCellValue($letter[$index] . $key, $d[$field[$index - 1]]);
                     if($letter[$index] == 'C' || $letter[$index] == 'D'){// 项目名称，依托单位 列靠左对齐
                         $excel->getActiveSheet()->getStyle($letter[$index] . $key)->applyFromArray($styleArrayLeft);
                     }else{
@@ -485,8 +500,7 @@ class JdQueryController extends BaseController
         $where['xm_class']  = $xm_class;
         $where['xm_type']   = $xm_type;
         $where['xr_status'] = '进行中';
-        $where['u.user_isdelete'] = ['neq','1'];
-        $Sum = M('xmps_xmrelation r')->join('left join xmps_xm x on x.xm_id=r.xr_xm_id')->join("sysuser u on r.xr_user_id = u.user_id")->where($where)->count();
+        $Sum = M('xmps_xmrelation r')->join('left join xmps_xm x on x.xm_id=r.xr_xm_id')->where($where)->count();
         if($Sum>0){
             exit(makeStandResult('2','当前分组下有未提交打分的专家,请等专家提交后再导出结果表！'));
         }else{

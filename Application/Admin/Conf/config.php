@@ -15,9 +15,9 @@ return array(
     'COOKIE_DOMAIN' => '',
     // 1.函评，['mark'=>'mark_config_hanping']
     // 2.会评，['mark'=>'mark_config']
-    'LOAD_EXT_CONFIG'=>['mark'=>'mark_config'],
+    'LOAD_EXT_CONFIG'=>['mark'=>'mark_config_hanping'],
     // 3.会评情况下，是否投票(1为投票，0为不需要投票)
-    'TOUPIAO'=>'1',
+    'TOUPIAO'=>'0',
 
     'COMMONUSERID'=> 'T30E9CC5E140D43A6B0E448B8', //‘普通用户’的角色id
     'PROFESSERID'=> 'TCAAB0FF33F1D45348204EB46', //‘专家’的角色id

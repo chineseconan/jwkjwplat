@@ -78,7 +78,12 @@
 <script>
     layui.use('layer', function() {
         layer = layui.layer;
-    })
+    });
+    if('{$psType}' == 'huiping'){
+        var zzTitle = '与战斗力<br/>关联程度';
+    }else{
+        var zzTitle = '定性评价';
+    }
     $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '120px'});
     $('#atpbiztable').bootstrapTable({
             url: '__CONTROLLER__/getData',
@@ -120,8 +125,7 @@
                 {field: 'xm_company', title: '依托单位', sortable: true,width:80},
                 {field: 'xm_createuser', title: '申请人', sortable: true,width:55,align:'center'},
                 {field: 'xm_class', title: '分组', sortable: true,width:50,align:'center'},
-                {field: 'xm_type', title: '课题分类', sortable: true,width:60,align:'center'},
-                // {field: 'xm_tmfs', title: '推荐方式', sortable: true,width:60,align:'center'},
+                {field: 'xm_type', title: '课题分类', sortable: true,width:65,align:'center'},
                 {field: '', title: '打分进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
@@ -137,6 +141,7 @@
                     }
                 },
                 {field: 'num', title: '已评<br/>平均分', sortable: true, width:60 ,align:'center'},
+                {field: 'ps_detail', title: zzTitle, sortable: true, width:85 ,align:'center'},
                 {field: 'wanchengvote1count', title: '第一轮<br/>投票进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
@@ -181,13 +186,12 @@
                        return ok+" / "+all;
                     }
                 },
-                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center'},
-                // {field: 'num', title: '已评总分', sortable: false,width:80,align:'center'},
-                {field: 'ps_detail', title: '已评与战斗力关联程度', sortable: true, width:70,align:'center',visible:false}
+                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center'}
             ],
             onLoadSuccess:function(){
-                if("{$Think.config.isZD}" == 1){
-                    $('#detailtable').bootstrapTable('showColumn','vote4');
+                // 是否显示与战斗关联
+                if('{$psType}' == 'huiping' && '{$Think.config.isZD}' != '1'){
+                    $('#atpbiztable').bootstrapTable('hideColumn','ps_zz');
                 }
                 // 是否显示投票字段
                 if('{$TOUPIAO}' != '1'){
