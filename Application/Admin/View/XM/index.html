@@ -142,6 +142,7 @@
                         a += '<a style="height:25px;line-height:23px;margin-top:5px;margin-left:5px;" class="btn btn-info btn-xs" onclick="sortByClass(' + classes + ')">分组排序</a>';
                         a += '<a style="height:25px;line-height:23px;margin-top:5px;margin-left:5px;" class="btn btn-info btn-xs" onclick="setExt(' + inp + ')">选择评委</a>';
                         a += '<a style="height:25px;line-height:23px;margin-top:5px;margin-left:5px;" class="btn btn-info btn-xs" onclick="XMlook(' + inp + ')">项目预览</a>';
+                        a += '<a style="height:25px;line-height:23px;margin-top:5px;margin-left:5px;" class="btn btn-info btn-xs" onclick="XMlooks(' + inp + ')">项目预览{多文件}</a>';
                         return a;
                     }
                 }
@@ -322,6 +323,13 @@
      */
     function  XMlook(id){
         window.open('__CONTROLLER__/listindex?xm_id=' + id);
+    }
+
+    /**
+     * 项目预览（查看材料）
+     */
+    function  XMlooks(id){
+        window.open('__CONTROLLER__/listindexs?xm_id=' + id);
     }
 
     /**
