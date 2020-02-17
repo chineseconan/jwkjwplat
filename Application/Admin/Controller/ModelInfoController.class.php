@@ -95,8 +95,8 @@ class ModelInfoController extends BaseController {
      * 模块添加或修改
      */
     public function add(){
-        $id = trim(I('get.id'));
-        $add=trim(I('get.add'));
+        $id    = trim(I('get.id'));
+        $add   = trim(I('get.add'));
         $model = M('modelinfo');
         $modelList = $model->field('mi_id,mi_name,mi_pid')->where("(mi_type is null or mi_type='功能类型') and  mi_isdefault!='是'")->select();
         if(!empty($id)){
@@ -151,7 +151,8 @@ class ModelInfoController extends BaseController {
                 }
             }
             $data['mi_createtime'] = time();
-            $data['mi_id'] = makeGuid();
+            $data['mi_id']         = makeGuid();
+            $data['mi_isdefault']  = '否';
             $data['mi_createuser'] = session('user_id');
             $res = $model->add($data);
             if(empty($res)){

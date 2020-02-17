@@ -57,67 +57,6 @@ class XmpsController extends BaseController {
     }
 
     /**
-     * 专家投票页面
-     */
-    public function indexold(){
-        $tab = I('get.tab','score');
-        $this->assign("offset",I("get.offset"));
-        $this->assign("limit",I("get.limit"));
-        $model = M('xmps_xmrelation');
-        $relationdata = $model
-            ->alias('t')
-            ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
-            ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中' and m.xm_class='".session('classid')."'")
-            ->count();
-        // 获取投票数量和状态信息
-        $class = session('classid');
-        //if(empty($class)){
-        //    echo "<script>top.location.href='".U('Admin/Index/index')."';</script>";die;
-        //}
-        $Round = 0; // 当前投票进行的轮次
-        $roundInfo = M('votesetting')->where("class = '".$class."'")->select();//根据分组获得投票轮次信息
-        $roundInfos = [];
-        if($roundInfo){//如果有轮次信息
-            foreach($roundInfo as $key=>$val){
-                if($val['status'] == 1){//状态为开启，则赋值当前轮
-                    $Round = $val['round'];
-                }
-                $roundInfos[$val['round']] = $val;//赋值该分组下的轮次信息，以轮次作为Key值
-            }
-        }
-        // 查已投票数,本轮投票专家是否提交
-        $votestatus = '';
-        for($i=1;$i<4;$i++){
-            if(!isset($roundInfos[$i])){//轮次为空 123
-                $roundInfos[$i]['maxnum'] = ' ';
-            }
-
-            $vote = 'vote'.$i;
-            $num = M('xmps_xm x')->join('xmps_xmrelation r on r.xr_xm_id=x.xm_id')->where("xm_class = '".$class."' and ".$vote." = 1 and xr_user_id='" . session("user_id") . "'")->count();
-            $roundInfos[$i]['votenum'] = $num;
-            if(($Round!=0) && ($i == $Round))
-			{
-                $voteroundstatus = 'vote'.$Round.'status';
-                $res = M('xmps_xm x')->field("distinct $voteroundstatus")->join('xmps_xmrelation r on r.xr_xm_id=x.xm_id')->where("xm_class = '".$class."' and xr_user_id='" . session("user_id") . "'")->find();
-                $votestatus = $res[$voteroundstatus];
-			}
-        }
-
-//        print_r($votestatus);die;
-        $this->assign('tab',$tab);
-        $this->assign('Round',$Round);
-        $this->assign('VotesSatus',$votestatus);
-        $this->assign('roundInfo',json_encode($roundInfos));
-        if($relationdata>0){
-            $this->display('score');
-        }else{
-            $this->display('index');
-        }
-    }
-
- 
-
-    /**
      * 获取列表
      */
     public function getData(){
@@ -382,7 +321,7 @@ class XmpsController extends BaseController {
                 $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
                 $ps_detail = implode('',$ps_zz);
                 if(!empty($ps_zz)){
-                    $M->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->setField("ps_detail",  $ps_detail);
+                    $M->where("xr_xm_id='".$xmid."'")->setField("ps_detail",  $ps_detail);
 //                    echo $M->_sql();die;
                 }
             }
@@ -465,7 +404,7 @@ class XmpsController extends BaseController {
                     $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
                     $ps_detail = implode('',$ps_zz);
                     if(!empty($ps_zz)){
-                        $M->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->setField("ps_detail",  $ps_detail);
+                        $M->where("xr_xm_id='".$xmid."'")->setField("ps_detail",  $ps_detail);
                     }
                 }
 //            echo $M->_sql();die;

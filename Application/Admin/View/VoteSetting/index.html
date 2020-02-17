@@ -1,0 +1,448 @@
+<include file="Public:tableheader" />
+<style>
+        *{
+            font-family: "微软雅黑;
+        }
+        .content{
+            padding: 10px;
+        }
+        .content form{
+            margin-top: 15px;
+        }
+        .content label{
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        .content .tableBox{
+            height: 100%;
+        }
+        .form_warp>div{
+            width: 24%;
+            display: inline-block;
+        }
+        .content select{
+            width: 130px;
+            height: 26px;
+            font-size: 16px;
+            border-radius: 2px;
+            margin-right: 30px;
+        }
+        .content select option{
+            height: 26px;
+            line-height: 26px;
+            font-size: 17px;
+        }
+        .chosen-select{
+            width: 180px!important;
+        }
+        .chosen-container-single .chosen-single {
+            min-height: inherit;
+            height: 37px!important;
+            line-height: 32px;
+        }
+    </style>
+</head>
+<body class="gray-bg"  style="font-family: 微软雅黑;" >
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content">
+            <div class="row row-lg">
+                <div class="col-sm-12">
+                    <div class="content bb">
+                        <div >
+                            <p class="name"  style="text-align: left;font-size:  22px;background-color:;border-left:5px solid green;padding-left: 10px;font-family: 微软雅黑;">投票设置</p>
+                        </div>
+                        <form action="" class="form-group">
+                            <label class="control-label">分组：</label>
+                            <select name="class" id="class" class="chosen-select">
+                                <option value=""></option>
+                                <foreach name="xmClass" item="val">
+                                    <option>{$val}</option>
+                                </foreach>
+                            </select>
+                        </form>
+                        <div>
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a href="#vote1" data-toggle="tab">第一轮投票</a></li>
+                                <li><a href="#vote2" data-toggle="tab">第二轮投票</a></li>
+                                <li><a href="#vote3" data-toggle="tab">第三轮投票</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div id="vote1" class="tab-pane fade active in">
+                                    <div class="col-sm-12">
+                                        <div class="_box" style="margin: 25px 0px;">
+                                            <label class="control-label" style="margin-left:25px;">类别:</label>
+                                            <select id="xm_type1" class="chosen-select1 xm_type">
+                                                <option></option>
+                                                <foreach name="xmType" item="val">
+                                                    <option>{$val}</option>
+                                                </foreach>
+                                            </select>
+                                            <label class="control-label" style="margin-left:25px;">最大投票:</label>
+                                            <input class="form-control number"  type="text" id="maxnum1" name="maxnum1" style="margin-left:10px;width: 150px;display: inline-block" >
+                                            <label class="control-label" style="margin-left:25px;">状态:</label>
+                                            <input type="radio" name="status1" id="status10" style="margin-left:10px;width: 20px;display: inline-block" value="1">开启
+                                            <input type="radio" name="status1" id="status11" style="margin-left:10px;width: 20px;display: inline-block" value="0">关闭
+                                            <button class="btn btn-info" style="margin-right: 10px;float:right;" type="button" id="save1"><i class="fa fa-check"></i>保存</button>
+                                        </div>
+                                        <table id="votetable1" data-height="620"></table>
+                                    </div>
+                                </div>
+                                <div id="vote2" class="tab-pane fade ">
+                                    <div class="col-sm-12">
+                                        <div class="_box" style="margin: 25px 0px;">
+                                            <label class="control-label" style="margin-left:25px;">类别:</label>
+                                            <select id="xm_type2" class="chosen-select2 xm_type">
+                                                <option></option>
+                                                <option>重点</option>
+                                                <option>军队</option>
+                                                <option>地方</option>
+                                            </select>
+                                            <label class="control-label" style="margin-left:25px;">最大投票:</label>
+                                            <input class="form-control number"  type="text" id="maxnum2" name="maxnum2" style="margin-left:10px;width: 150px;display: inline-block" >
+                                            <label class="control-label" style="margin-left:25px;">状态:</label>
+                                            <input type="radio" name="status2" style="margin-left:10px;width: 20px;display: inline-block" value="1">开启
+                                            <input type="radio" name="status2" style="margin-left:10px;width: 20px;display: inline-block" value="0">关闭
+                                            <button class="btn btn-info" style="margin-right: 10px;float:right;" type="button" id="save2"><i class="fa fa-check"></i>保存</button>
+                                        </div>
+                                        <table id="votetable2" data-height="620"></table>
+                                    </div>
+                                </div>
+                                <div id="vote3" class="tab-pane fade ">
+                                    <div class="col-sm-12">
+                                        <div class="_box" style="margin: 25px 0px;">
+                                            <label class="control-label" style="margin-left:25px;">类别:</label>
+                                            <select id="xm_type3" class="chosen-select3 xm_type">
+                                                <option></option>
+                                                <option>重点</option>
+                                                <option>军队</option>
+                                                <option>地方</option>
+                                            </select>
+                                            <label class="control-label" style="margin-left:25px;">最大投票:</label>
+                                            <input class="form-control number"  type="text" id="maxnum3" name="maxnum3" style="margin-left:10px;width: 150px;display: inline-block" >
+                                            <label class="control-label" style="margin-left:25px;">状态:</label>
+                                            <input type="radio" name="status3" style="margin-left:10px;width: 20px;display: inline-block" value="1">开启
+                                            <input type="radio" name="status3" style="margin-left:10px;width: 20px;display: inline-block" value="0">关闭
+                                            <button class="btn btn-info" style="margin-right: 10px;float:right;" type="button" id="save3"><i class="fa fa-check"></i>保存</button>
+                                        </div>
+                                        <table id="votetable3" data-height="620"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+</body>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true,width:"180px"});
+    $(".chosen-select1").chosen({disable_search_threshold: 0, search_contains: true,width:"180px"});
+    $(".chosen-select2").chosen({disable_search_threshold: 0, search_contains: true,width:"180px"});
+    $(".chosen-select3").chosen({disable_search_threshold: 0, search_contains: true,width:"180px"});
+    $(function() {
+        var TableObj1 = {
+            oTableInit: function () {
+                $('#votetable1').bootstrapTable({
+                    url: '__CONTROLLER__/getVoteXMData',
+                    method: 'post',
+                    toolbar: '#atpbiztoolbar',
+                    striped: true,
+                    cache: false,
+                    pagination: false,
+                    iconSize: 'outline',
+                    sortable: false,
+                    queryParams: queryParams1,
+                    sidePagination: "server",
+                    minimumCountColumns: 2,
+                    clickToSelect: true,
+                    uniqueId: "xm_id",
+                    detailView: false,
+                    detailFormatter: "detailFormatter",
+                    columns: [
+                        [
+                            {checkbox:true,
+                                formatter:function(value,row,index){
+                                    if(row.vote1option=="1"){
+                                        return true;
+                                    }
+                                    return false;
+                                }
+
+                            },
+                            {
+                                title: '序号', width: 40,align:'center',
+                                formatter: function (value, row, index) {
+                                    var option = $('#votetable1').bootstrapTable("getOptions");
+                                    return option.pageSize * (option.pageNumber - 1) + index + 1;
+                                }
+                            },
+                            {field: 'xm_code', title: '编号', width: 90},
+                            {field: 'xm_name', title: '项目名称', width: 110},
+                            {field: 'avgvalue', title: '平均分', width:100,sortable: true},
+                            {field: 'xm_company', title: '依托单位', width:150,sortable: true},
+                            {field: 'xm_createuser', title: '申请人', width:150},
+                            {field: 'xm_class', title: '分组', width:150,sortable: true},
+                            {field: 'xm_tmfs', title: '推荐方式', width:100,sortable: true}
+                        ]
+                    ]
+                });
+            }
+        };
+        TableObj1.oTableInit();
+        function queryParams1(params) {
+            var param = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                'class': $("#class").val(),
+                xm_type: $("#xm_type1 option:selected").val()
+            };
+            return param;
+        }
+
+        $(".chosen-select").on("change", function () {
+            getSettingInfo();
+            $('#votetable1').bootstrapTable("refresh");
+            $('#votetable2').bootstrapTable("refresh");
+            $('#votetable3').bootstrapTable("refresh");
+        });
+        $(".chosen-select1").on("change", function () {
+            getSettingInfo();
+            $('#votetable1').bootstrapTable("refresh");
+        });
+        $(".chosen-select2").on("change", function () {
+            getSettingInfo();
+            $('#votetable2').bootstrapTable("refresh");
+        });
+        $(".chosen-select3").on("change", function () {
+            getSettingInfo();
+            $('#votetable3').bootstrapTable("refresh");
+        });
+        var TableObj2 = {
+            oTableInit: function () {
+                $('#votetable2').bootstrapTable({
+                    url: '__CONTROLLER__/getVoteXMData',
+                    method: 'post',
+                    toolbar: '#atpbiztoolbar',
+                    striped: true,
+                    cache: false,
+                    pagination: false,
+                    iconSize: 'outline',
+                    sortable: false,
+                    queryParams: queryParams2,
+                    sidePagination: "server",
+                    minimumCountColumns: 2,
+                    clickToSelect: true,
+                    uniqueId: "xm_id",
+                    detailView: false,
+                    detailFormatter: "detailFormatter",
+                    columns: [
+                        [
+                            {checkbox:true,
+                                formatter:function(value,row,index){
+                                    if(row.vote2option=="1"){
+                                        return true;
+                                    }
+                                    return false;
+                                }
+
+                            },
+                            {
+                                title: '序号', width: 40,align:'center',
+                                formatter: function (value, row, index) {
+                                    var option = $('#votetable2').bootstrapTable("getOptions");
+                                    return option.pageSize * (option.pageNumber - 1) + index + 1;
+                                }
+                            },
+                            {field: 'xm_code', title: '编号', width: 90},
+                            {field: 'xm_name', title: '项目名称', width: 110},
+                            {field: 'avgvalue', title: '平均分', width:100,sortable: true},
+                            {field: 'xm_company', title: '依托单位', width:150,sortable: true},
+                            {field: 'xm_createuser', title: '申请人', width:150},
+                            {field: 'xm_class', title: '分组', width:150,sortable: true},
+                            {field: 'xm_tmfs', title: '推荐方式', width:100,sortable: true}
+                        ]
+                    ]
+                });
+            }
+        };
+        TableObj2.oTableInit();
+        function queryParams2(params) {
+            var param = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                'class': $("#class").val(),
+                xm_type: $("#xm_type2 option:selected").val()
+            };
+            return param;
+        }
+        var TableObj3 = {
+            oTableInit: function () {
+                $('#votetable3').bootstrapTable({
+                    url: '__CONTROLLER__/getVoteXMData',
+                    method: 'post',
+                    toolbar: '#atpbiztoolbar',
+                    striped: true,
+                    cache: false,
+                    pagination: false,
+                    iconSize: 'outline',
+                    sortable: false,
+                    queryParams: queryParams3,
+                    sidePagination: "server",
+                    minimumCountColumns: 2,
+                    clickToSelect: true,
+                    uniqueId: "xm_id",
+                    detailView: false,
+                    detailFormatter: "detailFormatter",
+                    columns: [
+                        [
+                            {checkbox:true,
+                                formatter:function(value,row,index){
+                                    if(row.vote3option=="1"){
+                                        return true;
+                                    }
+                                    return false;
+                                }
+
+                            },
+                            {
+                                title: '序号', width: 40,align:'center',
+                                formatter: function (value, row, index) {
+                                    var option = $('#votetable3').bootstrapTable("getOptions");
+                                    return option.pageSize * (option.pageNumber - 1) + index + 1;
+                                }
+                            },
+                            {field: 'xm_code', title: '编号', width: 90},
+                            {field: 'xm_name', title: '项目名称', width: 110},
+                            {field: 'avgvalue', title: '平均分', width:100,sortable: true},
+                            {field: 'xm_company', title: '依托单位', width:150,sortable: true},
+                            {field: 'xm_createuser', title: '申请人', width:150},
+                            {field: 'xm_class', title: '分组', width:150,sortable: true},
+                            {field: 'xm_tmfs', title: '推荐方式', width:100,sortable: true}
+                        ]
+                    ]
+                });
+            }
+        };
+        TableObj3.oTableInit();
+        function queryParams3(params) {
+            var param = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                'class': $("#class").val(),
+                xm_type: $("#xm_type3 option:selected").val()
+            };
+            return param;
+        }
+        function getSettingInfo(){
+            var classid = $("#class option:selected").val();
+            $.ajax({
+                type:'post',
+                url:'__CONTROLLER__/getSettingInfo',
+                data:{
+                    classid:classid
+                },
+                success:function(res){
+//                    console.log(res);
+                    for(var i=1;i<4;i++){
+                        var xm_type  = $("#xm_type"+i+" option:selected").val();
+                        var keys = i+'-'+xm_type;
+//                        console.log(keys);
+                        if(typeof(res[keys])=='undefined'){
+                            $("#maxnum"+i).val("");
+                            document.getElementsByName("status"+i)[0].checked = false;
+                            document.getElementsByName("status"+i)[1].checked = false;
+                        }else{
+                            var status  = res[keys].status;
+                            var maxnum  = res[keys].maxnum;
+                            $("#maxnum" + i).val(maxnum);
+                            if (status == 1) {
+                                document.getElementsByName("status" + i)[0].checked = true;
+                            } else {
+                                document.getElementsByName("status" + i)[1].checked = true;
+
+                            }
+                        }
+                    }
+                },
+                dataType:'json'
+            });
+        }
+        $("#save1").on('click',function(){
+            setVoteSetting(1);
+        });
+        function setVoteSetting(num){
+            var classid  = $("#class option:selected").val();
+            var xm_type  = $("#xm_type"+num+" option:selected").val();
+            var maxnum   = $("#maxnum"+num).val();
+            var status1  = $("input[name='status"+num+"']:checked").val();
+            var xmData   = $('#votetable'+num).bootstrapTable('getSelections');
+            if(classid == ''){
+                layer.alert("请选择分组");
+                return false;
+            }
+            if(xm_type == ''){
+                layer.alert("请选择类别");
+                return false;
+            }
+            if(typeof(status1)=='undefined' || (status1 == '')){
+                layer.alert("请选择状态");
+                return false;
+            }else if(status1 == 1){
+                if(xmData.length<1){
+                    layer.alert("请选择要投票的项目");
+                    return false;
+                }
+                if(typeof(maxnum)=='undefined' || (maxnum == '')){
+                    layer.alert("请填写最大投票数");
+                    return false;
+                }else if(isNaN(maxnum)){
+                    layer.alert("最大投票数应该为整数");
+                    return false;
+                }
+            }
+            var ids = [];
+            $.each(xmData, function () {
+                ids.push(this['xm_id']);
+            });
+            $.ajax({
+                type:'post',
+                url:'__CONTROLLER__/setVoteSetting',
+                data:{
+                    classid:classid,
+                    xm_type:xm_type,
+                    maxnum:maxnum,
+                    round:num,
+                    status:status1,
+                    ids:ids.join(',')
+                },
+                success:function(res){
+                    if(res.code != 0){
+                        layer.alert(res.message);
+                        return true;
+                    }else{
+                        layer.msg(res.message);
+                    }
+                },
+                dataType:'json'
+            });
+        }
+        $("#save2").on('click',function(){
+            setVoteSetting(2);
+        });
+        $("#save3").on('click',function(){
+            setVoteSetting(3);
+        });
+
+    });
+    $('body').on('keyup','.number',function(){
+        var preg = /[^\d]+/g;
+        var val  = $(this).val();
+        if(val.match(preg) != null){
+            $(this).val($(this).val().replace(preg,''));
+        }
+    });
+</script>
+</body>
+</html>

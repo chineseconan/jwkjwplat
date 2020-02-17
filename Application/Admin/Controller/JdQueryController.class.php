@@ -67,9 +67,9 @@ class JdQueryController extends BaseController
             ->join("left join (select xr_xm_id,count(xr_id) wanchengcount,max(avgvalue) as num,max(ps_detail) ps_detail from xmps_xmrelation a,sysuser b where b.user_id=a.xr_user_id and user_isdelete='0' and xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
             ->join("left join (select xr_xm_id,count(xr_id) allcount  from xmps_xmrelation a,sysuser b where b.user_id=a.xr_user_id and user_isdelete='0' group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id")
             // 第一轮投票信息
-            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote1count, sum(vote1) as vote1num,max(vote1rate) vote1rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote1status = '完成' group by xr_xm_id) v1 on xmps_xm.xm_id = v1.xr_xm_id")
-            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote2count, sum(vote2) as vote2num,max(vote2rate) vote2rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote2status = '完成' group by xr_xm_id) v2 on xmps_xm.xm_id = v2.xr_xm_id")
-            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote3count, sum(vote3) as vote3num,max(vote3rate) vote3rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote3status = '完成' group by xr_xm_id) v3 on xmps_xm.xm_id = v3.xr_xm_id")
+            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote1count, sum(vote1) as vote1num,max(vote1rate) vote1rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote1status = '已完成' group by xr_xm_id) v1 on xmps_xm.xm_id = v1.xr_xm_id")
+            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote2count, sum(vote2) as vote2num,max(vote2rate) vote2rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote2status = '已完成' group by xr_xm_id) v2 on xmps_xm.xm_id = v2.xr_xm_id")
+            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote3count, sum(vote3) as vote3num,max(vote3rate) vote3rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote3status = '已完成' group by xr_xm_id) v3 on xmps_xm.xm_id = v3.xr_xm_id")
             ->where($where)
             ->order($queryParam['sort'] . " " . $queryParam['sortOrder'])
             ->limit($queryParam['offset'], $queryParam['limit'])
@@ -205,9 +205,9 @@ class JdQueryController extends BaseController
         if ($status == 'ok') {
             $where['xr_status'] = ['eq', '完成'];
             if($type != ''){
-                if($type == 'vote1') $where['vote1status'] = ['eq', '完成'];
-                if($type == 'vote2') $where['vote2status'] = ['eq', '完成'];
-                if($type == 'vote3') $where['vote3status'] = ['eq', '完成'];
+                if($type == 'vote1') $where['vote1status'] = ['eq', '已完成'];
+                if($type == 'vote2') $where['vote2status'] = ['eq', '已完成'];
+                if($type == 'vote3') $where['vote3status'] = ['eq', '已完成'];
             }
         }
         $model = M('xmps_xmrelation');

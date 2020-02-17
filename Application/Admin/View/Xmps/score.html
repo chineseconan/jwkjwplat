@@ -205,6 +205,8 @@
                         var temp = $(table).eq(i).find('a[data-name="'+markFieldJson[j]+'"]');
                         $(temp).editable('disable');
                     }
+                    var ps_zz    = $(table).eq(i).find('a[data-name="ps_zz"]');
+                    $(ps_zz).editable('disable');
                     var ps_total = $(table).eq(i).find('a[data-name="ps_total"]');
                     $(ps_total).editable('disable');
                 }
