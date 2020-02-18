@@ -136,6 +136,7 @@
     layui.use('layer', function() {
         layer = layui.layer;
     });
+    var voteOption = eval('{$voteOption}');
     $(function() {
         votenum = $.parseJSON('{$roundInfo}');
         var TableObj = {
@@ -339,7 +340,7 @@
                 [
                     {
                         field: 'vote1',
-                        title: '最多支持 <span style="color: #419759;font-size: 20px;">'+votenum[1]['maxnum']+'</span> 票<br/>已支持 <span id="votenum1" style="color: gold;font-size: 20px;">'+votenum[1]['votenum']+'</span> 票',
+                        title: '最多支持 <span style="color: orange;font-size: 20px;">'+votenum[1]['maxnum']+'</span> 票<br/>已支持 <span id="votenum1" style="color: gold;font-size: 20px;">'+votenum[1]['votenum']+'</span> 票',
                         formatter:function(value, row, index){
                             var round = '{$Round}';
                             var votestatus = "vote"+'{$Round}'+"status";
@@ -353,13 +354,14 @@
                             }else{
                                 if(value == '-1'){
                                     return '回避';
-                                }else if(value == '1') {
-                                    return '支持';
-                                }else if(value == '0'){
-                                    return '不支持';
                                 }else{
-                                    return value;
+                                    for(var i=0;i<voteOption.length;i++){
+                                        if(value == voteOption[i]['value']){
+                                            return voteOption[i]['text'];
+                                        }
+                                    }
                                 }
+                                return value;
                             }
                         },
                         editable:{
@@ -369,10 +371,11 @@
                             emptytext:'请投票',
                             showbuttons:false,
                             onblur:'submit',
-                            source:[
-                                {value:'0',text:'不支持'},
-                                {value:'1',text:'支持'}
-                            ]
+                            source: '{$voteOption}'
+                                // [
+                                //     {value:'0',text:'不支持'},
+                                //     {value:'1',text:'支持'}
+                                // ]
                         }
                     },
                     {
@@ -391,13 +394,14 @@
                             }else{
                                 if(value == '-1'){
                                     return '回避';
-                                }else if(value == '1') {
-                                    return '支持';
-                                }else if(value == '0'){
-                                    return '不支持';
                                 }else{
-                                    return value;
+                                    for(var i=0;i<voteOption.length;i++){
+                                        if(value == voteOption[i]['value']){
+                                            return voteOption[i]['text'];
+                                        }
+                                    }
                                 }
+                                return value;
                             }
                         },
                         editable:{
@@ -407,15 +411,12 @@
                             mode:'inline',
                             showbuttons:false,
                             onblur:"submit",
-                            source:[
-                                {value:'0',text:'不支持'},
-                                {value:'1',text:'支持'}
-                            ]
+                            source:'{$voteOption}'
                         }
                     },
                     {
                         field: 'vote3',
-                        title: '最多支持'+votenum[3]['maxnum']+'票<br/>已支持 <span id="votenum3" style="color: gold;font-size: 20px;">'+votenum[3]['votenum']+'</span> 票',
+                        title: '最多支持 <span style="color: orange;font-size: 20px;">'+votenum[3]['maxnum']+'</span> 票<br/>已支持 <span id="votenum3" style="color: gold;font-size: 20px;">'+votenum[3]['votenum']+'</span> 票',
                         formatter:function(value, row, index){
                             var round = '{$Round}';
                             var votestatus = "vote"+'{$Round}'+"status";
@@ -429,13 +430,14 @@
                             }else{
                                 if(value == '-1'){
                                     return '回避';
-                                }else if(value == '1') {
-                                    return '支持';
-                                }else if(value == '0'){
-                                    return '不支持';
                                 }else{
-                                    return value;
+                                    for(var i=0;i<voteOption.length;i++){
+                                        if(value == voteOption[i]['value']){
+                                            return voteOption[i]['text'];
+                                        }
+                                    }
                                 }
+                                return value;
                             }
                         },
                         editable:{
@@ -445,10 +447,7 @@
                             mode:'inline',
                             showbuttons:false,
                             onblur:"submit",
-                            source:[
-                                {value:'0',text:'不支持'},
-                                {value:'1',text:'支持'}
-                            ]
+                            source:'{$voteOption}'
                         }
                     }
                 ]

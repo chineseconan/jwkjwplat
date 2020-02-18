@@ -94,9 +94,9 @@
                                             <label class="control-label" style="margin-left:25px;">类别:</label>
                                             <select id="xm_type2" class="chosen-select2 xm_type">
                                                 <option></option>
-                                                <option>重点</option>
-                                                <option>军队</option>
-                                                <option>地方</option>
+                                                <foreach name="xmType" item="val">
+                                                    <option>{$val}</option>
+                                                </foreach>
                                             </select>
                                             <label class="control-label" style="margin-left:25px;">最大投票:</label>
                                             <input class="form-control number"  type="text" id="maxnum2" name="maxnum2" style="margin-left:10px;width: 150px;display: inline-block" >
@@ -114,9 +114,9 @@
                                             <label class="control-label" style="margin-left:25px;">类别:</label>
                                             <select id="xm_type3" class="chosen-select3 xm_type">
                                                 <option></option>
-                                                <option>重点</option>
-                                                <option>军队</option>
-                                                <option>地方</option>
+                                                <foreach name="xmType" item="val">
+                                                    <option>{$val}</option>
+                                                </foreach>
                                             </select>
                                             <label class="control-label" style="margin-left:25px;">最大投票:</label>
                                             <input class="form-control number"  type="text" id="maxnum3" name="maxnum3" style="margin-left:10px;width: 150px;display: inline-block" >

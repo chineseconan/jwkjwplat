@@ -49,6 +49,9 @@ class JdQueryController extends BaseController
         xm_createuser,
         xm_class,
         xm_type,
+        vote1option,
+        vote2option,
+        vote3option,
         case when wanchengcount is null then 0 else wanchengcount end wanchengcount,
         case when allcount is null then 0 else allcount end allcount,
         0+cast(num as char) as num,
@@ -56,13 +59,13 @@ class JdQueryController extends BaseController
         /* 投票字段*/
         ,case when wanchengvote1count is null then 0 else wanchengvote1count end wanchengvote1count,
         case when vote1num is null then 0 else vote1num end vote1num,
-        vote1rate,
+        0+cast(vote1rate as char) as vote1rate,
         case when wanchengvote2count is null then 0 else wanchengvote2count end wanchengvote2count,
         case when vote2num is null then 0 else vote2num end vote2num,
-        vote2rate,
+        0+cast(vote2rate as char) as vote2rate,
         case when wanchengvote3count is null then 0 else wanchengvote3count end wanchengvote3count,
         case when vote3num is null then 0 else vote3num end vote3num,
-        vote3rate
+        0+cast(vote3rate as char) as vote3rate
         ')
             ->join("left join (select xr_xm_id,count(xr_id) wanchengcount,max(avgvalue) as num,max(ps_detail) ps_detail from xmps_xmrelation a,sysuser b where b.user_id=a.xr_user_id and user_isdelete='0' and xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
             ->join("left join (select xr_xm_id,count(xr_id) allcount  from xmps_xmrelation a,sysuser b where b.user_id=a.xr_user_id and user_isdelete='0' group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id")
@@ -188,6 +191,10 @@ class JdQueryController extends BaseController
 
         $markOption = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
         $this->assign('markOption',$markOption);
+
+        // 投票项
+        $voteOption = C('vote.REMARK_OPTION')[$xmType]['VOTE_OPTION'];
+        $this->assign('voteOption',json_encode($voteOption));
         $this->getDic();
         $this->display("pingshendetail");
     }
@@ -275,7 +282,7 @@ class JdQueryController extends BaseController
                     $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
                 }
             }else if($type == 'vote1'){ // 第一轮投票回退
-                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where and xm_type = '$xmType') and vote1status='已完成'")->select();
+                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote1status='已完成'")->select();
                 $data = array();
                 foreach ($relationdata as $rd) {
                     $data["vote1status"] = "进行中";
@@ -283,7 +290,7 @@ class JdQueryController extends BaseController
                     $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
                 }
             }else if($type == 'vote2'){ // 第二轮投票回退
-                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where and xm_type = '$xmType') and vote2status='已完成'")->select();
+                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote2status='已完成'")->select();
                 $data = array();
                 foreach ($relationdata as $rd) {
                     $data["vote2status"] = "进行中";
@@ -291,7 +298,7 @@ class JdQueryController extends BaseController
                     $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
                 }
             }else if($type == 'vote3'){ // 第三轮投票回退
-                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where and xm_type = '$xmType') and vote3status='已完成'")->select();
+                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote3status='已完成'")->select();
                 $data = array();
                 foreach ($relationdata as $rd) {
                     $data["vote3status"] = "进行中";

@@ -103,6 +103,14 @@ class MxQueryController extends BaseController
         $model     = M('xmps_xm');
         $psType    = trim($queryParam['psType']);  // 投票类型
         $TOUPIAO   = trim($queryParam['TOUPIAO']); // 是否投票
+        // 获取投票项
+        if($TOUPIAO == 1){
+            $voteOptions = C('vote.REMARK_OPTION')[$queryParam['xm_type']]['VOTE_OPTION'];
+            $voteOption  = [];
+            foreach ($voteOptions as $items){
+                $voteOption[$items['value']] = $items['text'];
+            }
+        }
         $markInfo  = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['评价内容'];
         $markField = removeArrKey($markInfo,'field');// 打分字段
         if($psType == 'huiping'){
@@ -132,10 +140,16 @@ class MxQueryController extends BaseController
         // 拼接投票信息
         if($TOUPIAO == 1){
             $field = array_merge($field,["xr_status",
-                "case vote1 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote1 end vote1","vote1status",
-                "case vote2 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote2 end vote2", "vote2status",                       "case vote3 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote3 end vote3","vote3status"]);
+                "vote1","vote2","vote3","vote1option","vote2option","vote3option",
+//                "case vote1 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote1 end vote1",
+                "vote1status",
+//                "case vote2 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote2 end vote2",
+                "vote2status",
+//                "case vote3 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote3 end vote3",
+                "vote3status"
+            ]);
             $header = array_merge($header ,["打分状态","第1轮投票","第1轮状态","第2轮投票","第2轮状态","第3轮投票","第3轮状态"]);
-            $width  = array_merge($width ,['15','8','8','8','8','8','8']);
+            $width  = array_merge($width ,['15','15','15','15','8','8','8']);
         }else{
             array_push($field,'xr_status');
             array_push($header,'打分状态');
@@ -148,11 +162,37 @@ class MxQueryController extends BaseController
             ->where($where)
             ->order("xm_class,xm_ordernum,user_realusername")
             ->select();
-//        echo $model->_sql();die;
         foreach($data as $keys=>$item){
             if($item['ps_total'] == -1){
                 $data[$keys]['ps_total'] = '回避';
                 foreach($markField as $fields) $data[$keys][$fields] = '回避';
+                if($TOUPIAO == 1){
+                    $data[$keys]['vote1'] = '回避';
+                    $data[$keys]['vote2'] = '回避';
+                    $data[$keys]['vote3'] = '回避';
+                    unset($data[$keys]['vote1option']);
+                    unset($data[$keys]['vote2option']);
+                    unset($data[$keys]['vote3option']);
+                }
+            }else if($TOUPIAO == 1) {
+                if ($item['vote1option'] == 0) {
+                    $data[$keys]['vote1'] = '不参与本轮投票';
+                }else{
+                    $data[$keys]['vote1'] = $voteOption[$data[$keys]['vote1']];
+                }
+                unset($data[$keys]['vote1option']);
+                if ($item['vote2option'] == 0) {
+                    $data[$keys]['vote2'] = '不参与本轮投票';
+                }else{
+                    $data[$keys]['vote2'] = $voteOption[$data[$keys]['vote2']];
+                }
+                unset($data[$keys]['vote2option']);
+                if ($item['vote3option'] == 0) {
+                    $data[$keys]['vote3'] = '不参与本轮投票';
+                }else{
+                    $data[$keys]['vote3'] = $voteOption[$data[$keys]['vote3']];
+                }
+                unset($data[$keys]['vote3option']);
             }
         }
         $title = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['exportTitle'];

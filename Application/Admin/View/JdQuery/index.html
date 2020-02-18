@@ -145,6 +145,10 @@
                 {field: 'wanchengvote1count', title: '第一轮<br/>投票进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
+                        // 若该项目不参与该轮次投票
+                        var voteoption=row["vote1option"];
+                        if(voteoption == 0) return null;
+
                         var all=row["allcount"];
                         var ok=row["wanchengvote1count"];
                         if(all!='0'){
@@ -156,10 +160,20 @@
                        return ok+" / "+all;
                     }
                 },
-                {field: 'vote1rate', title: '第一轮<br/>得票率', sortable: true, width:55 ,align:'center'},
+                {field: 'vote1rate', title: '第一轮<br/>得票率', sortable: true, width:55 ,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        if(value == null) return value;
+                        var val = parseFloat(value*100000/1000);
+                        return val+"%";
+                    }},
                 {field: 'wanchengvote2count', title: '第二轮<br/>投票进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
+                        // 若该项目不参与该轮次投票
+                        var voteoption=row["vote2option"];
+                        if(voteoption == 0) return null;
+
                         var all=row["allcount"];
                         var ok=row["wanchengvote2count"];
                         if(all!='0'){
@@ -171,10 +185,20 @@
                        return ok+" / "+all;
                     }
                 },
-                {field: 'vote2rate', title: '第二轮<br/>得票率', sortable: true, width:55 ,align:'center'},
+                {field: 'vote2rate', title: '第二轮<br/>得票率', sortable: true, width:55 ,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        if(value == null) return value;
+                        var val = parseFloat(value*100000/1000);
+                        return val+"%";
+                    }},
                 {field: 'wanchengvote3count', title: '第三轮<br/>投票进度', sortable: false,width:60,align:'center',
                     formatter: function (value, row, index)
                     {
+                        // 若该项目不参与该轮次投票
+                        var voteoption=row["vote3option"];
+                        if(voteoption == 0) return null;
+
                         var all=row["allcount"];
                         var ok=row["wanchengvote3count"];
                         if(all!='0'){
@@ -186,7 +210,13 @@
                        return ok+" / "+all;
                     }
                 },
-                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center'}
+                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        if(value == null) return value;
+                        var val = parseFloat(value*100000/1000);
+                        return val+"%";
+                    }}
             ],
             onLoadSuccess:function(){
                 // 是否显示与战斗关联

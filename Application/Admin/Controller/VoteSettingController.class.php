@@ -72,12 +72,6 @@ class VoteSettingController extends BaseController
                         exit(makeStandResult(2,'当前分组下有未提交打分的专家，不能开启当前轮次投票！'));
                     }
                 }
-                // 若为开启差额轮投票，需判断当前类别是否所有投票结束
-//                if($round == 4) {
-//                    $hasOther = $Model->where("class = '" . $classid . "' and status = '1' and round != '" . $round . "' and xmtype = '$xmtype'")->find();
-//                    // echo $Model->_sql();die;
-//                    if (!empty($hasOther)) exit(makeStandResult(1, '请先关闭当前类别下其他轮次的投票'));
-//                }
 
                 // 删除当前轮投票的voterate
                 $rate       = 'vote'.$round.'rate';
@@ -111,37 +105,32 @@ class VoteSettingController extends BaseController
                 }
 
                 // 写入当前轮投票的voterate
-                $vote = 'vote'.$round;
-                $votestatus = 'vote'.$round.'status';
-                $voteNum = M('xmpsXmrelation')->field("count(*) count,xr_xm_id")->where("xr_xm_id in ('$ids') and $vote = '1' and $votestatus = '已完成'")->group('xr_xm_id')->select(); //参加当前投票的项目的所有得票数
-                $voteNums = [];
-                foreach($voteNum as $val){
-                    $voteNums[$val['xr_xm_id']] = $val['count'];
-                }
-                $allNum  = M('xmpsXmrelation')->field("count(*) count,xr_xm_id")->where("xr_xm_id in ('$ids') and ($vote != '-1' or $vote is null or $vote = 0) and $votestatus = '已完成'")->group('xr_xm_id')->select(); //参加当前投票的项目的所有可得票数
-                $allNums = [];
-                foreach($allNum as $val){
-                    $allNums[$val['xr_xm_id']] = $val['count'];
-                }
-                foreach($idArr as $xm_id) {
-                    $voterate = 'vote' . $round . 'rate';
-                    $rateData = [];
-                    $rateData[$voterate] = 0;
-                    if (isset($voteNums[$xm_id])) {
-                        $voteCount = floatval($voteNums[$xm_id]);
-                        $allCount = floatval($allNums[$xm_id]);
-                        $rateData[$voterate] = round(floatval($voteCount / $allCount), 5) * 100;
-                    }
-                    M('xmpsXmrelation')->where("xr_xm_id ='$xm_id'")->save($rateData);
-                }
+//                $vote = 'vote'.$round;
+//                $votestatus = 'vote'.$round.'status';
+//                $voteNum = M('xmpsXmrelation')->field("count(*) count,xr_xm_id")->where("xr_xm_id in ('$ids') and $vote = '1' and $votestatus = '已完成'")->group('xr_xm_id')->select(); //参加当前投票的项目的所有得票数
+//                $voteNums = [];
+//                foreach($voteNum as $val){
+//                    $voteNums[$val['xr_xm_id']] = $val['count'];
+//                }
+//                $allNum  = M('xmpsXmrelation')->field("count(*) count,xr_xm_id")->where("xr_xm_id in ('$ids') and ($vote != '-1' or $vote is null or $vote = 0) and $votestatus = '已完成'")->group('xr_xm_id')->select(); //参加当前投票的项目的所有可得票数
+//                $allNums = [];
+//                foreach($allNum as $val){
+//                    $allNums[$val['xr_xm_id']] = $val['count'];
+//                }
+//                foreach($idArr as $xm_id) {
+//                    $voterate = 'vote' . $round . 'rate';
+//                    $rateData = [];
+//                    $rateData[$voterate] = 0;
+//                    if (isset($voteNums[$xm_id])) {
+//                        $voteCount = floatval($voteNums[$xm_id]);
+//                        $allCount = floatval($allNums[$xm_id]);
+//                        $rateData[$voterate] = round(floatval($voteCount / $allCount), 5) * 100;
+//                    }
+//                    M('xmpsXmrelation')->where("xr_xm_id ='$xm_id'")->save($rateData);
+//                }
             }
             // 更新xmps_xm,votesetting表数据
-//            if($round != 4){
-                $oldsetting = $Model->where("class = '".$classid."' and round = '".$round."' and xmtype = '$xmtype'")->getField('v_id');
-//                echo $Model->_sql();die;
-//            }else if($round == 4){
-//                $oldsetting = $Model->where("class = '".$classid."' and round = '".$round."' and xmtype = '$xmtype'")->getField('v_id');
-//            }
+            $oldsetting = $Model->where("class = '".$classid."' and round = '".$round."' and xmtype = '$xmtype'")->getField('v_id');
             if(!empty($oldsetting)){
                 $xmData[$roundnum] = 0;
                 M('xmps_xm')->where("xm_class = '".$classid."' and xm_type = '$xmtype'")->setField($xmData);

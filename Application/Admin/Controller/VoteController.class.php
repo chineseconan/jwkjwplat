@@ -31,6 +31,9 @@ class VoteController extends BaseController
             $markRule = '';
         }
         $this->assign('markRule',$markRule);
+        // 投票项
+        $voteOption = C('vote.REMARK_OPTION')[$xmType]['VOTE_OPTION'];
+        $this->assign('voteOption',json_encode($voteOption));
         // 获取投票数量和状态信息
         $class = session('classid');
         if(empty($class)){
@@ -79,9 +82,10 @@ class VoteController extends BaseController
         $nowround  = $roundInfo['round']; // 当前投票进行的轮次
         $maxnum    = $roundInfo['maxnum'];  // 当前投票的最大数
         if($nowround != $round) exit(makeStandResult(1,'当前投票已结束，请刷新页面'));
-        $voteround = 'vote'.$round;
+        $voteround  = 'vote'.$round;
         $voteoption = 'vote'.$round.'option';
-        
+        $voterate   = 'vote'.$round.'rate';
+
         // 投票数是否超出最大数
         $totalvotenum = 0;
         foreach($voteData as $key=>$val){
@@ -94,11 +98,12 @@ class VoteController extends BaseController
             $Model->startTrans();
             foreach($voteData as $key=>$val){
                 $voteres  = $val[$voteround];
+                $xmid     = $val['xm_id'];
                 if($voteres != '-1'){
                     $data     = [];
                     $xr_id    = $val['xr_id'];
                     if($voteres){
-                        $data[$voteround] = 1;
+                        $data[$voteround] = intval($voteres);
                     }else{
                         if($val[$voteoption]){
                             $data[$voteround] = 0;
@@ -107,6 +112,19 @@ class VoteController extends BaseController
                         }                      
                     }
                     $Model->where("xr_id = '".$xr_id."'")->setField($data);
+                }
+                // 写入得票率
+                if($val[$voteoption]) {
+                    $xmtotal = $Model->field($voteround)->where("xr_xm_id='" . $xmid . "' and $voteround is not null and ishuibi=0")->select();
+                    $xmtotal = removeArrKey($xmtotal, $voteround);
+                    $xmcount = count($xmtotal);
+                    if ($xmcount > 0) {
+                        $totalvote = intval(array_sum($xmtotal));
+                        $voterateval = round($totalvote / $xmcount, 3);
+                    } else {
+                        $voterateval = 0;
+                    }
+                    $Model->where("xr_xm_id='" . $xmid . "'")->setField($voterate, $voterateval);
                 }
             }
             $Model->commit();
@@ -134,6 +152,7 @@ class VoteController extends BaseController
         if($nowround != $round) exit(makeStandResult(1,'当前投票已结束，请刷新页面'));
         $voteround = 'vote'.$round;
         $voteoption = 'vote'.$round.'option';
+        $voterate   = 'vote'.$round.'rate';
         // 投票数是否超出最大数
         $totalvotenum = 0;
         foreach($voteData as $key=>$val){
@@ -147,12 +166,13 @@ class VoteController extends BaseController
             $votestatus = $voteround."status";
             foreach($voteData as $key=>$val){
                 $voteres  = $val[$voteround];
+                $xmid     = $val['xm_id'];
                 if($voteres != '-1'){
                     $data              = [];
                     $data[$votestatus] = '已完成';
                     $xr_id             = $val['xr_id'];
                     if($voteres){
-                        $data[$voteround] = 1;
+                        $data[$voteround] = intval($voteres);
                     }else{
                         if($val[$voteoption]){
                             $data[$voteround] = 0;
@@ -166,6 +186,19 @@ class VoteController extends BaseController
                     $data[$votestatus] = '已完成';
                     $xr_id             = $val['xr_id'];
                     $Model->where("xr_id = '".$xr_id."'")->setField($data);
+                }
+                // 写入得票率
+                if($val[$voteoption]) {
+                    $xmtotal = $Model->field($voteround)->where("xr_xm_id='" . $xmid . "' and $voteround is not null and ishuibi=0")->select();
+                    $xmtotal = removeArrKey($xmtotal, $voteround);
+                    $xmcount = count($xmtotal);
+                    if ($xmcount > 0) {
+                        $totalvote = intval(array_sum($xmtotal));
+                        $voterateval = round($totalvote / $xmcount, 3);
+                    } else {
+                        $voterateval = 0;
+                    }
+                    $Model->where("xr_xm_id='" . $xmid . "'")->setField($voterate, $voterateval);
                 }
             }
             $Model->commit();

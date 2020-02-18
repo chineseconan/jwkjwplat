@@ -23,6 +23,7 @@
     }else{
         var zzTitle = '定性评价';
     }
+    var voteOption = eval('{$voteOption}');
     $('#detailtable').bootstrapTable({
             url: '__CONTROLLER__/getpingshendata',         //请求后台的URL（*）
             method: 'post',                      //请求方式（*）
@@ -89,41 +90,74 @@
                     var ishuibi = row.ishuibi;
                     if(ishuibi == '1'){
                         return '回避';
-                    }else if(value == 1){
-                        return '支持';
-                    }else if(value == 0){
-                        return '不支持';
-                    }else {
+                    }else{
+                        if(value == '-1'){
+                            return '回避';
+                        }else{
+                            for(var i=0;i<voteOption.length;i++){
+                                if(value == voteOption[i]['value']){
+                                    return voteOption[i]['text'];
+                                }
+                            }
+                        }
                         return value;
                     }
                 },width:60},
-                    {field: 'vote1rate', title: '第一轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false},
+                {field: 'vote1rate', title: '第一轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false,
+                    formatter: function (value, row, index)
+                {
+                    if(value == null) return value;
+                    var val = parseFloat(value*100000/1000);
+                    return val+"%";
+                }},
                 {field: 'vote2', title: '第二轮<br/>投票', sortable: true,visible:false,formatter:function(value,row){
                     var ishuibi = row.ishuibi;
                     if(ishuibi == '1'){
                         return '回避';
-                    }else if(value == 1){
-                        return '支持';
-                    }else if(value == 0){
-                        return '不支持';
-                    }else {
+                    }else{
+                        if(value == '-1'){
+                            return '回避';
+                        }else{
+                            for(var i=0;i<voteOption.length;i++){
+                                if(value == voteOption[i]['value']){
+                                    return voteOption[i]['text'];
+                                }
+                            }
+                        }
                         return value;
                     }
                 },width:60},
-                {field: 'vote2rate', title: '第二轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false},
+                {field: 'vote2rate', title: '第二轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false,
+                    formatter: function (value, row, index)
+                {
+                    if(value == null) return value;
+                    var val = parseFloat(value*100000/1000);
+                    return val+"%";
+                }},
                 {field: 'vote3', title: '第三轮<br/>投票', sortable: true,visible:false,formatter:function(value,row){
                     var ishuibi = row.ishuibi;
                     if(ishuibi == '1'){
                         return '回避';
-                    }else if(value == 1){
-                        return '支持';
-                    }else if(value == 0){
-                        return '不支持';
-                    }else {
+                    }else{
+                        if(value == '-1'){
+                            return '回避';
+                        }else{
+                            for(var i=0;i<voteOption.length;i++){
+                                if(value == voteOption[i]['value']){
+                                    return voteOption[i]['text'];
+                                }
+                            }
+                        }
                         return value;
                     }
                 },width:60},
-                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false}
+                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center',visible:false,
+                    formatter: function (value, row, index)
+                {
+                    if(value == null) return value;
+                    var val = parseFloat(value*100000/1000);
+                    return val+"%";
+                }}
             ],
             onLoadSuccess:function(){
                 // 是否显示与战斗关联
