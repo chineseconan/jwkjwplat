@@ -1,0 +1,135 @@
+﻿<?php showViewsByPower() ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
+    <link href="__PUBLIC__/vendor/switchery/switchery.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
+    <link href="__PUBLIC__/css/style.css?v=4.0.0" rel="stylesheet">
+    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <script src="__PUBLIC__/vendor/bootstrap-table/jquery.min.js"></script>
+    <script src="__PUBLIC__/vendor/jquery/jquery.form.js"> </script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="__PUBLIC__/vendor/switchery/switchery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen/chosen.order.jquery.js"></script>
+    <script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
+
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
+    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
+    <script src="__PUBLIC__/vendor/ie8/respond.min.js"></script>
+    <style>
+        th{
+            text-align: center;
+        }
+        .form-control{
+            display: inline-block;
+            width: 250px;
+        }
+        .wrapper .wrapper-content{
+            padding-bottom: 0;
+        }
+        .control-label{
+            font-size: 16px!important;
+        }
+    </style>
+</head>
+<body class="gray-bg" style="font-family: 微软雅黑;" >
+<div class="wrapper wrapper-content " style="overflow: hidden">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div style="margin-bottom: 20px;">
+                        <p class="name"  style="text-align: left;font-size:  22px;background-color:;border-left:5px solid green;padding-left: 10px;font-family: 微软雅黑;">数据交互</p>
+                    </div>
+                    <ul style="list-style: none;">
+
+                        <li>
+                            <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_create"><i class="fa fa-download"></i>导出评审数据</button>
+
+                            <span style="margin-left: 10px;font-family: 微软雅黑;">提示：生成数据文件，导出所在会场的项目评审数据</span>
+
+
+                        </li>
+
+                        <li>
+                            <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_import"><i class="fa fa-upload"></i>导入评审数据</button>
+
+                            <span style="margin-left: 10px;font-family: 微软雅黑;">提示：上传数据文件，导入文件存储的项目评审数据</span>
+
+                        </li>
+
+                    </ul>
+                    <!--<div class="_box" style="margin-top: -5px;">-->
+                        <!--<button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_import"><i class="fa fa-upload"></i>上传数据</button>-->
+                        <!--<button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_create"><i class="fa fa-download"></i>生成数据文件</button>-->
+                    <!--</div>-->
+                    <!--<table id="atpbiztable" ></table>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+<script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/banBackSpace.js"></script>
+
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    })
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '300px'});
+
+    $('#sys_import').on('click',function() {
+        $("#sys_dlg").load('__CONTROLLER__/import', function() {
+            $('#sys_dlg_submit').on('click', submitdata);
+            $("#sys_dlg").modal({backdrop: false});
+        });
+    });
+    function submitdata() {
+        var ajax_option = {
+            url: "__CONTROLLER__/importSubmit",
+            type: "post",
+            success: function (data) {
+                if(data=="ok"){
+                    alert("导入成功！");
+                }else {
+                    alert(data);
+                }
+                $("#sys_dlg").modal("hide");
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert("文件上传失败");
+            }
+        }
+        $("#sys_dlg_form").submit(function (e) {
+            e.preventDefault();
+            $("#sys_dlg_form").ajaxSubmit(ajax_option);
+        });
+        $("#sys_dlg_form").submit();
+    }
+    $('#sys_create').on('click',function() {
+        window.open('__CONTROLLER__/create');
+    });
+
+</script>
+</body>
+
+</html>
+
+
+
+
