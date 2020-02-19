@@ -57,7 +57,7 @@ class DataCollectController extends BaseController {
         0+cast(vote3rate as char) as vote3rate")
             ->join("left join sysuser b on a.xr_user_id=b.user_id")
             ->where("xr_status='完成'")->select();
-        dump($data);die;
+//        dump($data);die;
         $xmdata          = $Model->field("xm_id,vote1option,vote2option,vote3option,xm_type,xm_group")->where("xm_id in(select xr_xm_id from xmps_xmrelation where xr_status='完成')")->select();
         $votesettingdata = $Modelsetting->field("v_id,class,round,maxnum,xmtype,xmgroup,status")->select();
         $html=json_encode(array(xmdata=>$xmdata,votesetting=>$votesettingdata,data=>$data));

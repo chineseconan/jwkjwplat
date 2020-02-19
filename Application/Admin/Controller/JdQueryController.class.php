@@ -67,12 +67,12 @@ class JdQueryController extends BaseController
         case when vote3num is null then 0 else vote3num end vote3num,
         0+cast(vote3rate as char) as vote3rate
         ')
-            ->join("left join (select xr_xm_id,count(xr_id) wanchengcount,max(avgvalue) as num,max(ps_detail) ps_detail from xmps_xmrelation a,sysuser b where b.user_id=a.xr_user_id and user_isdelete='0' and xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
-            ->join("left join (select xr_xm_id,count(xr_id) allcount  from xmps_xmrelation a,sysuser b where b.user_id=a.xr_user_id and user_isdelete='0' group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id")
+            ->join("left join (select xr_xm_id,count(xr_id) wanchengcount from xmps_xmrelation a where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
+            ->join("left join (select xr_xm_id,count(xr_id) allcount,max(avgvalue) as num,max(ps_detail) ps_detail,max(vote1rate) vote1rate,max(vote2rate) vote2rate,max(vote3rate) vote3rate from xmps_xmrelation a group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id")
             // 第一轮投票信息
-            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote1count, sum(vote1) as vote1num,max(vote1rate) vote1rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote1status = '已完成' group by xr_xm_id) v1 on xmps_xm.xm_id = v1.xr_xm_id")
-            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote2count, sum(vote2) as vote2num,max(vote2rate) vote2rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote2status = '已完成' group by xr_xm_id) v2 on xmps_xm.xm_id = v2.xr_xm_id")
-            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote3count, sum(vote3) as vote3num,max(vote3rate) vote3rate from xmps_xmrelation a, sysuser b where b.user_id = a.xr_user_id and user_isdelete = '0' and vote3status = '已完成' group by xr_xm_id) v3 on xmps_xm.xm_id = v3.xr_xm_id")
+            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote1count, sum(vote1) as vote1num from xmps_xmrelation a where  vote1status = '已完成' group by xr_xm_id) v1 on xmps_xm.xm_id = v1.xr_xm_id")
+            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote2count, sum(vote2) as vote2num from xmps_xmrelation a where vote2status = '已完成' group by xr_xm_id) v2 on xmps_xm.xm_id = v2.xr_xm_id")
+            ->join("left join (select xr_xm_id, count(xr_id) wanchengvote3count, sum(vote3) as vote3num from xmps_xmrelation a where vote3status = '已完成' group by xr_xm_id) v3 on xmps_xm.xm_id = v3.xr_xm_id")
             ->where($where)
             ->order($queryParam['sort'] . " " . $queryParam['sortOrder'])
             ->limit($queryParam['offset'], $queryParam['limit'])
@@ -218,7 +218,7 @@ class JdQueryController extends BaseController
             }
         }
         $model = M('xmps_xmrelation');
-        $field = ["user_realusername","xr_id","ps_zz","ps_detail","ps_total","xr_status","ishuibi"];
+        $field = ["user_realusername","xr_id","ps_zz","ps_detail","0+cast(ps_total as char) as ps_total","xr_status","ishuibi"];
         $allMarkField = $this->getAllMarkFieldFormat();
         $field = array_merge($field,$allMarkField);
         if($type != ''){
@@ -414,7 +414,7 @@ class JdQueryController extends BaseController
             }
             // 第二行样式设置，显示值设置
             $excel->getActiveSheet()->getRowDimension(2)->setRowHeight(30);
-            $excel->getActiveSheet()->setCellValue('A2', "分组名称：" . $queryParam['xm_class'])->mergeCells('A2:C2');
+            $excel->getActiveSheet()->setCellValue('A2', "分组名称：" . $queryParam['xm_class']."；课题分类：".$queryParam['xm_type'])->mergeCells('A2:C2');
             $excel->getActiveSheet()->getStyle('A2:C2')->applyFromArray($titleStyleLeft);
             $excel->getActiveSheet()->getStyle('A2:C2')->getFont()->setName("楷体")->setSize(13);
             $excel->getActiveSheet()->setCellValue('D2', "本组项目数：" . count($data) . "个");
