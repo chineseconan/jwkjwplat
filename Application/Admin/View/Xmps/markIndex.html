@@ -84,7 +84,14 @@
                 {field: 'xm_class', title: '分组', sortable: true,width:60,visible:false},
                 {field: 'xm_type', title: '申报类别', sortable: true,width:90},
                 {field: 'ps_zz', title: '定性评价', sortable: true,width:90,visible:false},
-                {field: 'ps_total', title: '总分', sortable: true,width:60},
+                {field: 'ps_total', title: '总分', sortable: true,width:60,
+                    formatter: function (value, row, index) {
+                        if (row['ishuibi'] == "1") {
+                            return '回避';
+                        }else{
+                            return value;
+                        }
+                    }},
                 {field: 'ishuibi', title: '是否回避', sortable: true,width:90,
                     formatter: function (value, row, index) {
                         if (value != "1") {

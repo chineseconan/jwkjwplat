@@ -220,8 +220,8 @@
             ],
             onLoadSuccess:function(){
                 // 是否显示与战斗关联
-                if('{$psType}' == 'huiping' && '{$Think.config.isZD}' != '1'){
-                    $('#atpbiztable').bootstrapTable('hideColumn','ps_zz');
+                if(('{$psType}' == 'huiping' && '{$Think.config.isZD}' != '1') || ('{$psType}' != 'huiping')){
+                    $('#atpbiztable').bootstrapTable('hideColumn','ps_detail');
                 }
                 // 是否显示投票字段
                 if('{$TOUPIAO}' != '1'){

@@ -18,11 +18,11 @@ return array(
                 '<b>5.研究思路和方案创新性强，科学合理；不过分强调研究路径的可行性和研究方案的完备性（20分）【优（17-20）；良（14-17）；中（10-13）；差（0-9）】。</b>'
             ],
             '评价内容'=>[
-                'ps_item1'=>['field'=>'ps_item1','title'=>'研究定位','brief'=>'研究定位','minVal'=>0,'maxVal'=>20,'type'=>'text'],
-                'ps_item2'=>['field'=>'ps_item2','title'=>'研究内容<br/>技术支撑','brief'=>'研究内容技术支撑','minVal'=>0,'maxVal'=>20,'type'=>'text'],
-                'ps_item3'=>['field'=>'ps_item3','title'=>'研究项目军事价<br/>值和科学价值','brief'=>'研究项目军事价值和科学价值','minVal'=>0,'maxVal'=>20,'type'=>'text'],
-                'ps_item5'=>['field'=>'ps_item5','title'=>'研究单位及<br/>人员实力','brief'=>'研究单位及人员实力','minVal'=>0,'maxVal'=>20,'type'=>'text'],
-                'ps_item4'=>['field'=>'ps_item4','title'=>'研究思路和方案<br/>创新性，可行性','brief'=>'研究思路和方案创新性，可行性','minVal'=>0,'maxVal'=>20,'type'=>'select','source'=>[0,5,15,20]]
+                'ps_item1'=>['field'=>'ps_item1','title'=>'研究定位','brief'=>'研究定位','minVal'=>0,'maxVal'=>20,'type'=>'select','source'=>[0,5,10,15,20]],
+                'ps_item2'=>['field'=>'ps_item2','title'=>'研究内容<br/>技术支撑','brief'=>'研究内容技术支撑','minVal'=>0,'maxVal'=>20,'type'=>'select','source'=>[0,5,10,15,20]],
+                'ps_item3'=>['field'=>'ps_item3','title'=>'研究项目军事价<br/>值和科学价值','brief'=>'研究项目军事价值和科学价值','minVal'=>0,'maxVal'=>20,'type'=>'select','source'=>[0,5,10,15,20]],
+                'ps_item5'=>['field'=>'ps_item5','title'=>'研究单位及<br/>人员实力','brief'=>'研究单位及人员实力','minVal'=>0,'maxVal'=>20,'type'=>'select','source'=>[0,5,10,15,20]],
+                'ps_item4'=>['field'=>'ps_item4','title'=>'研究思路和方案<br/>创新性，可行性','brief'=>'研究思路和方案创新性，可行性','minVal'=>0,'maxVal'=>20,'type'=>'select','source'=>[0,5,10,15,20]]
             ]
         ],
         '重点'=>[

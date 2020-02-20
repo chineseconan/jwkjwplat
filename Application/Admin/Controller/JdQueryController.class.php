@@ -191,6 +191,8 @@ class JdQueryController extends BaseController
 
         $markOption = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
         $this->assign('markOption',$markOption);
+        $iszz       = C('mark.REMARK_OPTION')[$xmType]['定性评价'];
+        $this->assign('iszz',$iszz);
 
         // 投票项
         $voteOption = C('vote.REMARK_OPTION')[$xmType]['VOTE_OPTION'];
@@ -328,10 +330,13 @@ class JdQueryController extends BaseController
             // 是否有与战斗力关联
             if($psType == 'huiping'){
                 $zzTitle   = "与战斗力关联程度";
+                $zzField   = "ps_detail";
                 $isZD      = C('isZD');
             }else{
                 $zzTitle   = "定性评价";
-                $isZD      = 1;
+                $zzField   = "ps_zz";
+                $isZD      = 0;
+//                $isZD      = C('mark.REMARK_OPTION')[$queryParam["xm_type"]]['定性评价'];
             }
             $where['xm_class']  = ['eq', $queryParam["xm_class"]];
             $where['xm_type']   = ['eq', $queryParam["xm_type"]];
@@ -340,14 +345,14 @@ class JdQueryController extends BaseController
             $width = [7, 15, 25, 30, 15, 15];
             $title = ["序号", "项目编号", "项目名称", "依托单位", "申请人", "平均分"];
             if($isZD == 1){
-                array_push($field,'ps_detail');
+                array_push($field,$zzField);
                 array_push($title,$zzTitle);
                 array_push($width,15);
             }
             array_push($field,'null as remark');
             array_push($title,'备注');
             $data = $model->field($field)
-                ->join("left join (select xr_xm_id,max(avgvalue) as avgvalue,max(ps_detail) as ps_detail from xmps_xmrelation where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
+                ->join("left join (select xr_xm_id,max(avgvalue) as avgvalue,max(ps_detail) as ps_detail,max(ps_zz) as ps_zz from xmps_xmrelation where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
                 ->where($where)
                 ->order('avgvalue desc')
                 ->select();

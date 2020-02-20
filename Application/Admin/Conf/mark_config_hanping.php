@@ -21,7 +21,7 @@ return array(
                 '2.如果您对项目研究内容不熟悉，或因为其他原因不便进行评审，请及时联系工作人员。'
             ],
             '评审意见'=>'（请从已取得的成绩和贡献、拟开展的研究工作、申请人的创新能力及发展潜力三个方面撰写评审意见）',
-            '定性评价'=>'1' // 定性评价是否必填
+            '定性评价'=>'0' // 定性评价是否必填
         ],
 		'重大'=>[
             'title'=>'基础加强计划重点基础研究项目评审系统',
@@ -34,9 +34,9 @@ return array(
             ],
             '评价内容'=>[
                 ['field'=>'ps_item1','mainpoints'=>'研究定位相符性','content'=>'主要考察项目是否符合基础加强计划重点项目定位、是否符合GF科技重点发展方向、对基础科学问题总结凝练的准确性等','maxVal'=>3,'type'=>'select','source'=>[0,1,2,3]],
-                ['field'=>'ps_item2','mainpoints'=>'项目策划合理性','content'=>'主要考察项目目标设定的科学性，项目课题设置、研究内容安排、研究阶段划分的合理性，经费预算安排的合规、合理性等','maxVal'=>3,'type'=>'input','decimalpoint'=>2],
-                ['field'=>'ps_item3','mainpoints'=>'综合效益显著性','content'=>'主要考察项目技术指标的先进性、预期成果JS价值及可检验性等','maxVal'=>2,'type'=>'input','decimalpoint'=>2],
-                ['field'=>'ps_item4','mainpoints'=>'团队实力匹配性','content'=>'主要考察研究团队基础、支撑平台、配套保障条件等','maxVal'=>2,'type'=>'input','decimalpoint'=>2]
+                ['field'=>'ps_item2','mainpoints'=>'项目策划合理性','content'=>'主要考察项目目标设定的科学性，项目课题设置、研究内容安排、研究阶段划分的合理性，经费预算安排的合规、合理性等','maxVal'=>3,'type'=>'select','source'=>[0,1,2,3]],
+                ['field'=>'ps_item3','mainpoints'=>'综合效益显著性','content'=>'主要考察项目技术指标的先进性、预期成果JS价值及可检验性等','maxVal'=>2,'type'=>'select','source'=>[0,1,2]],
+                ['field'=>'ps_item4','mainpoints'=>'团队实力匹配性','content'=>'主要考察研究团队基础、支撑平台、配套保障条件等','maxVal'=>2,'type'=>'select','source'=>[0,1,2]]
             ],
             '注意事项'=>[
                 '1.评审前请签署专家承诺书；',

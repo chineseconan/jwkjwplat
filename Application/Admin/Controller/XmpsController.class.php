@@ -317,6 +317,7 @@ class XmpsController extends BaseController {
             }
             // 将是否与战斗关联写入ps_detail
             if(C('isZD') != 0){
+                if($data['ps_zz'] == '') exit(makeStandResult(2,'项目'.$data['xm_name'].'请填写 与战斗力关联程度'));
                 $ps_zz = $M->field('ps_zz')->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->order('ps_zz asc')->select();
                 $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
                 $ps_detail = implode('',$ps_zz);
@@ -400,7 +401,8 @@ class XmpsController extends BaseController {
                 }
                 // 将是否与战斗关联写入ps_detail
                 if(C('isZD') != 0){
-                    $ps_zz = $M->field('ps_zz')->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->order('ps_zz asc')->select();
+                    if($data['ps_zz'] == '') exit(makeStandResult(2,'项目'.$data['xm_name'].'请填写 与战斗力关联程度'));
+                    $ps_zz     = $M->field('ps_zz')->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->order('ps_zz asc')->select();
                     $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
                     $ps_detail = implode('',$ps_zz);
                     if(!empty($ps_zz)){
@@ -444,6 +446,9 @@ class XmpsController extends BaseController {
                     if(!in_array('<li>'.$rd['xm_code']. '</li>',$tips) && ($rd[$field] == "")){
                         $tips[] ='<li>'.$rd['xm_code'] . '</li>';
                     }
+                }
+                if(C('isZD') != 0 && !in_array('<li>'.$rd['xm_code']. '</li>',$tips) && ($rd['ps_zz'] == "")){
+                    $tips[] ='<li>'.$rd['xm_code'] . '</li>';
                 }
             }
         }

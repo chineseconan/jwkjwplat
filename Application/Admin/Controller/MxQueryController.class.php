@@ -58,7 +58,7 @@ class MxQueryController extends BaseController
             $where['xm_code'] = ['eq', $queryParam['xm_code']];
         }
         $model = M('xmps_xm');
-        $field = "xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_class,xm_type,xr_id,xr_status,ps_zz,ps_detail,0+cast(ps_total as char) as ps_total,user_realusername,vote1,vote2,vote3,vote1status,vote2status,vote3status";
+        $field = "xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_class,xm_type,xr_id,xr_status,ishuibi,ps_zz,ps_detail,0+cast(ps_total as char) as ps_total,user_realusername,vote1,vote2,vote3,vote1status,vote2status,vote3status";
         $allMarkField = $this->getAllMarkFieldFormat();
         $allMarkField = implode(",",$allMarkField);
         $field       .= ",".$allMarkField;
