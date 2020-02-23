@@ -106,78 +106,6 @@ class JdQueryController extends BaseController
         excelExport($header, $data, true, $width,true);
     }
 
-    //大表 明细导出
-    public function exportxx()
-    {
-        $queryParam = I('post.');
-        $xm_id = trim($queryParam['xm_id']);
-        $where = [];
-        if (!empty($xm_id)) {
-            $where['xm_id'] = ['eq', $xm_id];
-        }
-        if (!empty($queryParam['xm_class'])) {
-            $where['xm_class'] = ['like', '%' . $queryParam['xm_class'] . '%'];
-        }
-        $model = M('xmps_xm');
-        $relationmodel = M('xmps_xmrelation');
-        $getmax = "select max(x) num
-                from (
-                    select count(*) x,xr_xm_id from xmps_xmrelation group by xr_xm_id
-                ) a ";
-        $num = 0;
-        $maxdata = $model->query($getmax);
-        if (!empty($maxdata))
-            $num = intval($maxdata[0]["num"]);
-        $data = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_class')
-            ->where($where)
-            ->order('xm_code asc')
-            ->select();
-        foreach ($data as $key => $d) {
-            $relationdata = $relationmodel->field("ps_total,user_realusername,ps_zz,ps_detail")
-                ->join("left join sysuser on xr_user_id=user_id")
-                ->where("xr_xm_id='" . $d["xm_id"] . "'")
-                ->select();
-            $sum_zz = Array();
-            $sum = Array();
-            foreach ($relationdata as $rdata) {
-                array_push($data[$key], $rdata["user_realusername"]);
-                array_push($data[$key], $rdata["ps_total"]);
-                array_push($data[$key], $rdata["ps_zz"]);
-                array_push($data[$key], $rdata["ps_detail"]);
-                array_push($sum_zz, $rdata["ps_zz"]);
-                array_push($sum, $rdata["ps_total"]);
-
-            }
-            sort($sum_zz);
-            $sum_zz = implode($sum_zz);
-            array_push($data[$key], $sum_zz);
-            array_push($data[$key], array_sum($sum));
-            array_push($data[$key], number_format(array_sum($sum) / count($sum), 2));
-            unset($data[$key]["xm_id"]);
-        }
-        $this->addLog('', '明细查询', '', '导出', '成功');
-        $header = array('项目编号', '项目名称', '单位', '申请人', '分组');
-        $width = Array("5", "10", "30", "15", "15", "15");
-
-        for ($i = 0; $i < $num; $i++) {
-            array_push($header, "专家" . ($i + 1));
-            array_push($width, "10");
-            array_push($header, "分数");
-            array_push($width, "10");
-            array_push($header, "资助意见");
-            array_push($width, "10");
-            array_push($header, "评审意见");
-            array_push($width, "30");
-        }
-        array_push($header, '综合评审意见');
-        array_push($width, '30');
-        array_push($header, '总分');
-        array_push($width, '20');
-        array_push($header, '平均分');
-        array_push($width, '20');
-        echo excelExport($header, $data, true, $width);
-    }
-
     /**
      * 明细数据页
      */
@@ -325,19 +253,7 @@ class JdQueryController extends BaseController
     {
         $queryParam = I("post.");
         if (!empty($queryParam['xm_class'])) {
-            $psType    = trim($queryParam['psType']);  // 投票类型
-            $TOUPIAO   = trim($queryParam['TOUPIAO']); // 是否打分
-            // 是否有与战斗力关联
-            if($psType == 'huiping'){
-                $zzTitle   = "与战斗力关联程度";
-                $zzField   = "ps_detail";
-                $isZD      = C('isZD');
-            }else{
-                $zzTitle   = "定性评价";
-                $zzField   = "ps_zz";
-                $isZD      = 0;
-//                $isZD      = C('mark.REMARK_OPTION')[$queryParam["xm_type"]]['定性评价'];
-            }
+            $isZD      = C('isZD');                    // 是否有与战斗力关联
             $where['xm_class']  = ['eq', $queryParam["xm_class"]];
             $where['xm_type']   = ['eq', $queryParam["xm_type"]];
             $model = M('xmps_xm');
@@ -345,8 +261,8 @@ class JdQueryController extends BaseController
             $width = [7, 15, 25, 30, 15, 15];
             $title = ["序号", "项目编号", "项目名称", "依托单位", "申请人", "平均分"];
             if($isZD == 1){
-                array_push($field,$zzField);
-                array_push($title,$zzTitle);
+                array_push($field,"ps_detail");
+                array_push($title,"与战斗力关联程度");
                 array_push($width,15);
             }
             array_push($field,'null as remark');
@@ -489,6 +405,97 @@ class JdQueryController extends BaseController
             $filePath = $savePath . '/' . $filename;
             exit(json_encode(array('code' => 1, 'message' => $fileRootPath . $filePath)));
         }
+    }
+
+
+    /**
+     * 函评导出（不区分课题分类）
+     */
+    public function exportxx()
+    {
+        $queryParam = I('post.');
+        $xm_id      = trim($queryParam['xm_id']);
+        $where      = [];
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        if (!empty($queryParam['xm_class'])) {
+            $where['xm_class'] = ['eq', $queryParam['xm_class']];
+        }
+        if (!empty($queryParam['xm_type'])) {
+            $where['xm_type'] = ['eq', $queryParam['xm_type']];
+        }
+        $model         = M('xmps_xm');
+        $relationmodel = M('xmps_xmrelation');
+        // 查询关联表共有几个项目参与打分
+        $getmax        = "select max(x) num from (select count(*) x,xr_xm_id from xmps_xmrelation group by xr_xm_id) a ";
+        $maxdata       = $model->query($getmax);
+        $num           = 0;
+        if (!empty($maxdata)) $num = intval($maxdata[0]["num"]);
+        // 查询所有项目信息
+        $data = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_class,xm_type')
+            ->where($where)
+            ->order('xm_class,xm_type,xm_code asc')
+            ->select();
+        // 查询一个项目最多有几个专家打分
+        $maxpsnum = $relationmodel->field("count(*) c")
+            ->join("inner join xmps_xm on xr_xm_id = xm_id")
+            ->where($where)
+            ->group("xr_xm_id")
+            ->order("c desc")
+            ->find();
+        $maxpsnum = $maxpsnum['c'];
+        foreach ($data as $key => $d) {
+            $relationdata = $relationmodel->field("0+cast(ps_total as char) as ps_total,user_realusername,ps_zz,ps_detail,0+cast(avgvalue as char) as avgvalue")
+                ->join("left join sysuser on xr_user_id=user_id")
+                ->where("xr_xm_id='" . $d["xm_id"] . "'")
+                ->select();
+            $sum_zz = [];
+            $sum    = [];
+            foreach ($relationdata as $rdata) {
+                array_push($data[$key], $rdata["user_realusername"]);
+                array_push($data[$key], $rdata["ps_total"]);
+                array_push($data[$key], $rdata["ps_zz"]);
+                array_push($data[$key], $rdata["ps_detail"]);
+                array_push($sum_zz, $rdata["ps_zz"]);
+                array_push($sum, $rdata["ps_total"]);
+            }
+            if(count($relationdata)<$maxpsnum){
+                $short = intval($maxpsnum-count($relationdata));
+                for($i=0;$i<$short;$i++){
+                    array_push($data[$key], null);
+                    array_push($data[$key], null);
+                    array_push($data[$key], null);
+                    array_push($data[$key], null);
+                }
+            }
+            sort($sum_zz);
+            $sum_zz = implode($sum_zz);
+            array_push($data[$key], $sum_zz);         // 综合评审意见
+            array_push($data[$key], array_sum($sum)); // 总分
+            array_push($data[$key], $rdata["avgvalue"]); // 平均分
+            unset($data[$key]["xm_id"]);
+        }
+        $header = array('项目编号', '项目名称', '单位', '申请人', '分组','课题分类');
+        $width = Array("5", "10", "30", "15", "15", "15", "15");
+
+        for ($i = 0; $i < $num; $i++) {
+            array_push($header, "专家" . ($i + 1));
+            array_push($width, "10");
+            array_push($header, "分数");
+            array_push($width, "10");
+            array_push($header, "定性评价");
+            array_push($width, "10");
+            array_push($header, "评审意见");
+            array_push($width, "30");
+        }
+        array_push($header, '综合评审意见');
+        array_push($width, '30');
+        array_push($header, '总分');
+        array_push($width, '20');
+        array_push($header, '平均分');
+        array_push($width, '20');
+        echo excelExport($header, $data, true, $width);
     }
 
     /**

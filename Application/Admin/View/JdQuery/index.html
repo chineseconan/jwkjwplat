@@ -63,9 +63,12 @@
                         </select>
 
                         <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-search"></i>查询</button>
-<!--                        <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_export"><i class="fa fa-download"></i>导出</button>-->
                         <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_huitui"><i class="fa fa-wrench"></i>回退</button>
-                        <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_resultexport"><i class="fa fa-download"></i>结果表导出</button>
+                        <if condition="$psType eq 'huiping'">
+                            <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_resultexport"><i class="fa fa-download"></i>结果表导出</button>
+                        <else/>
+                            <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_exportxx"><i class="fa fa-download"></i>导出</button>
+                        </if>
                     </div>
                     <table id="atpbiztable" ></table>
                 </div>
@@ -290,27 +293,34 @@
     });
 
     $('#sys_exportxx').on('click',function() {
-        $('#loading').modal('show');
-        var data= {
-            xm_id: $('#xm_id').val(),
-            xm_class:$("#xm_class").val()
-        };
-        var t = "__CONTROLLER__/exportxx";
-        t = encodeURI(t);
-        $.ajax({
-            type:'post',
-            url: t,
-            data:data,
-            dataType:'json',
-            success:function(data){
-                $('#loading').modal('hide');
-                if(data.code > 0){
-                    location.href = data.message;
-                }else{
-                    layer.msg(data.message);
+        var xm_type = $("#xm_type").val();
+        var message = "确定导出课题分类为 <b>"+xm_type+"</b> 的项目评审表吗？";
+        if(xm_type == '') message = "确定导出所有课题分类的项目评审表吗？";
+        layer.confirm(message,function(indexs){
+            layer.close(indexs);
+            $('#loading').modal('show');
+            var data= {
+                xm_type:xm_type,
+                xm_id: $('#xm_id').val(),
+                xm_class:$("#xm_class").val()
+            };
+            var t = "__CONTROLLER__/exportxx";
+            t = encodeURI(t);
+            $.ajax({
+                type:'post',
+                url: t,
+                data:data,
+                dataType:'json',
+                success:function(data){
+                    $('#loading').modal('hide');
+                    if(data.code > 0){
+                        location.href = data.message;
+                    }else{
+                        layer.msg(data.message);
+                    }
                 }
-            }
-        })
+            })
+        });
     });
     $('#sys_huitui').on('click',function() {
         layer.open({
