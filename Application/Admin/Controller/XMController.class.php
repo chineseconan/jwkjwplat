@@ -96,8 +96,11 @@ class XMController extends BaseController
      * 项目信息保存方法
      */
     public function saveXm(){
-        $param = I("post.");
-        $Model = M("xmps_xm");
+        $param         = I("post.");
+        $Model         = M("xmps_xm");
+        $relationModel = M("xmps_xmrelation");
+        $userModel     = M("sysuser");
+        // 查询是否存在相同的项目编号
         $xm_code = $Model
             ->field("xm_code,xm_id")
             ->where("xm_code='".$param['xm_code']."' and xm_id!='".$param['xm_id']."'")
@@ -105,69 +108,53 @@ class XMController extends BaseController
         if(!empty($xm_code)){
             echo makeStandResult("1", "已存在相同的项目编号");die;
         }
-        $relationModel = M("xmps_xmrelation");
-        $data = $param;
-        $userModel  = M("sysuser");
+        // 查询同分类下的专家
         $userMap['is_delete']   = Array("eq","0");
         $userMap['is_enable']   = Array("eq","启用");
         $userMap['is_issystem'] = Array("eq","否");
-        $userMap['user_class']  = Array("like","%".$data['xm_class']."%");
+        $userMap['user_class']  = Array("like","%".$param['xm_class']."%");
         $userData = $userModel->where($userMap)->select();
-        if (!$param['xm_id']) {
+        try{
             $Model->startTrans();
-            try{
-                $data['xm_id'] = makeGuid();
-                $Model->add($data);
+            if (!$param['xm_id']) { // 新增
+                $param['xm_id'] = makeGuid();
+                $Model->add($param);
                 foreach($userData as $user){
                     $item['xr_id'] = makeGuid();
                     $item['xr_user_id'] = $user['user_id'];
-                    $item['xr_xm_id'] = $data['xm_id'];
+                    $item['xr_xm_id'] = $param['xm_id'];
                     $item['xr_status'] = "进行中";
                     $relationModel->add($item);
                 }
-                $count = $Model
-                    ->where("xm_class='".$param['xm_class']."' and xm_ordernum='".$param['xm_ordernum']."' and xm_type = '".$param['xm_type']."' and xm_group = '".$param['xm_group']."'")
-                    ->count();
-                $isSame = 0;
-                if($count>1) $isSame = 1;
-                $Model->commit();
-                if($isSame == 0){
-                    echo makeStandResult("0", "保存成功!");die;
-                }else{
-                    echo makeStandResult("99", "保存成功，当前分组下答辩顺序重复");die;
+            } else { // 修改
+                $xm_class = $Model->where("xm_id='".$param['xm_id']."'")->getField("xm_class");
+                $Model->where("xm_id='".$param['xm_id']."'")->save($param);
+                if($xm_class!=$param['xm_class']){ // 若修改了项目分类
+                    $relationModel->where("xr_xm_id='".$param['xm_id']."'")->delete();
+                    foreach($userData as $user){
+                        $item['xr_id'] = makeGuid();
+                        $item['xr_user_id'] = $user['user_id'];
+                        $item['xr_xm_id'] = $param['xm_id'];
+                        $item['xr_status'] = "进行中";
+                        $relationModel->add($item);
+                    }
                 }
-            }catch(Exception $e){
-                $Model->rollback();
-                echo makeStandResult("2", "保存失败,请关闭重试");die;
             }
-        } else {
-            $XM = M("xmps_xm");
-            $xm_class = $XM->where("xm_id='".$param['xm_id']."'")->getField("xm_class");
-            $re = $XM->where("xm_id='".$param['xm_id']."'")->save($param);
+            // 查询同分组下是否答辩顺序重复
             $count = $Model
-                ->where("xm_class='".$param['xm_class']."' and xm_ordernum='".$param['xm_ordernum']."' and xm_type = '".$param['xm_type']."' and xm_group = '".$param['xm_group']."'")
+                ->where("xm_class='".$param['xm_class']."' and xm_ordernum='".$param['xm_ordernum']."' and xm_type = '".$param['xm_type']."'")
                 ->count();
             $isSame = 0;
             if($count>1) $isSame = 1;
-            if($xm_class!=$param['xm_class']){
-                $relationModel->where("xr_xm_id='".$param['xm_id']."'")->delete();
-                foreach($userData as $user){
-                    $item['xr_id'] = makeGuid();
-                    $item['xr_user_id'] = $user['user_id'];
-                    $item['xr_xm_id'] = $data['xm_id'];
-                    $item['xr_status'] = "进行中";
-                    $relationModel->add($item);
-                }
-            }
-        }
-        if ($re===false) {
-            echo makeStandResult("3", "保存失败,请关闭重试");die;
-        } else {
+            $Model->commit();
             if($isSame == 0){
                 echo makeStandResult("0", "保存成功!");die;
             }else{
                 echo makeStandResult("99", "保存成功，当前分组下答辩顺序重复");die;
             }
+        }catch(Exception $e){
+            $Model->rollback();
+            echo makeStandResult("2", "保存失败,请关闭重试");die;
         }
     }
 
@@ -294,7 +281,7 @@ class XMController extends BaseController
             $path = "./Public/".$file['message'];
             $import = excelImport($path);
 
-             $column = Array("项目编号","项目名称","依托单位","申请人","分组","类别","技术方向","推荐方式","答辩顺序","初审分组","初审得分","初审排名");
+            $column = Array("项目编号","项目名称","依托单位","申请人","分组","类别","技术方向","推荐方式","答辩顺序","初审分组","初审得分","初审排名");
             $len = count($column);
             for($i=0;$i<$len;$i++){
                 if($column[$i]!=$import['column'][$i]){
@@ -405,17 +392,18 @@ class XMController extends BaseController
      */
     public function listindexs()
     {
-        $xm_id=I("get.xm_id");
-        $model = M('xmps_xm');
-        $xmdata=$model->where("xm_id='".$xm_id."'")->find();
-        $path = './Public/'. C("xmfilepath")."/".$xmdata["xm_code"];
-        $file = scandir($path);
-        $filesort = [];
+        $xm_id    = I("get.xm_id");
+        $model    = M('xmps_xm');
+        $xmdata   = $model->where("xm_id='".$xm_id."'")->find();
+        $path     = './Public/'. C("xmfilepath")."/".$xmdata["xm_code"];
+        $file     = scandir($path);
+        $filesort = []; // 排序文件用数组
         foreach($file as $fileSortName){
             if($fileSortName == '.' || $fileSortName == '..'){
                 $filesort[] = $fileSortName;
             }else{
                 if(strpos($fileSortName,'_') !== false){
+                    // 若文件名称中有数字，按数字从小到大然后中文的顺序排序
                     $fileSortNames = explode('_',$fileSortName);
                     preg_match('/[0-9]+/',$fileSortNames[0],$fileSortNum);
                     if(!empty($fileSortNum)){
@@ -429,18 +417,20 @@ class XMController extends BaseController
             }
         }
 
-        $menu=array();
-        $relativePath = $_SERVER['SCRIPT_NAME'];
-        array_multisort($filesort,$file);
-        $jianyishu=array();
-        $other=array();
-        $defname=strtolower(C("defaultfilename"));
+        array_multisort($filesort,$file);  // 根据刚刚保存的排序字符串排序
+        $menu         = [];                      // 发送到前台的列表数组
+        $relativePath = $_SERVER['SCRIPT_NAME']; // '/jwkjwplat/index.php' 入口文件地址
+        $jianyishu    = [];                      // 建议书名称数组（用于置顶）
+        $other        = [];                      // 其他文件名称数组
+        $defname      = strtolower(C("defaultfilename")); // 配置文件配置的建议书文件名（用于置顶）
         foreach($file as $key=>$val){
             if($val!='.' && $val!='..') {
+                // 检测文件编码，转码
                 $encode = mb_detect_encoding($val, array("UTF-8", "GB2312"));
                 if ($encode != "UTF-8") {
                     $val = iconv('gb2312', 'utf-8', $val);
                 }
+                // 项目建议书单独拿出来，一会用array_merge放最上面
                 if(strtolower($val)==$defname){
                     array_push($jianyishu,$val);
                     unset($file[$key]);
@@ -451,7 +441,8 @@ class XMController extends BaseController
                 unset($file[$key]);
             }
         }
-        $file=array_merge($jianyishu,$other);
+        $file = array_merge($jianyishu,$other);
+        // 生成页面左侧列表数组
         foreach($file as $val) {
             $temparr = explode(".", $val);
             $houzhui = $temparr[count($temparr) - 1];
@@ -475,31 +466,28 @@ class XMController extends BaseController
      */
     public function listindex()
     {
-        $xm_id   = I("get.xm_id");
-        $model   = M('xmps_xm');
-        $xmdata  = $model->where("xm_id='".$xm_id."'")->find();
-        $xm_code = $xmdata["xm_code"];
-
-        $path    = './Public/'. C("xmfilepath");
-
-        $file    = scandir($path);
-        $menu    = array();
-        $relativePath = $_SERVER['SCRIPT_NAME'];
-        array_multisort($file);
-        $other     = array();
+        $xm_id        = I("get.xm_id");
+        $model        = M('xmps_xm');
+        $xmdata       = $model->where("xm_id='".$xm_id."'")->find();
+        $path         = './Public/'. C("xmfilepath");
+        $file         = scandir($path);
+        $menu         = [];                      // 发送到前台的列表数组
+        $relativePath = $_SERVER['SCRIPT_NAME']; // '/jwkjwplat/index.php' 入口文件地址
+        array_multisort($file);            // 排序
+        $other        = [];                      // 文件名称数组
         foreach($file as $key=>$val){
             if($val!='.' && $val!='..') {
+                // 检测文件编码，转码
                 $encode = mb_detect_encoding($val, array("UTF-8", "GB2312"));
-                $vals = $val;
                 if ($encode != "UTF-8") {
-                    $vals = iconv('gb2312', 'utf-8', $val);
+                    $val = iconv('gb2312', 'utf-8', $val);
                 }
-                array_push($other,$vals);
-
+                array_push($other,$val);
             }else{
                 unset($file[$key]);
             }
         }
+        // 生成页面左侧列表数组
         foreach($other as $val) {
             $temparr = explode(".", $val);
             if($temparr[0] == $xmdata['xm_name'] && $temparr[1] == 'pdf'){
@@ -550,6 +538,7 @@ class XMController extends BaseController
 //                if(count($orders) != 1){
 //                    exit(makeStandResult(1,'项目分组已更改，请刷新后再进行分组排序！'));
 //                }
+                // 遍历接收到的数组挨个保存排序号
                 foreach($orderData as $id=>$order){
                     $data = [];
                     $data['xm_ordernum'] = $order;

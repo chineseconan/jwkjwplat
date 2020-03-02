@@ -119,12 +119,12 @@
             [
                 {checkbox:true},
                 {
-                    title: '序号', width: 20,
+                    title: '序号', width: 40,
                     formatter: function (value, row, index) {
                         var option = $('#xmTable').bootstrapTable("getOptions");
                         return option.pageSize * (option.pageNumber - 1) + index + 1;                                }
                 },
-                {field: 'xm_ordernum', title: '答辩顺序', width:90,sortable: true},
+                {field: 'xm_ordernum', title: '答辩顺序', width:80,sortable: true},
                 {field: 'xm_code', title: '项目编号', width:100,sortable: true},
                 {field: 'xm_name', title: '项目名称', width: 200},
                 {field: 'xm_company', title: '依托单位', width:200,sortable: true},

@@ -69,7 +69,7 @@ class JdQueryController extends BaseController
         ')
             ->join("left join (select xr_xm_id,count(xr_id) wanchengcount from xmps_xmrelation a where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id")
             ->join("left join (select xr_xm_id,count(xr_id) allcount,max(avgvalue) as num,max(ps_detail) ps_detail,max(vote1rate) vote1rate,max(vote2rate) vote2rate,max(vote3rate) vote3rate from xmps_xmrelation a group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id")
-            // 第一轮投票信息
+            // 投票信息
             ->join("left join (select xr_xm_id, count(xr_id) wanchengvote1count, sum(vote1) as vote1num from xmps_xmrelation a where  vote1status = '已完成' group by xr_xm_id) v1 on xmps_xm.xm_id = v1.xr_xm_id")
             ->join("left join (select xr_xm_id, count(xr_id) wanchengvote2count, sum(vote2) as vote2num from xmps_xmrelation a where vote2status = '已完成' group by xr_xm_id) v2 on xmps_xm.xm_id = v2.xr_xm_id")
             ->join("left join (select xr_xm_id, count(xr_id) wanchengvote3count, sum(vote3) as vote3num from xmps_xmrelation a where vote3status = '已完成' group by xr_xm_id) v3 on xmps_xm.xm_id = v3.xr_xm_id")
@@ -112,10 +112,10 @@ class JdQueryController extends BaseController
     public function getpingshen()
     {
         $queryParam = I('get.');
-        $xmType = M('xmps_xm')->where("xm_id = '%s'",$queryParam["xm_id"])->getField('xm_type');
-        $this->assign('xm_id', $queryParam["xm_id"]);
-        $this->assign('status', $queryParam["status"]);
-        $this->assign('type', $queryParam["type"]);
+        $xmType = M('xmps_xm')->where("xm_id = '%s'",$queryParam["xm_id"])->getField('xm_type'); // 获取课题分类
+        $this->assign('xm_id', $queryParam["xm_id"]);   // 项目id
+        $this->assign('status', $queryParam["status"]); // 查看类型：all,所有；ok,已完成
+        $this->assign('type', $queryParam["type"]);     // 是否查看投票：‘’，不看；vote1/vote2/vote3，查看投票
 
         $markOption = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
         $this->assign('markOption',$markOption);
@@ -198,8 +198,8 @@ class JdQueryController extends BaseController
     {
         $user_id  = I("post.user_id");
 //        $classid  = I("post.classid");
-        $xmType   = I("post.xmType");
-        $type     = I("post.type");
+        $xmType   = I("post.xmType"); // 课题分类
+        $type     = I("post.type");   // 回退类型
         $model   = M('xmps_xmrelation');
         try {
             $model->startTrans();
@@ -245,7 +245,7 @@ class JdQueryController extends BaseController
     }
 
     /**
-     * 结果表导出
+     * 结果表导出（会评）
      * @throws \PHPExcel_Exception
      * @throws \PHPExcel_Writer_Exception
      */

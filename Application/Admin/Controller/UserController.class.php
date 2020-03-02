@@ -76,7 +76,7 @@ public $viewid;
      */
     public function add(){
         $id = trim(I('get.id'));
-        if(!empty($id)){
+        if(!empty($id)){ // 如果get接收到id,则为修改需查询用户信息
             $model = M('sysuser');
             $data = $model
                 ->field('user_id,user_zhiwu,user_password,user_zhicheng,user_mobile,user_class,user_realusername,user_name,user_orgid,user_secretlevel')
@@ -125,6 +125,7 @@ public $viewid;
             $map['user_name']     = $data['user_name'];
             $map['user_password'] = $data['user_password'];
             $map['user_isdelete'] = 0;
+            // 查询是否已存在相同用户名用户
             $isexist= $model->where($map)->find();
             if(!empty($isexist)) {
                 $this->addLog('sysuser','三员操作日志','add','新增用户'.$data['user_realusername'],'失败');
@@ -138,6 +139,7 @@ public $viewid;
             $data['user_issystem']   = '否';
             $data['user_role']       = $this->roleid;
             $res = $model->add($data);
+            // 关联表新增数据
             foreach($xmData as $xm){
                 $item['xr_id']      = makeGuid();
                 $item['xr_status']  = "进行中";
@@ -145,6 +147,7 @@ public $viewid;
                 $item['xr_xm_id']   = $xm['xm_id'];
                 $relation->add($item);
             }
+            // 用户角色表新增用户专家角色数据
             $adduserauth                  = [];
             $adduserauth["ua_id"]         = makeGuid();
             $adduserauth["ua_roleid"]     = $this->roleid;
@@ -159,7 +162,7 @@ public $viewid;
                 $this->addLog('sysuser','三员操作日志','add','新增用户'.$data['user_realusername'],'成功');
                 exit(makeStandResult(0,'添加成功'));
             }
-        }else{
+        }else{ // 修改用户信息
             $data['user_lastmodifytime']  = time();
             $data['user_lastmodifyuser']  = session('user_id');
             $data['user_secretlevelcode'] = md5($id.trim(I('post.user_secretlevel')));
@@ -168,6 +171,7 @@ public $viewid;
             $map['user_password']         = $data['user_password'];
             $map['user_isdelete']         = 0;
 
+            // 查询是否已存在相同用户名用户
             $isexist = $model->where($map)->find();
             if($id!=$isexist["user_id"]&&!empty($isexist))
             {
@@ -175,6 +179,7 @@ public $viewid;
                 exit(makeStandResult(3,'账号已存在'));
             }
             $res = $model->where("user_id='%s'", $id)->save($data);
+            // 若修改了用户分类，则关联表删除旧数据，重新新增数据
             if($data['user_class']!=$isexist['user_class']){
                 $relation->where("xr_user_id='$id'")->delete();
                 foreach($xmData as $xm){
@@ -227,7 +232,8 @@ public $viewid;
                 }
             }
             foreach($import['data'] as $val){
-                if($val['B']!=NULL && $val['C']!=NULL && $val['A']!=NULL && $val['D']!=NULL){
+                if($val['B']!=NULL && $val['C']!=NULL && $val['A']!=NULL && $val['D']!=NULL){ // 判断前四列不为空时新增用户
+                    // 查询是否已存在相同用户名、密码用户
                     $re = $Model->where("user_name='".$val['B']."' and user_password='". $val['C']."' and user_isdelete!='1'")->find();
                     if(empty($re)){
                         $data['user_name']         = $val['B'];
@@ -249,6 +255,7 @@ public $viewid;
                         $data['user_class']       = $user_class;
                         $user_class               = explode(',',$user_class);
                         $Model->add($data);
+                        // 关联表新增数据
                         $xmMoel                   = M("xmps_xm");
                         $xmMap['xm_status']       = Array("eq","正常");
                         $xmMap['xm_class']        = Array("in",$user_class);
@@ -261,6 +268,7 @@ public $viewid;
                             $item['xr_xm_id'] = $xm['xm_id'];
                             $relation->add($item);
                         }
+                        // 用户角色表新增用户专家角色数据
                         $adduserauth                  = array();
                         $adduserauth["ua_id"]         = makeGuid();
                         $adduserauth["ua_roleid"]     = $this->roleid;
@@ -330,6 +338,7 @@ public $viewid;
             $model->where("user_role = '%s'",$this->viewid)->delete();
             M("userauth")->where("ua_roleid = '%s'",$this->viewid)->delete();
             for($i=1;$i<=$num;$i++){
+                // 用户表新增数据
                 $data['user_name']         = "L".$i;
                 $data['user_realusername'] = "浏览专家".$i;
                 $data['user_password']     = "1";
@@ -341,6 +350,7 @@ public $viewid;
                 $data['user_role']         = $this->viewid;
                 $res = $model->add($data);
 
+                // 用户角色表新增浏览专家角色数据
                 $adduserauth                  = [];
                 $adduserauth["ua_id"]         = makeGuid();
                 $adduserauth["ua_roleid"]     = $this->viewid;
@@ -368,7 +378,6 @@ public $viewid;
             ->order("xm_class,xm_ordernum")
             ->select();
 
-
         $Model = D("xmps_xmrelation");
         $map   = [];
         $map['xr_user_id']    = Array("eq", $id);
@@ -389,7 +398,7 @@ public $viewid;
         $this->display();
     }
 
-    //备选项目
+    //备选项目（已不用）
     public function getAlternativeData()
     {
         $param = json_decode(file_get_contents("php://input"), true);
@@ -410,11 +419,10 @@ public $viewid;
     public function saveZhuanjiaData()
     {
         $param = I("post.");
-//        dump($param);die;
         $XR    = M("xmps_xmrelation");
         try{
             $XR->startTrans();
-            $xrData = $XR->field("xr_id")->where("xr_user_id='%s'",trim($param['user_id']))->delete();
+            $XR->field("xr_id")->where("xr_user_id='%s'",trim($param['user_id']))->delete(); // 删除旧关联表信息
             $xmIds = I('post.xmid');
             foreach ($xmIds as $key => $val) {
                 $data['xr_user_id'] = $param['user_id'];

@@ -32,7 +32,7 @@ class MxQueryController extends BaseController
     }
 
     /**
-     * 获取字典列表
+     * 获取列表
      */
     public function getData()
     {
@@ -58,6 +58,7 @@ class MxQueryController extends BaseController
             $where['xm_code'] = ['eq', $queryParam['xm_code']];
         }
         $model = M('xmps_xm');
+        // 拼接所有要查的字段
         $field = "xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_class,xm_type,xr_id,xr_status,ishuibi,ps_zz,ps_detail,0+cast(ps_total as char) as ps_total,user_realusername,vote1,vote2,vote3,vote1status,vote2status,vote3status";
         $allMarkField = $this->getAllMarkFieldFormat();
         $allMarkField = implode(",",$allMarkField);
@@ -114,13 +115,13 @@ class MxQueryController extends BaseController
         $markInfo  = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['评价内容'];
         $markField = removeArrKey($markInfo,'field');// 打分字段
         if($psType == 'huiping'){
-            $zzTitle   = "与战斗力关联程度";
-            $isZD      = C('isZD');                    // 是否有与战斗力关联
-            $markTitle = removeArrKey($markInfo,'brief');
+            $zzTitle   = "与战斗力关联程度";                // ps_zz列表头设置
+            $isZD      = C('isZD');                       // 是否有与战斗力关联
+            $markTitle = removeArrKey($markInfo,'brief'); // 会评时打分列表头
         }else{
-            $zzTitle   = "定性评价";
-            $isZD      = 1;
-            $markTitle = removeArrKey($markInfo,'mainpoints');
+            $zzTitle   = "定性评价";                      // ps_zz列表头设置
+            $isZD      = 1;                              // 是否有与战斗力关联
+            $markTitle = removeArrKey($markInfo,'mainpoints');// 函评时打分列表头
         }
         // 查询字段
         $field = ['xm_code','xm_name','xm_class','user_realusername','ps_total'];
@@ -141,11 +142,8 @@ class MxQueryController extends BaseController
         if($TOUPIAO == 1){
             $field = array_merge($field,["xr_status",
                 "vote1","vote2","vote3","vote1option","vote2option","vote3option",
-//                "case vote1 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote1 end vote1",
                 "vote1status",
-//                "case vote2 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote2 end vote2",
                 "vote2status",
-//                "case vote3 when '-1' then '回避' when '0' then '不支持' when '1' then '支持' when '-2' then '不参与本轮投票' else vote3 end vote3",
                 "vote3status"
             ]);
             $header = array_merge($header ,["打分状态","第1轮投票","第1轮状态","第2轮投票","第2轮状态","第3轮投票","第3轮状态"]);
@@ -163,7 +161,7 @@ class MxQueryController extends BaseController
             ->order("xm_class,xm_ordernum,user_realusername")
             ->select();
         foreach($data as $keys=>$item){
-            if($item['ps_total'] == -1){
+            if($item['ps_total'] == -1){ // 回避时投票字段需设置为回避
                 $data[$keys]['ps_total'] = '回避';
                 foreach($markField as $fields) $data[$keys][$fields] = '回避';
                 if($TOUPIAO == 1){
@@ -174,7 +172,7 @@ class MxQueryController extends BaseController
                     unset($data[$keys]['vote2option']);
                     unset($data[$keys]['vote3option']);
                 }
-            }else if($TOUPIAO == 1) {
+            }else if($TOUPIAO == 1) { // 不参与投票时需设置
                 if ($item['vote1option'] == 0) {
                     $data[$keys]['vote1'] = '不参与本轮投票';
                 }else{
