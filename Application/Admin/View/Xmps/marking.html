@@ -44,7 +44,7 @@
     .tip{
         text-align: left;
         text-indent: 2em;
-        font-size: 16px;
+        font-size: 18px;
         font-weight: bold;
         margin-left: 10px;
         margin-bottom:15px;
@@ -57,12 +57,13 @@
         margin-bottom:5px;
         width:100%;
         float:left;
+		font-size: 17px;
     }
 </style>
 <body  style="font-family: 微软雅黑;">
     <div class="btns">
         <a class="btn btn-danger"  id="back" style="float:right;">返回项目列表</a>
-        <button class="btn btn-warning" id="submit" style="float:right;">保存</button>
+        <button class="btn btn-warning" id="submit" style="float:right;" onclick="submitData();">保存</button>
         <button class="btn btn-success" id="fileshow" style="float:right;">查看申报材料</button>
     </div>
     <div style=''>
@@ -95,7 +96,7 @@
             </tr>
             <?php foreach($standrad as $key=>$value){?>
                 <tr>
-                    <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo ($key+1).".".$value['mainpoints']."（0-".$value['maxVal']."分）";?></td>
+                    <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $mainpoint[$key];?></td>
                     <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $value['content'];?></td>
                     <td style="text-align: center;vertical-align: middle;">
                         <?php if($value['type'] == 'select'){?>
@@ -168,7 +169,13 @@
                 var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
                 if(value.match(preg) != null){ // 1.先去掉不是数字的部分
                     $(this).val($(this).val().replace(preg,""));
-                    value = 0;
+                    if($(this).val().replace(preg,"") == ''){
+                        $(this).val(null)
+                        value = 0;
+                    }else{
+                        value = $(this).val().replace(preg,"");
+                    }
+                    alert("输入数值必须为数字！");
                 }
                 if(!preg1.test(value)){ // 2.再判断小数点
                     var f  = parseFloat(value);
@@ -176,7 +183,7 @@
                 }
                 if (value > maxVal || value < 0) { // 3.最后判断最大值
                     ss.val("");
-                    layer.msg("输入数值必须在 0-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
+                    alert("输入数值必须在 0-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
                     return;
                 }
             }
@@ -190,7 +197,7 @@
         $("#total").html(ps_total);
     });
 //        保存
-        $("#submit").on("click",submitData);
+        // $("#submit").on("click",submitData());
         function submitData() {
             var ps_inputObj = $(".ps_input");
             if(ps_inputObj.length>0){
@@ -199,13 +206,19 @@
                     var decimalpoint = ss.attr('decimalpoint');
                     var maxVal       = parseInt(ss.attr('maxVal'));
                     var value        = ss.val();
+            // console.log(value);
 
                     if(value != "" && value != 0) {
                         var preg = /[^\d\.]+/g;
                         var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
                         if(value.match(preg) != null){ // 1.先去掉不是数字的部分
                             ss.val(ss.val().replace(preg,""));
-                            value = 0;
+                            if(ss.val().replace(preg,"") == ''){
+                                ss.val(null)
+                                value = 0;
+                            }else{
+                                value = ss.val().replace(preg,"");
+                            }
                         }
                         if(!preg1.test(value)){ // 2.再判断小数点
                             var f  = parseFloat(value);
@@ -260,13 +273,13 @@
             ($("#ps_detail").length == 1 && $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val())) {
                 layer.confirm("有评审项尚未保存，是否保存？", function () {
                     var res = submitData();
-                    if (res !== false) location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
+                    if (res !== false) location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
                     return ;
                 },function(){
-                    location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
+                    location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
                 });
             }else{
-                location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
+                location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
             }
         });
         $("#back1").on("click",function(){
@@ -277,7 +290,7 @@
         });
 
         $("#fileshow").on("click",function(){
-            window.open('__MODULE__/XM/listindex?xm_id=' + $("#xm_id").val());
+            window.open('__MODULE__/XM/listindexs?xm_id=' + $("#xm_id").val());
         });
     </script>
 

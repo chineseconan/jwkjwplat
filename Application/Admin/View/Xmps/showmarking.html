@@ -108,10 +108,10 @@
     <script>
 //        返回
         $("#back").on("click",function(){
-            location.href="__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}";
+            location.href="__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
         });
         $("#fileshow").on("click",function(){
-            window.open('__MODULE__/XM/listindex?xm_id=' + $("#xm_id").val());
+            window.open('__MODULE__/XM/listindexs?xm_id=' + $("#xm_id").val());
         });
     </script>
 

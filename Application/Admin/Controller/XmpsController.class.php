@@ -53,6 +53,9 @@ class XmpsController extends BaseController {
      * 专家打分页面（函评）
      */
     public function markIndex(){
+        $this->assign("offset",I("get.offset"));
+        $this->assign("limit",I("get.limit"));
+        $this->assign("position",I("get.position"));
         $this->display();
     }
 
@@ -108,11 +111,13 @@ class XmpsController extends BaseController {
             ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->where("xr_id='".$id."'")
             ->find();
-        if($data['xm_type']){
+        
+		if($data['xm_type']){
             $xm_type = trim($data['xm_type']);
             $remarkConfig = C('mark.REMARK_OPTION')[$xm_type];
             if($remarkConfig){
                 $this->assign("title",$remarkConfig['title']);// 标题
+                $this->assign("mainpoint",$remarkConfig['评价要点']);// 评价要点
                 $this->assign("standrad",$remarkConfig['评价内容']);// 评价内容
                 // 打分字段
                 $markField = removeArrKey($remarkConfig['评价内容'],'field');
@@ -128,6 +133,7 @@ class XmpsController extends BaseController {
         $this->assign("data",$data);
         $this->assign("offset",I("get.offset"));
         $this->assign("limit",I("get.limit"));
+        $this->assign("position",I("get.position"));
         $this->display();
     }
 
@@ -170,6 +176,7 @@ class XmpsController extends BaseController {
         $this->assign("data",$data);
         $this->assign("offset",I("get.offset"));
         $this->assign("limit",I("get.limit"));
+        $this->assign("position",I("get.position"));
         $this->display();
     }
 
@@ -190,8 +197,9 @@ class XmpsController extends BaseController {
             if(!isset($data[$field])) continue;
             $ps_total += $data[$field];
         }
-        $data["ps_total"] = $ps_total;
-        $data["ps_time"]  = time();
+        $data["ps_detail"] = trim($data['ps_detail']);
+        $data["ps_total"]  = $ps_total;
+        $data["ps_time"]   = time();
         try {
             $model = M('xmps_xmrelation');
             $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
@@ -433,6 +441,7 @@ class XmpsController extends BaseController {
             ->alias('t')
             ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
             ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中' and m.xm_type = '$xmType'")
+            ->order("xm_ordernum")
             ->select();
 //        echo $model->_sql();die;
 //        dump($relationdata);die;
@@ -469,7 +478,9 @@ class XmpsController extends BaseController {
             ->alias('t')
             ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
             ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中' and ishuibi != 1")
+            ->order("xm_type,xm_ordernum")
             ->select();
+//        echo $model->_sql();die;
         $data         = [];
         $remarkConfig = C('mark.REMARK_OPTION');
         $str          = "";
@@ -513,8 +524,24 @@ class XmpsController extends BaseController {
                 ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中'")
                 ->select();
             $xr_ids = removeArrKey($relationdata,'xr_id');
-            $data["xr_status"] = "完成";
-            $model->where(["xr_id"=>['in',$xr_ids]])->save($data);
+            if(!empty($xr_ids)){
+				$model->where(["xr_id"=>['in',$xr_ids]])->save(["xr_status"=>"完成"]);
+				// 求平均
+				$xm_ids = removeArrKey($relationdata,'xr_xm_id');
+				foreach ($xm_ids as $xmid){
+					$xmtotal = $model->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0")->order("ps_total")->select();
+					$xmcount = count($xmtotal);
+					if($xmcount>2) {
+						unset($xmtotal[0]);
+						unset($xmtotal[$xmcount - 1]);
+						$total = 0;
+						foreach ($xmtotal as $t) {
+							$total += floatval($t["ps_total"]);
+						}
+						$model->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
+					}
+				}
+			}
             $model->commit();
             exit(makeStandResult(0,''));
         } catch (Exception $e) {

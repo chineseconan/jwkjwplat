@@ -16,7 +16,63 @@ class JdQueryController extends BaseController
         $this->getDic();
         $this->display();
     }
+    /**
+     * 进度查询页
+     */
+    public function view()
+    {
+        $model = M('xmps_xm');
+        $where = [];
+        $data = $model->field('xm_id,xm_name,xm_code')->order("xm_code asc")->where($where)->select();
+        $this->assign("xmdata", $data);
+        $this->getDic();
+        $this->display();
+    }
 
+    /**
+     * 专家进度查询页
+     */
+    public function viewExport()
+    {
+        $userModel = M("sysuser");
+        $where = [];
+        $where['user_isdelete'] = ['eq', '0'];
+        $where['user_issystem'] = ['eq', '否'];
+        $where['user_role']     = ['eq', C("PROFESSERID")];
+        $data = $userModel->field('user_id,user_name,user_realusername')->where($where)->order("user_class asc")->select();
+        $this->assign("user", $data);
+        $this->getDic();
+        $this->display();
+    }
+
+    /**
+     * 获取专家进度查询列表
+     */
+    public function getExportData()
+    {
+        $queryParam = json_decode(file_get_contents("php://input"), true);
+        $where      = [];
+        $xm_user    = trim($queryParam['xm_user']);
+        if (!empty($xm_user)) {
+            $where['xr_user_id'] = ['eq', $xm_user];
+        }
+        $model = M('xmps_xmrelation');
+        $data = $model->field('
+            user_id,user_realusername,user_name,xr_status
+        ')
+            ->join("inner join sysuser u on xmps_xmrelation.xr_user_id=u.user_id")
+            ->where($where)
+            ->group("user_id,user_realusername,user_name,xr_status")
+            ->order($queryParam['sort'] . " " . $queryParam['sortOrder'])
+            ->limit($queryParam['offset'], $queryParam['limit'])
+            ->select();
+//        echo $model->_sql();die;
+        $count = $model->field("count(*) c")
+        ->where($where)
+        ->group("xr_user_id")
+        ->select();
+        echo json_encode(array('total' => count($count), 'rows' => $data));
+    }
     /**
      * 获取进度列表
      */
@@ -204,36 +260,86 @@ class JdQueryController extends BaseController
         try {
             $model->startTrans();
             if($type == ''){ // 打分回退
-                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and xr_status='完成'")->select();
-                $data = array();
-                foreach ($relationdata as $rd) {
+                $where = [];
+                $where['xr_user_id'] = ['eq',$user_id];
+                $where['xr_status']  = ['eq','完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["xr_status"] = "进行中";
-                    $data["xr_id"] = $rd["xr_id"];
-                    $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["xr_status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
                 }
             }else if($type == 'vote1'){ // 第一轮投票回退
-                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote1status='已完成'")->select();
-                $data = array();
-                foreach ($relationdata as $rd) {
+                $where = [];
+                $where['xr_user_id']  = ['eq',$user_id];
+                $where['vote1status'] = ['eq','已完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["vote1status"] = "进行中";
-                    $data["xr_id"] = $rd["xr_id"];
-                    $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["vote1status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
                 }
             }else if($type == 'vote2'){ // 第二轮投票回退
-                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote2status='已完成'")->select();
-                $data = array();
-                foreach ($relationdata as $rd) {
+                $where = [];
+                $where['xr_user_id']  = ['eq',$user_id];
+                $where['vote2status'] = ['eq','已完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+//                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote2status='已完成'")->select();
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["vote2status"] = "进行中";
-                    $data["xr_id"] = $rd["xr_id"];
-                    $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["vote2status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
                 }
             }else if($type == 'vote3'){ // 第三轮投票回退
-                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote3status='已完成'")->select();
-                $data = array();
-                foreach ($relationdata as $rd) {
+                $where = [];
+                $where['xr_user_id']  = ['eq',$user_id];
+                $where['vote3status'] = ['eq','已完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+//                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote3status='已完成'")->select();
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["vote3status"] = "进行中";
-                    $data["xr_id"] = $rd["xr_id"];
-                    $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["vote3status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
                 }
             }
             $model->commit();
@@ -424,6 +530,11 @@ class JdQueryController extends BaseController
         }
         if (!empty($queryParam['xm_type'])) {
             $where['xm_type'] = ['eq', $queryParam['xm_type']];
+            // 是否有定性评价(有课题分类取对应课题分类的)
+            $isDXPJ = C('mark.REMARK_OPTION')[$where['xm_type']]['定性评价']; 
+        }else{
+            // 是否有定性评价(没有课题分类取配置文件的第一个课题分类的)
+            $isDXPJ = C('mark.REMARK_OPTION')[array_keys(C('mark.REMARK_OPTION'))[0]]['定性评价']; 
         }
         $model         = M('xmps_xm');
         $relationmodel = M('xmps_xmrelation');
@@ -455,7 +566,9 @@ class JdQueryController extends BaseController
             foreach ($relationdata as $rdata) {
                 array_push($data[$key], $rdata["user_realusername"]);
                 array_push($data[$key], $rdata["ps_total"]);
-                array_push($data[$key], $rdata["ps_zz"]);
+                if($isDXPJ){
+                    array_push($data[$key], $rdata["ps_zz"]);
+                }
                 array_push($data[$key], $rdata["ps_detail"]);
                 array_push($sum_zz, $rdata["ps_zz"]);
                 array_push($sum, $rdata["ps_total"]);
@@ -466,12 +579,14 @@ class JdQueryController extends BaseController
                     array_push($data[$key], null);
                     array_push($data[$key], null);
                     array_push($data[$key], null);
-                    array_push($data[$key], null);
+                    if($isDXPJ){
+                        array_push($data[$key], null);
+                    }
                 }
             }
             sort($sum_zz);
             $sum_zz = implode($sum_zz);
-            array_push($data[$key], $sum_zz);         // 综合评审意见
+            //array_push($data[$key], $sum_zz);         // 综合评审意见
             array_push($data[$key], array_sum($sum)); // 总分
             array_push($data[$key], $rdata["avgvalue"]); // 平均分
             unset($data[$key]["xm_id"]);
@@ -484,13 +599,15 @@ class JdQueryController extends BaseController
             array_push($width, "10");
             array_push($header, "分数");
             array_push($width, "10");
-            array_push($header, "定性评价");
-            array_push($width, "10");
+            if($isDXPJ){
+                array_push($header, "定性评价");
+                array_push($width, "10");
+            }
             array_push($header, "评审意见");
             array_push($width, "30");
         }
-        array_push($header, '综合评审意见');
-        array_push($width, '30');
+        //array_push($header, '综合评审意见');
+        //array_push($width, '30');
         array_push($header, '总分');
         array_push($width, '20');
         array_push($header, '平均分');

@@ -16,8 +16,9 @@ class DataCollectController extends BaseController {
         $relationModel = M("xmps_xmrelation");
         $Model         = M("xmps_xm");
         $Modelsetting  = M("votesetting");
-        $markField     = $this->getAllMarkFieldFormat();
-        $markField     = implode(",",$markField);
+//        $markField     = $this->getAllMarkFieldFormat();
+//        $markField     = implode(",",$markField);
+        // 所有xmps_xmrelation联查sysuser， xr_status 为完成的数据
         $data          = $relationModel->alias('a')->field("
         xr_id,
         xr_user_id,
@@ -44,6 +45,15 @@ class DataCollectController extends BaseController {
         user_realusername,
         user_name,
         user_orgid,
+		user_password,
+		user_role,
+		user_enable,
+		user_issystem,
+		user_passworderrornum,
+		user_createtime,
+		user_createuser,
+		user_lastmodifytime,
+		user_lastmodifyuser,
         ishuibi,
         vote1,
         vote2,
@@ -57,8 +67,9 @@ class DataCollectController extends BaseController {
         0+cast(vote3rate as char) as vote3rate")
             ->join("left join sysuser b on a.xr_user_id=b.user_id")
             ->where("xr_status='完成'")->select();
-//        dump($data);die;
+        // 查询 xr_status 状态为完成的项目信息
         $xmdata          = $Model->field("xm_id,vote1option,vote2option,vote3option,xm_type,xm_group")->where("xm_id in(select xr_xm_id from xmps_xmrelation where xr_status='完成')")->select();
+//        dump($xmdata);die;
         $votesettingdata = $Modelsetting->field("v_id,class,round,maxnum,xmtype,xmgroup,status")->select();
         $html=json_encode(array(xmdata=>$xmdata,votesetting=>$votesettingdata,data=>$data));
         $html=base64_encode($html);
@@ -95,18 +106,20 @@ class DataCollectController extends BaseController {
         $html          = file_get_contents("./public/".$file["message"]);
         $data          = base64_decode($html, true);
         $data          = json_decode($data, true);
-        $xmdata=$data["xmdata"];
-        $votesettingdata=$data["votesetting"];
-        $data=$data["data"];
+        $xmdata          = $data["xmdata"];
+        $votesettingdata = $data["votesetting"];
+        $data            = $data["data"];
         if($data==null){
             echo "文件读取失败";
             die;
         }
         $relationModel->startTrans();
         try {
+            // xmps_xm 表修改
             foreach($xmdata as $x){
                 $Model->where("xm_id='".$x["xm_id"]."'")->save($x);
             }
+            // votesetting有则改，无则新增
             foreach($votesettingdata as $x) {
                 $settingd = $Modelsetting->where("v_id='" . $x["v_id"] . "'")->find();
                 if (empty($settingd))
@@ -114,6 +127,7 @@ class DataCollectController extends BaseController {
                 else
                     $Modelsetting->where("v_id='" . $x["v_id"] . "'")->save($x);
             }
+            //
             $xr_xm_id = Array();
             foreach($data as $v){
                 array_push($xr_xm_id,$v['xr_xm_id']);
@@ -122,6 +136,7 @@ class DataCollectController extends BaseController {
             foreach($xr_xm_id as $delete){
                 $relationModel->where("xr_xm_id='" . $delete . "' and xr_status='进行中'")->delete();
             }
+            // xmps_xmrelation有则改，无则新增,sysuser修改
             foreach ($data as $d) {
                 $ha = $relationModel->where("xr_id='" . $d["xr_id"] . "'")->find();
                 $redata = array(
@@ -160,6 +175,7 @@ class DataCollectController extends BaseController {
                 } else {
                     $relationModel->save($redata);
                 }
+				$ha = $sysuserModel->where("user_id='" . $d["xr_user_id"] . "'")->find();
                 $sysuserData = array(
                     user_id => $d["xr_user_id"],
                     user_class => $d["user_class"],
@@ -169,8 +185,38 @@ class DataCollectController extends BaseController {
                     user_realusername => $d["user_realusername"],
                     user_name => $d["user_name"],
                     user_orgid => $d["user_orgid"],
+                    user_password => $d["user_password"],
+					user_role => $d["user_role"],
+					user_enable => $d["user_enable"],
+					user_issystem => $d["user_issystem"],
+					user_passworderrornum => $d["user_passworderrornum"],
+					user_createtime => $d["user_createtime"],
+					user_createuser => $d["user_createuser"],
+					user_lastmodifytime => $d["user_lastmodifytime"],
+					user_lastmodifyuser => $d["user_lastmodifyuser"],
                 );
-                $sysuserModel->where("user_id='" . $d["xr_user_id"] . "'")->save($sysuserData);
+                if (empty($ha)) {
+                    $sysuserModel->add($sysuserData);
+                } else {
+                    $relationModel->where("user_id='" . $d["xr_user_id"] . "'")->save($sysuserData);
+                }
+            }
+            // 写入平均分
+//            dump($xr_xm_id);die;
+            foreach($xr_xm_id as $xmid){
+
+                $xmtotal = $relationModel->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0")->order("ps_total")->select();
+//            dump($xmtotal);die;
+                $xmcount = count($xmtotal);
+                if($xmcount>2) {
+                    unset($xmtotal[0]);
+                    unset($xmtotal[$xmcount - 1]);
+                    $total = 0;
+                    foreach ($xmtotal as $t) {
+                        $total += floatval($t["ps_total"]);
+                    }
+                    $relationModel->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
+                }
             }
             $relationModel->commit();
             echo "ok";

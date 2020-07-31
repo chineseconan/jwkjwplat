@@ -24,7 +24,8 @@ class RoleAuthController extends BaseController
         $roleName = trim($queryParam['real_name']);
 //        if(!empty($roleName))
 //            $this->addLog('','用户访问日志','','访问模块授权管理,查询角色关键字:'.$roleName,'成功');
-        $where['role_name'][]=[['neq','系统管理员'],['neq','安全管理员'],['neq','审计管理员'],['like',"%$roleName%"]];
+//        $where['role_name'][]=[['neq','系统管理员'],['neq','安全管理员'],['neq','审计管理员'],['like',"%$roleName%"]];
+        $where['role_name'][]=['like',"%$roleName%"];
         $where['role_isdefault']=['neq','是'];
         $model = M('sysrole');
         $data = $model->field('role_id,role_name,role_createtime,role_createuser,role_lastmodifytime')->where($where)->order("$queryParam[sort] $queryParam[sortOrder]")->limit($queryParam['offset'], $queryParam['limit'])->select();

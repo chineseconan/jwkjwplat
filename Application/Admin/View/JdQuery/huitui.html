@@ -72,10 +72,11 @@
     </div>
     <div class="tc" style="height:50px;margin-top: 50px">
         <a class="btn btn-success" onclick="saveData('')">打分回退</a>
-<!--        <br/><br/>-->
-        <a class="btn btn-success" onclick="saveData('vote1')">第一轮投票回退</a>
-        <a class="btn btn-success" onclick="saveData('vote2')">第二轮投票回退</a>
-        <a class="btn btn-success" onclick="saveData('vote3')">第三轮投票回退</a>
+        <if condition="$Think.config.TOUPIAO == 1">
+            <a class="btn btn-success" onclick="saveData('vote1')">第一轮投票回退</a>
+            <a class="btn btn-success" onclick="saveData('vote2')">第二轮投票回退</a>
+            <a class="btn btn-success" onclick="saveData('vote3')">第三轮投票回退</a>
+        </if>
     </div>
 </div>
 <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>

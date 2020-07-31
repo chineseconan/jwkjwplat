@@ -1,0 +1,363 @@
+﻿<include file="Public:tableheader" />
+<style>
+    #atpbiztable th{
+        text-align: center;
+        vertical-align: middle;
+    }
+    .form-control{
+        display: inline-block;
+        width: 250px;
+    }
+    .wrapper .wrapper-content{
+        padding-bottom: 0;
+    }
+    #sys_resultexport{
+        background-color:#68941e;
+        border-color: #68941e;
+    }
+    .ibox {
+        margin-bottom: 0px;
+    }
+    #sys_export_expert{
+        background-color: forestgreen;
+        border-color: forestgreen;
+    }
+</style>
+<body class="gray-bg" style="font-family: 微软雅黑;">
+<div class="wrapper wrapper-content " style="overflow: hidden">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div>
+                        <p class="name" style="text-align: left;font-size:  22px;background-color:;border-left:5px solid green;padding-left: 10px;font-family: 微软雅黑;">评分统计</p>
+                    </div>
+                    <div class="_box" style="margin-top: -5px;">
+
+                        <label class="control-label" style="margin-left:15px;">项目编号：</label>
+                        <select id="xm_code" class="chosen-select" >
+                            <option value="">&nbsp;</option>
+                            <foreach name="xmdata" item="val" >
+                                <option value="{$val.xm_code}" >{$val.xm_code}</option>
+                            </foreach>
+                        </select>
+
+                        <label class="control-label" style="margin-left:15px;">项目名称：</label>
+                        <select id="xm_id" class="chosen-select" >
+                            <option value="">&nbsp;</option>
+                            <foreach name="xmdata" item="val" >
+                                <option value="{$val.xm_id}" >{$val.xm_name}</option>
+                            </foreach>
+                        </select>
+<!-- 
+                        <label class="control-label" style="margin-left:15px;">分&nbsp;&nbsp;组：</label>
+                        <select id="xm_class" class="chosen-select">
+                            <option value="">&nbsp;</option>
+                            <foreach name="xmClass" item="val">
+                                <option>{$val}</option>
+                            </foreach>
+                        </select>
+
+                        <label class="control-label" style="margin-left:15px;">课题分类：</label>
+                        <select id="xm_type" class="chosen-select">
+                            <option value="">&nbsp;</option>
+                            <foreach name="xmType" item="item">
+                                <option value="{$item}"<?php if(count($xmType) == 1) echo "selected";?>>{$item}</option>
+                            </foreach>
+                        </select> -->
+
+                        <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-search"></i>查询</button>
+                        <!-- <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_huitui"><i class="fa fa-wrench"></i>回退</button> -->
+                        <!-- <button class="btn btn-danger" style="margin-left: 4px;" type="button" id="sys_export_expert"><i class="fa fa-download"></i>签字表导出</button> -->
+                    </div>
+                    <table id="atpbiztable" ></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+    if('{$psType}' == 'huiping'){
+        var zzTitle = '与战斗力<br/>关联程度';
+    }else{
+        var zzTitle = '定性评价';
+    }
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '120px'});
+    $('#atpbiztable').bootstrapTable({
+            url: '__CONTROLLER__/getData',
+            method: 'post',
+            toolbar: '#atpbiztoolbar',
+            striped: true,
+            cache: false,
+            pagination: true,
+            iconSize: 'outline',
+            sortable: true,
+            sortName:"xm_code",
+            sortOrder: "asc",
+            queryParams: queryParams,
+            sidePagination: "server",
+            pageNumber: 1,
+            pageSize: 15,
+            pageList: [5,15, 25, 50, 100],
+            minimumCountColumns: 2,
+            clickToSelect: true,
+            uniqueId: "xr_id",
+            detailView: false,
+            rowStyle:function(row,index){
+                return style = {
+                    css:{
+                        'font-size':'15px'
+                    }
+                }
+            },
+            columns: [
+                {title: '序号', width: 40,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        var option =  $('#atpbiztable').bootstrapTable("getOptions");
+                        return option.pageSize * (option.pageNumber - 1) + index + 1;
+                    }
+                },
+                {field: 'xm_code', title: '项目编号', sortable: true,width:60,align:'center'},
+                {field: 'xm_name', title: '项目名称', sortable: true,width:95},
+                {field: 'xm_company', title: '依托单位', sortable: true,width:80},
+                {field: 'xm_createuser', title: '申请人', sortable: true,width:55,align:'center'},
+                // {field: 'xm_class', title: '分组', sortable: true,width:50,align:'center'},
+                // {field: 'xm_type', title: '课题分类', sortable: true,width:65,align:'center'},
+                {field: '', title: '打分进度', sortable: false,width:60,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        var all=row["allcount"];
+                        var ok=row["wanchengcount"];
+                        // if(all!='0'){
+                        //     all='<a onclick="getpingshen(\''+row["xm_id"]+ '\',\'all\',\'\')">'+all+'</a>';
+                        // }
+                        // if(ok!='0'){
+                        //     ok='<a onclick="getpingshen(\''+row["xm_id"] + '\',\'ok\',\'\')">'+ok+'</a>';
+                        // }
+                       return ok+" / "+all;
+                    }
+                },
+                // {field: 'num', title: '已评<br/>平均分', sortable: true, width:60 ,align:'center'},
+                {field: 'ps_detail', title: zzTitle, sortable: true, width:85 ,align:'center'},
+                {field: 'wanchengvote1count', title: '第一轮<br/>投票进度', sortable: false,width:60,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        // 若该项目不参与该轮次投票
+                        var voteoption=row["vote1option"];
+                        if(voteoption == 0) return null;
+
+                        var all=row["allcount"];
+                        var ok=row["wanchengvote1count"];
+                        // if(all!='0'){
+                        //     all='<a onclick="getpingshen(\''+row["xm_id"]+ '\',\'all\',\'vote1\')">'+all+'</a>';
+                        // }
+                        // if(ok!='0'){
+                        //     ok='<a onclick="getpingshen(\''+row["xm_id"] + '\',\'ok\',\'vote1\')">'+ok+'</a>';
+                        // }
+                       return ok+" / "+all;
+                    }
+                },
+                {field: 'vote1rate', title: '第一轮<br/>得票率', sortable: true, width:55 ,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        if(value == null) return value;
+                        var val = parseFloat(value*100000/1000);
+                        return val+"%";
+                    }},
+                {field: 'wanchengvote2count', title: '第二轮<br/>投票进度', sortable: false,width:60,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        // 若该项目不参与该轮次投票
+                        var voteoption=row["vote2option"];
+                        if(voteoption == 0) return null;
+
+                        var all=row["allcount"];
+                        var ok=row["wanchengvote2count"];
+                        // if(all!='0'){
+                        //     all='<a onclick="getpingshen(\''+row["xm_id"]+ '\',\'all\',\'vote2\')">'+all+'</a>';
+                        // }
+                        // if(ok!='0'){
+                        //     ok='<a onclick="getpingshen(\''+row["xm_id"] + '\',\'ok\',\'vote2\')">'+ok+'</a>';
+                        // }
+                       return ok+" / "+all;
+                    }
+                },
+                {field: 'vote2rate', title: '第二轮<br/>得票率', sortable: true, width:55 ,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        if(value == null) return value;
+                        var val = parseFloat(value*100000/1000);
+                        return val+"%";
+                    }},
+                {field: 'wanchengvote3count', title: '第三轮<br/>投票进度', sortable: false,width:60,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        // 若该项目不参与该轮次投票
+                        var voteoption=row["vote3option"];
+                        if(voteoption == 0) return null;
+
+                        var all=row["allcount"];
+                        var ok=row["wanchengvote3count"];
+                        // if(all!='0'){
+                        //     all='<a onclick="getpingshen(\''+row["xm_id"]+ '\',\'all\',\'vote3\')">'+all+'</a>';
+                        // }
+                        // if(ok!='0'){
+                        //     ok='<a onclick="getpingshen(\''+row["xm_id"] + '\',\'ok\',\'vote3\')">'+ok+'</a>';
+                        // }
+                       return ok+" / "+all;
+                    }
+                },
+                {field: 'vote3rate', title: '第三轮<br/>得票率', sortable: true, width:55 ,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        if(value == null) return value;
+                        var val = parseFloat(value*100000/1000);
+                        return val+"%";
+                    }}
+            ],
+            onLoadSuccess:function(){
+                // 是否显示与战斗关联
+                if(('{$psType}' == 'huiping' && '{$Think.config.isZD}' != '1') || ('{$psType}' != 'huiping')){
+                    $('#atpbiztable').bootstrapTable('hideColumn','ps_detail');
+                }
+                // 是否显示投票字段
+                if('{$TOUPIAO}' != '1'){
+                    $('#atpbiztable').bootstrapTable('hideColumn','wanchengvote1count');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote1rate');
+                    $('#atpbiztable').bootstrapTable('hideColumn','wanchengvote2count');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote2rate');
+                    $('#atpbiztable').bootstrapTable('hideColumn','wanchengvote3count');
+                    $('#atpbiztable').bootstrapTable('hideColumn','vote3rate');
+                }
+            }
+        });
+    $('#sys_refresh').on('click',function() {
+        $('#atpbiztable').bootstrapTable('refresh')
+    });
+    function queryParams(params) {  //配置参数
+        var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+            limit: params.limit,   //页面大小
+            offset: params.offset,  //页码
+            sort: params.sort,  //排序列名
+            sortOrder: params.order,//排位命令（desc，asc）
+            xm_id: $("#xm_id").val(),//排位命令（desc，asc）
+            xm_class:$("#xm_class").val(),
+            xm_type:$("#xm_type option:selected").val(),
+            xm_group:$("#xm_group").val(),
+            xm_code:$("#xm_code").val()
+        };
+        return temp;
+    }
+    function getpingshen(id,status,type) {
+        var width = '1000px';
+        if(type != ''){
+            width = '1400px';
+        }
+        layer.open({
+            title: '信息',
+            closeBtn: 1,
+            type: 2,
+            shadeClose: false,
+            content: '__CONTROLLER__/getpingshen?xm_id=' + id+'&status='+status+'&type='+type,
+            area: [width, '575px']
+        });
+    }
+    $('#sys_export').on('click',function() {
+        $('#loading').modal('show');
+        var data= {
+            xm_id: $('#xm_id').val(),
+            xm_class:$("#xm_class").val()
+        };
+        var t = "__CONTROLLER__/export";
+        t = encodeURI(t);
+        $.ajax({
+            type:'post',
+            url: t,
+            data:data,
+            dataType:'json',
+            success:function(data){
+                $('#loading').modal('hide');
+                if(data.code > 0){
+                    location.href = data.message;
+                }else{
+                    layer.msg(data.message);
+                }
+            }
+        })
+    });
+
+    $('#sys_exportxx').on('click',function() {
+        var xm_type = $("#xm_type").val();
+        var message = "确定导出课题分类为 <b>"+xm_type+"</b> 的项目评审表吗？";
+        if(xm_type == '') message = "确定导出所有课题分类的项目评审表吗？";
+        layer.confirm(message,function(indexs){
+            layer.close(indexs);
+            $('#loading').modal('show');
+            var data= {
+                xm_type:xm_type,
+                xm_id: $('#xm_id').val(),
+                xm_class:$("#xm_class").val()
+            };
+            var t = "__CONTROLLER__/exportxx";
+            t = encodeURI(t);
+            $.ajax({
+                type:'post',
+                url: t,
+                data:data,
+                dataType:'json',
+                success:function(data){
+                    $('#loading').modal('hide');
+                    if(data.code > 0){
+                        location.href = data.message;
+                    }else{
+                        layer.msg(data.message);
+                    }
+                }
+            })
+        });
+    });
+
+    $('#sys_export_expert').on('click',function() {
+        layer.open({
+            title:'选择导出专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__MODULE__/mxQuery/expertexport',
+            area: ['500px', '300px']
+        });
+    });
+    $('#sys_huitui').on('click',function() {
+        layer.open({
+            title:'回退选择专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/huitui',
+            area: ['500px', '350px']
+        });
+    });
+    $('#sys_resultexport').on('click',function() {
+        layer.open({
+            title:'选择分组',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/checkclass',
+            area: ['500px', '350px']
+        });
+    });
+</script>
+</body>
+
+</html>
+
+
+
+

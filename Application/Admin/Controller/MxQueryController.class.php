@@ -3,6 +3,11 @@ namespace Admin\Controller;
 use Think\Controller;
 class MxQueryController extends BaseController
 {
+    public $professorid;
+
+    function _initialize(){
+        $this->professorid = C('PROFESSERID');
+    }
 
     /**
      * 字典管理
@@ -22,6 +27,7 @@ class MxQueryController extends BaseController
         $where = [];
         $where['user_isdelete'] = ['eq', '0'];
         $where['user_issystem'] = ['eq', '否'];
+        $where['user_role']     = ['eq', C('PROFESSERID')];
         $data = $userModel->field('user_id,user_realusername')->where($where)->select();
         $this->assign("user", $data);
 
@@ -76,6 +82,21 @@ class MxQueryController extends BaseController
         $count = $model->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->join("sysuser on user_id=xmps_xmrelation.xr_user_id and user_isdelete='0'")->where($where)->count();
         echo json_encode(array('total' => $count, 'rows' => $data));
+    }
+
+    /**
+     * 导出专家签字表选择专家页面
+     */
+    public function expertexport()
+    {
+        $userModel = M("sysuser");
+        $where = [];
+        $where['user_isdelete'] = ['eq', '0'];
+        $where['user_issystem'] = ['eq', '否'];
+        $where['user_role']     = ['eq',$this->professorid];
+        $data = $userModel->field('user_id,user_name,user_realusername')->where($where)->select();
+        $this->assign("user", $data);
+        $this->display();
     }
 
     public function export()
@@ -195,6 +216,66 @@ class MxQueryController extends BaseController
         }
         $title = C('mark.REMARK_OPTION')[$queryParam['xm_type']]['exportTitle'];
         echo excelExport($header, $data, true,$width,true,true,true,$title);
+    }
+
+    /**
+     * 签字表导出
+     * @throws \PHPExcel_Writer_Exception
+     */
+    public function exportForExpert()
+    {
+        $queryParam = I('post.');
+        $xm_id = trim($queryParam['xm_id']);
+        $where = [];
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        if (!empty($queryParam['xm_class'])) {
+            $where['xm_class'] = ['like', '%'.$queryParam['xm_class'].'%'];
+        }
+        if (!empty($queryParam['xm_user'])) {
+            $where['xr_user_id'] = ['eq', $queryParam['xm_user']];
+        }
+        $map['user_id'] = Array("eq",$queryParam['xm_user']);
+        $username = M("sysuser")->where($map)->find();
+        $model = M('xmps_xm');// 专家是否打完分
+        $isFinish = M('xmps_xmrelation')
+            ->alias('t')
+            ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
+            ->where("xr_user_id='%s' and xr_status='进行中'",$queryParam['xm_user'])
+            ->count();
+        if($isFinish != 0) exit(makeStandResult(0,'当前专家未提及，请等专家提交后再导出签字表！'));
+
+        // 拼接列
+        $fields = ['xm_code','xm_name','xm_company','xm_createuser','xm_type'];
+        if(C('isZZ')){
+            $fields[] = "case when ishuibi = 0 then ps_zz else '回避' end ps_zz";
+        }
+        $fields = array_merge($fields,["case when ishuibi = 0 then ps_total else '回避' end ps_total","case when ishuibi = 0 then ps_detail else '回避' end ps_detail"]);
+
+        $data = $model->field($fields)
+            ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
+            ->join("sysuser on user_id=xmps_xmrelation.xr_user_id and user_isdelete='0'")
+            ->join("left join xmps_typeorder o on o.type_name = xmps_xm.xm_type")
+            ->where($where)
+            ->order("xm_type,xm_ordernum asc,ps_total desc,xm_code asc")
+            ->select();
+        $this->addLog('','明细查询','','导出','成功');
+        // 拼表头，列宽
+        $header = ['项目编号','项目名称','单位','申请人','申报类别'];
+        $width  = ["5","10","20","10","10","15"];
+        if(C('isZZ')){
+            $header[] = '资助意见';
+            $width[]  = '10';
+        }
+        $header = array_merge($header,['总分','评审意见']);
+        $width  = array_merge($width,['5','45']);
+
+        // $header = array(,'申报类别','总分','评审意见');
+        // $width = Array(,'10',"5",'50');
+        $title = C('ExportTitle')."专家评审意见汇总表";
+
+        echo excelExport($header, $data, true,$width,true,true,true,$title,"分组：".$username["user_class"]."          评审专家：".$username["user_realusername"],array(1,3),$username["user_realusername"]);
     }
 
 }

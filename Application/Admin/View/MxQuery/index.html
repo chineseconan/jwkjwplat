@@ -17,6 +17,10 @@
     .ibox {
         margin-bottom: 0px;
     }
+    #sys_export_expert{
+        background-color: forestgreen;
+        border-color: forestgreen;
+    }
 </style>
 <body class="gray-bg" style="font-family: 微软雅黑;">
 <div class="wrapper wrapper-content animated fadeInRight">
@@ -71,6 +75,7 @@
 
                         <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-search"></i>查询</button>
                         <button class="btn btn-danger" style="margin-left: 8px;" type="button" id="sys_export"><i class="fa fa-download"></i>导出</button>
+                        <button class="btn btn-danger" style="margin-left: 4px;" type="button" id="sys_export_expert"><i class="fa fa-download"></i>签字表导出</button>
                     </div>
                     <table id="atpbiztable" ></table>
                 </div>
@@ -357,6 +362,17 @@
                 $('#loading').modal('hide');
             }
         })
+    });
+
+    $('#sys_export_expert').on('click',function() {
+        layer.open({
+            title:'选择导出专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/expertexport',
+            area: ['500px', '300px']
+        });
     });
 </script>
 </body>

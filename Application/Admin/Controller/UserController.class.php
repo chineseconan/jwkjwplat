@@ -422,15 +422,24 @@ public $viewid;
         $XR    = M("xmps_xmrelation");
         try{
             $XR->startTrans();
-            $XR->field("xr_id")->where("xr_user_id='%s'",trim($param['user_id']))->delete(); // 删除旧关联表信息
+            $oldRelation = $XR->field("xr_id,xr_xm_id")->where("xr_user_id='%s'",trim($param['user_id']))->select(); // 查找旧关联表信息
+			$oldRelations = [];
+			foreach($oldRelation as $key => $val){
+				$oldRelations[$val['xr_xm_id']] = $val['xr_id'];
+			}
             $xmIds = I('post.xmid');
             foreach ($xmIds as $key => $val) {
-                $data['xr_user_id'] = $param['user_id'];
-                $data['xr_xm_id']   = $val;
-                $data['xr_id'] = makeGuid();
-                $data['xr_status'] = "进行中";
-                $XR->add($data);
+				if(array_key_exists($val,$oldRelations)){
+					unset($oldRelations[$val]);
+				}else{
+					$data['xr_user_id'] = $param['user_id'];
+					$data['xr_xm_id']   = $val;
+					$data['xr_id'] = makeGuid();
+					$data['xr_status'] = "进行中";
+					$XR->add($data);
+				}
             }
+			if(!empty($oldRelations)) $XR->where(['xr_id'=>['in',$oldRelations]])->delete(); // 删除旧关联表信息
             $XR->commit();
             exit(makeStandResult(0,'保存成功'));
         }catch(\Exception $e){

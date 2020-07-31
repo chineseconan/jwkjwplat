@@ -75,15 +75,24 @@ class XMController extends BaseController
         $XR    = M("xmps_xmrelation");
         try{
             $XR->startTrans();
-            $xrData = $XR->field("xr_id")->where("xr_xm_id='%s'",trim($param['xm_id']))->delete();
+            $oldRelation = $XR->field("xr_id,xr_user_id")->where("xr_xm_id='%s'",trim($param['xm_id']))->select(); // 查找旧关联表信息
+			$oldRelations = [];
+			foreach($oldRelation as $key => $val){
+				$oldRelations[$val['xr_user_id']] = $val['xr_id'];
+			}
             $userIds = I('post.userid');
             foreach ($userIds as $key => $val) {
-                $data['xr_user_id'] = $val;
-                $data['xr_xm_id'] = $param['xm_id'];
-                $data['xr_id'] = makeGuid();
-                $data['xr_status'] = "进行中";
-                $XR->add($data);
+				if(array_key_exists($val,$oldRelations)){
+					unset($oldRelations[$val]);
+				}else{
+					$data['xr_user_id'] = $val;
+					$data['xr_xm_id']   = $param['xm_id'];
+					$data['xr_id'] = makeGuid();
+					$data['xr_status'] = "进行中";
+					$XR->add($data);
+				}
             }
+			if(!empty($oldRelations)) $XR->where(['xr_id'=>['in',$oldRelations]])->delete(); // 删除旧关联表信息
             $XR->commit();
             exit(makeStandResult(0,'保存成功'));
         }catch(\Exception $e){
@@ -167,16 +176,16 @@ class XMController extends BaseController
         $model = M('sysuser');
         // 查询所有专家
         $userdata = $model->field("user_id,user_realusername")
-            ->where(" user_issystem != '是' and user_isdelete ='0'")
+            ->where(" user_issystem != '是' and user_isdelete ='0' and user_role = '".C('PROFESSERID')."'")
             ->order("user_realusername")
             ->select();
-
         $Model = D("xmps_xmrelation");
         $map   = [];
         $map['xr_xm_id']      = Array("eq", $id);
         $map['user_enable']   = Array("eq", "启用");
         $map['user_issystem'] = Array("eq", "否");
         $map['user_isdelete'] = Array("neq", "1");
+        $map['user_role']     = Array("eq", C('PROFESSERID'));
         // 查询已选择专家
         $selectedData = $Model
             ->alias("t")
@@ -242,6 +251,7 @@ class XMController extends BaseController
         $map['user_issystem'] = ["eq", "否"];
         if($param['class'] != '') $map['user_class']    = ["eq",trim($param['class'])];
         $map['user_isdelete'] = ["neq","1"];
+        $map['user_role']     = Array("eq", C('PROFESSERID'));
         $Model = M("sysuser");
         $data = $Model->field("user_id,user_realusername,user_class,user_orgid")->where($map)->select();
 //        echo $Model->_sql();die;

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="__PUBLIC__/css/tablepublic.css">
+    <link rel="stylesheet" href="__PUBLIC__/vendor/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="__PUBLIC__/css/public.css">
+    <link href="__PUBLIC__/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet" >
+    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
+    <title>选择专家</title>
+    <style>
+        .content select{
+            width: 130px;
+            height: 26px;
+            font-size: 16px;
+            border-radius: 2px;
+            margin-right: 30px;
+        }
+        .content select option{
+            height: 26px;
+            line-height: 26px;
+            font-size: 17px;
+        }
+        .chosen-select{
+            width: 280px!important;
+        }
+        .confirm{
+            margin-right: 50px;
+        }
+        #confirm,#cancel{
+            padding: 6px 36px;
+        }
+        .alternative,.selected{
+            width: 50%;
+        }
+        #participants .chosen-container-single{
+            width: 175px!important;
+        }
+        #judges .chosen-container-single{
+            width: 150px!important;
+        }
+        .alternative>div{
+            margin-bottom: 20px;
+        }
+        .personneltype {
+            margin-bottom: 8px;
+            color:blue;
+            font-weight: bold;
+        }
+        #alternativeTable,#selectedTable{
+            table-layout: fixed;
+            width: 500px;
+        }
+        #alterjudges,#seljudges{
+            table-layout: fixed;
+            width: 420px;
+        }
+        span i{
+            font-size: 20px;
+        }
+        .form{
+            margin-top: 30px;
+        }
+        .tab-content{
+            padding-top: 10px;
+            margin-left: 10px;
+            box-sizing: border-box;
+        }
+        .tab-content span{
+            display: block;
+            margin-bottom: 10px;
+        }
+        .personnel{
+            margin: 10px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+<input type="hidden" value="{$xmId}" id="xmId">
+<div class="dialog">
+    <div class="content">
+        <div class="body">
+            <div>
+                <div class="tab-content">
+                    <div id="basicInfo" class="tab-pane fade active in">
+                        <form class="form">
+                            <div class="cb" style="margin-top: 20px;">
+                                <div class="fl" style="width: 400px;text-align:center;">
+                                    <label class="control-label">专家：</label>
+                                    <select id="xm_user" class="chosen-select">
+                                        <foreach name="user" item="userItem">
+                                            <option value="{$userItem.user_id}">{$userItem.user_realusername}({$userItem.user_name})</option>
+                                        </foreach>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="tc" style="height:50px;margin-top: 60px">
+                    <a class="btn btn-success confirm" id="sys_dlg_submit">确定</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
+<script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script type="text/javascript" src="__PUBLIC__/vendor/ie8/jquery.form.js"></script>
+<script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
+</body>
+</html>
+<script>
+    $(function () {
+        $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '180px'});
+        $("#sys_dlg_submit").on("click", saveData);
+        function saveData() {
+            var name = $("#xm_user").val();
+            if (name == "") {
+                alert("请选择专家");
+                return false;
+            }
+            var data = {
+                xm_user:name
+            };
+            var t = "__CONTROLLER__/exportForExpert";
+            t = encodeURI(t);
+            $.ajax({
+                type:'post',
+                url: t,
+                data:data,
+                dataType:'json',
+                success:function(data){
+//                    console.log(data);
+                    if(data.code > 0){
+                        location.href = data.message;
+                        var index = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(index);
+                    }else{
+                        parent.layer.msg(data.message);
+                    }
+                }
+            })
+        }
+    });
+</script>
+</html>

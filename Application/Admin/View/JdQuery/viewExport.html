@@ -1,0 +1,220 @@
+﻿<include file="Public:tableheader" />
+<style>
+    #atpbiztable th{
+        text-align: center;
+        vertical-align: middle;
+    }
+    .form-control{
+        display: inline-block;
+        width: 250px;
+    }
+    .wrapper .wrapper-content{
+        padding-bottom: 0;
+    }
+    #sys_resultexport{
+        background-color:#68941e;
+        border-color: #68941e;
+    }
+    .ibox {
+        margin-bottom: 0px;
+    }
+    #sys_export_expert{
+        background-color: forestgreen;
+        border-color: forestgreen;
+    }
+</style>
+<body class="gray-bg" style="font-family: 微软雅黑;">
+<div class="wrapper wrapper-content " style="overflow: hidden">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div>
+                        <p class="name" style="text-align: left;font-size:  22px;background-color:;border-left:5px solid green;padding-left: 10px;font-family: 微软雅黑;">评分统计</p>
+                    </div>
+                    <div class="_box" style="margin-top: -5px;">
+                        <label class="control-label" style="margin-left:15px;">专&emsp;家：</label>
+                        <select id="xm_user" class="chosen-select" >
+                        <option value="">&nbsp;</option>
+                        <foreach name="user" item="userItem" >
+                            <option value="{$userItem.user_id}" >{$userItem.user_realusername}</option>
+                        </foreach>
+                        </select>
+
+                        <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-search"></i>查询</button>
+                        <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_huitui"><i class="fa fa-wrench"></i>回退</button>
+                        <button class="btn btn-danger" style="margin-left: 4px;" type="button" id="sys_export_expert"><i class="fa fa-download"></i>签字表导出</button>
+                    </div>
+                    <table id="atpbiztable" ></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+    if('{$psType}' == 'huiping'){
+        var zzTitle = '与战斗力<br/>关联程度';
+    }else{
+        var zzTitle = '定性评价';
+    }
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '120px'});
+    $('#atpbiztable').bootstrapTable({
+            url: '__CONTROLLER__/getExportData',
+            method: 'post',
+            toolbar: '#atpbiztoolbar',
+            striped: true,
+            cache: false,
+            pagination: true,
+            iconSize: 'outline',
+            sortable: true,
+            sortName:"user_realusername",
+            sortOrder: "asc",
+            queryParams: queryParams,
+            sidePagination: "server",
+            pageNumber: 1,
+            pageSize: 15,
+            pageList: [5,15, 25, 50, 100],
+            minimumCountColumns: 2,
+            clickToSelect: true,
+            uniqueId: "xr_id",
+            detailView: false,
+            rowStyle:function(row,index){
+                return style = {
+                    css:{
+                        'font-size':'15px'
+                    }
+                }
+            },
+            columns: [
+                {title: '序号', width: 40,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        var option =  $('#atpbiztable').bootstrapTable("getOptions");
+                        return option.pageSize * (option.pageNumber - 1) + index + 1;
+                    }
+                },
+                {field: 'user_realusername', title: '专家姓名', sortable: true,width:60,align:'center'},
+                {field: 'xr_status', title: '专家是否提交', sortable: true,width:95,
+                    formatter: function (value, row, index)
+                    {
+                        if(value == '进行中'){
+                            return '否';
+                        }else if(value == '完成'){
+                            return '是';
+                        }else{
+                            return value;
+                        }
+                    }}
+            ]
+        });
+    $('#sys_refresh').on('click',function() {
+        $('#atpbiztable').bootstrapTable('refresh')
+    });
+    function queryParams(params) {  
+        var temp = { 
+            limit: params.limit,   
+            offset: params.offset,  
+            sort: params.sort,  
+            sortOrder: params.order,
+            xm_user: $("#xm_user").val()
+        };
+        return temp;
+    }
+    $('#sys_export').on('click',function() {
+        $('#loading').modal('show');
+        var data= {
+            xm_id: $('#xm_id').val(),
+            xm_class:$("#xm_class").val()
+        };
+        var t = "__CONTROLLER__/export";
+        t = encodeURI(t);
+        $.ajax({
+            type:'post',
+            url: t,
+            data:data,
+            dataType:'json',
+            success:function(data){
+                $('#loading').modal('hide');
+                if(data.code > 0){
+                    location.href = data.message;
+                }else{
+                    layer.msg(data.message);
+                }
+            }
+        })
+    });
+
+    $('#sys_exportxx').on('click',function() {
+        var xm_type = $("#xm_type").val();
+        var message = "确定导出课题分类为 <b>"+xm_type+"</b> 的项目评审表吗？";
+        if(xm_type == '') message = "确定导出所有课题分类的项目评审表吗？";
+        layer.confirm(message,function(indexs){
+            layer.close(indexs);
+            $('#loading').modal('show');
+            var data= {
+                xm_type:xm_type,
+                xm_id: $('#xm_id').val(),
+                xm_class:$("#xm_class").val()
+            };
+            var t = "__CONTROLLER__/exportxx";
+            t = encodeURI(t);
+            $.ajax({
+                type:'post',
+                url: t,
+                data:data,
+                dataType:'json',
+                success:function(data){
+                    $('#loading').modal('hide');
+                    if(data.code > 0){
+                        location.href = data.message;
+                    }else{
+                        layer.msg(data.message);
+                    }
+                }
+            })
+        });
+    });
+
+    $('#sys_export_expert').on('click',function() {
+        layer.open({
+            title:'选择导出专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__MODULE__/mxQuery/expertexport',
+            area: ['500px', '300px']
+        });
+    });
+    $('#sys_huitui').on('click',function() {
+        layer.open({
+            title:'回退选择专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/huitui',
+            area: ['500px', '350px']
+        });
+    });
+    $('#sys_resultexport').on('click',function() {
+        layer.open({
+            title:'选择分组',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/checkclass',
+            area: ['500px', '350px']
+        });
+    });
+</script>
+</body>
+
+</html>
+
+
+
+
