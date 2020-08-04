@@ -32,7 +32,7 @@ class JdQueryController extends BaseController
     /**
      * 专家进度查询页
      */
-    public function viewExport()
+    public function viewExpert()
     {
         $userModel = M("sysuser");
         $where = [];

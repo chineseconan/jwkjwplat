@@ -187,12 +187,13 @@
             var trObj = $($el).parents("tr");
             var index = trObj.attr("data-index");
 	        var newValue = row[field];
-            row["ps_total"] = parseInt(totalnum);
-                $('#atpbiztable').bootstrapTable("updateRow",{
-                       index:index,
-                      row:row
-                   });
-            },
+            row["ps_total"] = fomatFloat(totalnum);
+            row[field]      = fomatFloat(newValue);
+            $('#atpbiztable').bootstrapTable("updateRow",{
+                index:index,
+                row:row
+            });
+        },
         onPostBody: function (tableValue) {
             var markFieldJson = eval({$markFieldJson});
             var table  = $('#atpbiztable tbody tr');
@@ -319,7 +320,7 @@
                     if(ishuibi == '1'){
                         return '回避';
                     }else{
-                        return fomatInt(value);
+                        return fomatFloat(value);
                     }
                 }
             },
@@ -354,20 +355,20 @@
     // 表格内部文字垂直居中
     $('#atpbiztable th').css('vertical-align','middle');
     // 输入字母，文字，‘-’等无法输入
-    $('body').on('focus','#atpbiztable .editable-input input',function(){
-        var preg = /[^\d]+/g;
-        var val  = $(this).val();
-        if(val.match(preg) != null){
-            $(this).val($(this).val().replace(preg,''));
-        }
-    });
-    $('body').on('keyup','#atpbiztable .editable-input input',function(){
-        var preg = /[^\d]+/g;
-        var val  = $(this).val();
-        if(val.match(preg) != null){
-            $(this).val($(this).val().replace(preg,''));
-        }
-    });
+    // $('body').on('focus','#atpbiztable .editable-input input',function(){
+    //     var preg = /[^\d]+/g;
+    //     var val  = $(this).val();
+    //     if(val.match(preg) != null){
+    //         $(this).val($(this).val().replace(preg,''));
+    //     }
+    // });
+    // $('body').on('keyup','#atpbiztable .editable-input input',function(){
+    //     var preg = /[^\d]+/g;
+    //     var val  = $(this).val();
+    //     if(val.match(preg) != null){
+    //         $(this).val($(this).val().replace(preg,''));
+    //     }
+    // });
     function updateInRow(id,index)
     {
         setTimeout(function(){
@@ -680,10 +681,10 @@
             var markFieldJson = '{$markFieldJson}';
             markFieldJson = eval("{" + markFieldJson + "}");
             for(var i=0;i<markFieldJson.length;i++){
-                totalnum += fomatInt(row[markFieldJson[i]]);
+                totalnum += fomatFloat(row[markFieldJson[i]]);
             }
         }
-        return fomatInt(totalnum);
+        return fomatFloat(totalnum);
     }
     /**
      * 格式化小数
@@ -693,7 +694,20 @@
             return parseInt(0);
         }
         var f  = parseFloat(number);
-        return Math.round(f*100)/100;
+        if('{$Decimals}' == 0){
+            return parseInt(f);
+        }else if('{$Decimals}' == 1){
+            return Math.round(f*10)/10;
+        }else if('{$Decimals}' == 2){
+            return Math.round(f*100)/100;
+        }else if('{$Decimals}' == 3){
+            return Math.round(f*1000)/1000;
+        }else if('{$Decimals}' == 4){
+            return Math.round(f*10000)/10000;
+        }else if('{$Decimals}' == 5){
+            return Math.round(f*100000)/100000;
+        }
+        return Math.round(f*10)/10;
     }
     /**
      * 格式化为整数

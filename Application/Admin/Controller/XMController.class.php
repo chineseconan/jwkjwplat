@@ -8,7 +8,6 @@
 namespace Admin\Controller;
 
 use Think\Controller;
-use Think\Exception;
 
 class XMController extends BaseController
 {
@@ -287,19 +286,20 @@ class XMController extends BaseController
     public function import(){
         if(IS_POST){
             $Model = M("xmps_xm");
-            $file = uploadFile("file");
-            $path = "./Public/".$file['message'];
-            $import = excelImport($path);
-
-            $column = Array("项目编号","项目名称","依托单位","申请人","分组","类别","技术方向","推荐方式","答辩顺序","初审分组","初审得分","初审排名");
-            $len = count($column);
-            for($i=0;$i<$len;$i++){
-                if($column[$i]!=$import['column'][$i]){
-                    die("请按照模板填写导入数据，保持列头一致");
-                }
-            }
-            $str  = "";
             try{
+                $file = uploadFile("file",1024*1024*10);
+                $path = "./Public/".$file['message'];
+                $import = excelImport($path);
+
+                $column = Array("项目编号","项目名称","依托单位","申请人","分组","类别","技术方向","推荐方式","答辩顺序","初审分组","初审得分","初审排名");
+                $len = count($column);
+                for($i=0;$i<$len;$i++){
+                    if($column[$i]!=$import['column'][$i]){
+                        die("请按照模板填写导入数据，保持列头一致");
+                    }
+                }
+                $str  = "";
+
                 foreach($import['data'] as $val){
                     if($val['B']!=NULL && $val['A']!=NULL  ){
                         $xm_code = $Model
@@ -348,7 +348,7 @@ class XMController extends BaseController
                 }else{
                     echo "ok";
                 }
-            }catch(Exception $e){
+            }catch(\Exception $e){
                 echo "fail:$e";
             }
         }else{

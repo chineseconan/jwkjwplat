@@ -509,6 +509,7 @@ function uploadFile($type = 'image', $size = 3145728, $savePath = 'img/')
 
     $upload->rootPath = './Public/uploads/';
     $upload->savePath = 'projectimg/';
+    if (!is_dir($upload->rootPath)) mkdir($upload->rootPath, 0777, true);
     $info = $upload->upload();
     if (!$info) {
         $result = ['state' => 'fail', 'message' => $upload->getError()];

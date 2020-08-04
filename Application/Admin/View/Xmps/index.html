@@ -185,7 +185,7 @@
                         if(ishuibi == '1'){
                             return '回避';
                         }else{
-                            return fomatInt(value);
+                            return fomatFloat(value);
                         }
                     }
                 },
@@ -207,7 +207,7 @@
                     if(ishuibi == '1'){
                         return '回避';
                     }else{
-                        return fomatInt(value);
+                        return fomatFloat(value);
                     }
                 }},
             {field: 'xm_id', title: '操作',width:70,
@@ -267,7 +267,29 @@
         html.push("</div>");
         return html.join('').replace(/null/g, "").replace(/undefined/g, "");
     }
-
+    /**
+     * 格式化小数
+     */
+    function fomatFloat(number){
+        if(isNaN(number) || (number == '') || (number == null)){
+            return parseInt(0);
+        }
+        var f  = parseFloat(number);
+        if('{$Decimals}' == 0){
+            return parseInt(f);
+        }else if('{$Decimals}' == 1){
+            return Math.round(f*10)/10;
+        }else if('{$Decimals}' == 2){
+            return Math.round(f*100)/100;
+        }else if('{$Decimals}' == 3){
+            return Math.round(f*1000)/1000;
+        }else if('{$Decimals}' == 4){
+            return Math.round(f*10000)/10000;
+        }else if('{$Decimals}' == 5){
+            return Math.round(f*100000)/100000;
+        }
+        return Math.round(f*10)/10;
+    }
     /**
      * 格式化为整数
      */

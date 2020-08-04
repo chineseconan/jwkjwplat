@@ -258,7 +258,7 @@ class MxQueryController extends BaseController
             ->join("sysuser on user_id=xmps_xmrelation.xr_user_id and user_isdelete='0'")
             ->join("left join xmps_typeorder o on o.type_name = xmps_xm.xm_type")
             ->where($where)
-            ->order("xm_type,xm_ordernum asc,ps_total desc,xm_code asc")
+            ->order("xm_ordernum asc,ps_total desc,xm_code asc")
             ->select();
         $this->addLog('','明细查询','','导出','成功');
         // 拼表头，列宽

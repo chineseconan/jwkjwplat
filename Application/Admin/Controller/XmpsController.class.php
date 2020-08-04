@@ -30,6 +30,8 @@ class XmpsController extends BaseController {
 //        echo $model->_sql();die;
         $markOption = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
         $markRule   = C('mark.REMARK_OPTION')[$xmType]['注意事项'];
+        // 保留小数点位数
+        $Decimals   = C('mark.DECIMALS');
         if(!empty($markRule) && !empty($markRule[0])){
             $markRule = '<p class="tips">'.implode('</p><p class="tips">',$markRule)."</p>";
         }else{
@@ -39,6 +41,7 @@ class XmpsController extends BaseController {
         $this->assign('markRule',$markRule);
         $this->assign('markOption',$markOption);
         $this->assign('markField',$markField);
+        $this->assign('Decimals',$Decimals);
         $this->assign('markOptionJson',json_encode(array_values($markOption)));
         $this->assign('markFieldJson',json_encode($markField));
         $this->assign("xmType",$xmType);
@@ -256,6 +259,8 @@ class XmpsController extends BaseController {
         $xmType      = I('post.xmType','');
         $quxiaohuibi = I('post.quxiaohuibi','0');
         $markOption  = C('mark.REMARK_OPTION')[$xmType]['评价内容'];
+        // 保留小数点位数
+        $Decimals       = C('mark.DECIMALS');
         $markField   = removeArrKey($markOption,'field');
         $M           = M('xmps_xmrelation');
         try{
@@ -297,14 +302,14 @@ class XmpsController extends BaseController {
                     }
                     if(in_array($field,$markField) && $data['ishuibi'] != 1){
                         // 计算total值
-                        $total += round($data[$field]);
+                        $total += round($data[$field],$Decimals);
                         // 判断范围
-                        if($data[$field] == '' || round($data[$field])>round($markOption[$field]['maxVal']) || round($data[$field])<round($markOption[$field]['minVal'])){
+                        if($data[$field] == '' || round($data[$field],$Decimals)>round($markOption[$field]['maxVal'],$Decimals) || round($data[$field],$Decimals)<round($markOption[$field]['minVal'],$Decimals)){
                             exit(makeStandResult(2,'项目'.$data['xm_name']."：".$markOption[$field]['title'].'（分数值：'.$data[$field].'）<br/>不在取值范围内（'.$markOption[$field]['minVal'].'-'.$markOption[$field]['maxVal'].'），请刷新页面重新填写！'));
                         }
                     }
                 }
-                if($total != $data['ps_total'] && $data['ps_total'] != -1){ // 验证总分
+                if(bccomp(floatval($total),floatval($data['ps_total']),$Decimals) != 0 && $data['ps_total'] != -1){ // 验证总分
                     exit(makeStandResult(1,'项目'.$data['xm_name'].'总分计算有误，请刷新页面重试！'.$total."---".$data['ps_total']));
                 }
             }
@@ -319,7 +324,7 @@ class XmpsController extends BaseController {
                 unset($xmtotal[$xmcount - 1]);
                 $total = 0;
                 foreach ($xmtotal as $t) {
-                    $total += intval($t["ps_total"]);
+                    $total += round($t["ps_total"],$Decimals);
                 }
                 $M->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
             }
@@ -356,6 +361,8 @@ class XmpsController extends BaseController {
         $markField      = removeArrKey($markOption,'field');
         // 所有的评审打分字段
         $allRemarkField = $this->getAllMarkField();
+        // 保留小数点位数
+        $Decimals       = C('mark.DECIMALS');
         try{
             $M->startTrans();
             foreach($updateData as $data){
@@ -382,14 +389,15 @@ class XmpsController extends BaseController {
                         }
                         if(in_array($field,$markField) && $data['ishuibi'] != 1){
                             // 计算total值
-                            $total += round($data[$field]);
+                            $total += round($data[$field],$Decimals);
                             // 判断范围
-                            if($data[$field] == '' || round($data[$field])>round($markOption[$field]['maxVal']) || round($data[$field])<round($markOption[$field]['minVal'])){
+                            if($data[$field] == '' || round($data[$field],$Decimals)>round($markOption[$field]['maxVal'],$Decimals) || round($data[$field],$Decimals)<round($markOption[$field]['minVal'],$Decimals)){
                                 exit(makeStandResult(2,'项目'.$data['xm_name']."：".$markOption[$field]['title'].'（分数值：'.$data[$field].'）<br/>不在取值范围内（'.$markOption[$field]['minVal'].'-'.$markOption[$field]['maxVal'].'），请刷新页面重新填写！'));
                             }
                         }
                     }
-                    if($total != $data['ps_total'] && $data['ps_total'] != -1){
+//                    $total = round($total,$Decimals);
+                    if(bccomp(floatval($total),floatval($data['ps_total']),$Decimals) != 0 && $data['ps_total'] != -1){
                         exit(makeStandResult(1,'项目'.$data['xm_name'].'总分计算有误，请刷新页面重试！'.$total."---".$data['ps_total']));
                     }
                 }
@@ -403,7 +411,7 @@ class XmpsController extends BaseController {
                     unset($xmtotal[$xmcount - 1]);
                     $total = 0;
                     foreach ($xmtotal as $t) {
-                        $total += intval($t["ps_total"]);
+                        $total += round($t["ps_total"],$Decimals);
                     }
                     $M->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
                 }

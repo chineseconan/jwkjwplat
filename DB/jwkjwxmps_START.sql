@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 100119
 File Encoding         : 65001
 
-Date: 2020-01-17 10:58:20
+Date: 2020-08-04 17:07:06
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -110,22 +110,26 @@ CREATE TABLE `modelinfo` (
 -- ----------------------------
 -- Records of modelinfo
 -- ----------------------------
-INSERT INTO `modelinfo` VALUES ('T2857459C8ACA4AF18ACEA755', '明细查询', '1528418343', 'safe', null, null, '80', 'Admin/MxQuery/index', null, '页面类型', '', '否');
-INSERT INTO `modelinfo` VALUES ('T3A62E07E49B94413BF9C8E5E', '模块授权', '1522202442', 'safe', null, null, '81', 'Admin/RoleAuth/index', '是', null, null, '否');
-INSERT INTO `modelinfo` VALUES ('T68588C53EC674BB389EFE3BB', '用户授权', '1522202454', 'safe', null, null, '78', 'Admin/UserAuth/index', '是', null, null, '否');
-INSERT INTO `modelinfo` VALUES ('T6CBD13D50B8B4DF5946A29CE', '专家管理', '1522202403', 'safe', null, null, '79', 'Admin/User/index', '是', null, null, '否');
-INSERT INTO `modelinfo` VALUES ('T73ED91364FC84B81979F3FC0', '用户状态管理', '1522202430', 'safe', null, null, '75', 'Admin/UserSafe/index', '是', null, null, '否');
-INSERT INTO `modelinfo` VALUES ('T8A86398AC5FC4F39944FDBA1', '日志查询', '1522202465', 'safe', null, null, '83', 'Admin/LogManage/index', '是', null, null, '否');
-INSERT INTO `modelinfo` VALUES ('T8FF84931BD364BB6B0D5FD5C', '字典类型管理页面', '1522372818', 'safe', null, null, '15', 'Admin/DicType/index', '是', '页面类型', '2', '否');
-INSERT INTO `modelinfo` VALUES ('T94277F330BAE48E0AE1C9BFA', '角色管理', '1522202373', 'safe', null, null, '76', 'Admin/RoleInfo/index', '是', null, null, '否');
-INSERT INTO `modelinfo` VALUES ('TB1F58C240D2A4C47AD58E377', '数据交互', '1528967210', 'safe', null, null, '200', 'Admin/DataCollect/index', null, '页面类型', '', null);
-INSERT INTO `modelinfo` VALUES ('TBA684FA78040438C946D2B31', '项目评审', '1559294478', 'system', '1572846076', 'T32855831508743FC8A28A3D3', '1', 'Admin/XmpsNew/index', null, '页面类型', '', '否');
-INSERT INTO `modelinfo` VALUES ('TBBEE81C030EA4D529920AAE8', '进度查询', '1528418383', 'safe', null, null, '90', 'Admin/JdQuery/index', null, '页面类型', '', '否');
-INSERT INTO `modelinfo` VALUES ('TD2E907966B824F72ACE07E55', '字典管理页面', '1522371879', 'safe', null, null, '99', 'Admin/Dictionary/index', '是', '页面类型', '1', '否');
-INSERT INTO `modelinfo` VALUES ('TD6B35D17E00D45A8805FEA79', '模块管理', '1522202360', 'safe', null, null, '73', 'Admin/ModelInfo/index', '是', null, null, '否');
-INSERT INTO `modelinfo` VALUES ('TE7FC3A0E1FA54D4DAE429497', '项目审查', '1528355636', 'safe', null, null, '101', 'Admin/Xmps/index', null, '页面类型', '', '否');
-INSERT INTO `modelinfo` VALUES ('TF250F0BCDF5D42F8AAF5802C', '项目管理', '1528355499', 'safe', null, null, '10', 'Admin/XM/index', null, '页面类型', '', '否');
-INSERT INTO `modelinfo` VALUES ('TF404DA085875493D92E30184', '计划重点项目', '1559290345', 'system', '1559291178', 'system', '201', 'Admin/XMNew/manage', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('T10EA28F5589C4B389E6E6388', '进度查看', '1591183541', 'safe', '1591183554', 'safe', '92', 'Admin/jdQuery/view', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('T2857459C8ACA4AF18ACEA755', '明细查询', '1528418343', 'safe', null, null, '81', 'Admin/MxQuery/index', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('T3A62E07E49B94413BF9C8E5E', '模块授权', '1522202442', 'safe', null, null, '82', 'Admin/RoleAuth/index', '是', null, null, '否');
+INSERT INTO `modelinfo` VALUES ('T68588C53EC674BB389EFE3BB', '用户授权', '1522202454', 'safe', null, null, '79', 'Admin/UserAuth/index', '是', null, null, '否');
+INSERT INTO `modelinfo` VALUES ('T6CBD13D50B8B4DF5946A29CE', '专家管理', '1522202403', 'safe', null, null, '80', 'Admin/User/index', null, null, null, '否');
+INSERT INTO `modelinfo` VALUES ('T73ED91364FC84B81979F3FC0', '用户状态管理', '1522202430', 'safe', null, null, '76', 'Admin/UserSafe/index', '是', null, null, '否');
+INSERT INTO `modelinfo` VALUES ('T8A86398AC5FC4F39944FDBA1', '日志查询', '1522202465', 'safe', null, null, '84', 'Admin/LogManage/index', '是', null, null, '否');
+INSERT INTO `modelinfo` VALUES ('T8FF84931BD364BB6B0D5FD5C', '字典类型管理页面', '1522372818', 'safe', null, null, '16', 'Admin/DicType/index', '是', '页面类型', '2', '否');
+INSERT INTO `modelinfo` VALUES ('T94277F330BAE48E0AE1C9BFA', '角色管理', '1522202373', 'safe', null, null, '77', 'Admin/RoleInfo/index', '是', null, null, '否');
+INSERT INTO `modelinfo` VALUES ('TA4DD108FFD824F34A15F8CFC', '专家查看', '1596530637', 'safe', null, null, '93', 'Admin/jdQuery/viewExpert', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TB1F58C240D2A4C47AD58E377', '数据交互', '1528967210', 'safe', null, null, '203', 'Admin/DataCollect/index', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TBA684FA78040438C946D2B31', '项目评审', '1559294478', 'system', '1581528706', 'safe', '2', 'Admin/Xmps/markIndex', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TBBEE81C030EA4D529920AAE8', '进度查询', '1528418383', 'safe', null, null, '91', 'Admin/JdQuery/index', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TD2E907966B824F72ACE07E55', '字典管理页面', '1522371879', 'safe', null, null, '102', 'Admin/Dictionary/index', '是', '页面类型', '1', '否');
+INSERT INTO `modelinfo` VALUES ('TD6B35D17E00D45A8805FEA79', '模块管理', '1522202360', 'safe', null, null, '74', 'Admin/ModelInfo/index', '是', null, null, '否');
+INSERT INTO `modelinfo` VALUES ('TE460FF6627E7427DAA5B88F2', '投票设置', '1581951877', 'system', null, null, '94', 'Admin/VoteSetting/index', null, '功能类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TE7FC3A0E1FA54D4DAE429497', '项目评审', '1528355636', 'safe', null, null, '3', 'Admin/Xmps/index', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TEB53C7085F854EDAAE66166C', '项目投票(重大)', '1581951148', 'T44383E50863249778EFDBC55', '1581952022', 'system', '5', 'Admin/Vote/index?type=da', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TF250F0BCDF5D42F8AAF5802C', '项目管理', '1528355499', 'safe', null, null, '11', 'Admin/XM/index', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TF404DA085875493D92E30184', '计划重点项目', '1559290345', 'system', '1559291178', 'system', '204', 'Admin/XMNew/manage', null, '页面类型', '', '否');
 
 -- ----------------------------
 -- Table structure for oplog
@@ -169,18 +173,20 @@ CREATE TABLE `roleauth` (
 -- ----------------------------
 INSERT INTO `roleauth` VALUES ('T0D2CAFF72A4E4DA1AE2FFFA6', '', 'TF404DA085875493D92E30184', '1560158180', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('T1B48D9EADA7C4C7FBA367FED', '3', 'TD6B35D17E00D45A8805FEA79', '1528354759', 'safe', null, null);
-INSERT INTO `roleauth` VALUES ('T30263A6D17D54B47B5DC70D7', '', 'TBBEE81C030EA4D529920AAE8', '1573375807', 'safe', null, null);
-INSERT INTO `roleauth` VALUES ('T34FA869FC9C942BCB1DEAEE1', 'TCAAB0FF33F1D45348204EB46', 'TE7FC3A0E1FA54D4DAE429497', '1528355698', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('T1EEA01C8C85C477F8D2A50CD', '1', 'T2857459C8ACA4AF18ACEA755', '1592186183', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('T3065B5EB777249AD87618B52', 'T6DC140B1FDD24849B2212C91', 'TA4DD108FFD824F34A15F8CFC', '1596530647', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('T39D57472E82543968CE80025', '1', 'T6CBD13D50B8B4DF5946A29CE', '1592186183', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('T3D7D7AB1D391496AB3D43E94', 'T6DC140B1FDD24849B2212C91', 'T10EA28F5589C4B389E6E6388', '1596530647', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('T47C3F8EBFE1F4CB6B33D6C15', '3', 'T73ED91364FC84B81979F3FC0', '1528356339', 'safe', null, null);
-INSERT INTO `roleauth` VALUES ('T749A2BB61F5F4552A0161B72', '', 'TB1F58C240D2A4C47AD58E377', '1573375907', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('T4D09E2B31CA64CFAA20DCC05', '1', 'TF250F0BCDF5D42F8AAF5802C', '1592186183', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('T7EAC2BE133084ED193EF50CB', '', 'T8A86398AC5FC4F39944FDBA1', '1528355293', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('T88D03E05F87D4DE0B2608F80', '1', 'TB1F58C240D2A4C47AD58E377', '1592186183', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('T95DDFEB2059D4A94B3E4071A', 'TCAAB0FF33F1D45348204EB46', 'TE7FC3A0E1FA54D4DAE429497', '1596519235', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('T9F441B2ADD31470184863E7C', '3', 'T8FF84931BD364BB6B0D5FD5C', '1528436064', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TA4777F9CB90544E9A2EBF77D', '3', 'T3A62E07E49B94413BF9C8E5E', '1528354752', 'safe', null, null);
-INSERT INTO `roleauth` VALUES ('TB08B00E0990340E9B7BD32AF', '1', 'T6CBD13D50B8B4DF5946A29CE', '1528356375', 'safe', null, null);
-INSERT INTO `roleauth` VALUES ('TB3B51452804F405591B09879', '1', 'T2857459C8ACA4AF18ACEA755', '1528418423', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TCC20A141DD7F4C82A68E6F49', '', 'T94277F330BAE48E0AE1C9BFA', '1528355281', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TD3D455415853482DA1C4AB32', '3', 'T68588C53EC674BB389EFE3BB', '1528355827', 'safe', null, null);
-INSERT INTO `roleauth` VALUES ('TEA545AF7035F43D6BB10214D', '1', 'TF250F0BCDF5D42F8AAF5802C', '1528355691', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('TF6719B613A844DD88F0CED48', '1', 'TBBEE81C030EA4D529920AAE8', '1592186183', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TF690FFDF86C14E2486FA7313', '3', 'TD2E907966B824F72ACE07E55', '1528436061', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TFEC6A9CF20274090B6F99B61', 'TEA7ECCADA3784874A074E57D', 'TBA684FA78040438C946D2B31', '1559555615', 'TC8728CA511A34A07ACE8C7F3', null, null);
 
@@ -233,6 +239,7 @@ INSERT INTO `sysrole` VALUES ('2', '审计管理员', null, null, null, null, '�
 INSERT INTO `sysrole` VALUES ('3', '安全管理员', null, null, null, null, '否');
 INSERT INTO `sysrole` VALUES ('1', '系统管理员', null, null, null, null, '否');
 INSERT INTO `sysrole` VALUES ('TC0956A46AAEB448DB04EE0C0', '浏览专家', '1559294159', 'system', null, null, '否');
+INSERT INTO `sysrole` VALUES ('T6DC140B1FDD24849B2212C91', '操作用户', '1591183229', 'audit', null, null, '否');
 
 -- ----------------------------
 -- Table structure for sysuser
@@ -268,10 +275,11 @@ CREATE TABLE `sysuser` (
 -- ----------------------------
 -- Records of sysuser
 -- ----------------------------
-INSERT INTO `sysuser` VALUES ('system', '系统管理员', 'sysadmin', '1', '1', '绝密', null, '启用', '是', null, '0', '1559206875', null, null, '1528354890', 'safe', '1528348089', '0', null, null, null, null, 'b26p09djfjnsuv37g862s6dmr5', '::1');
-INSERT INTO `sysuser` VALUES ('audit', '审计管理员', 'auditadmin', 'Guanli2018', '2', '绝密', null, '启用', '是', '07b3c32099f3f28b0a9c92ae6dd035e3', '0', '1526548169', null, null, '1526548202', 'audit', '1525913729', '0', null, null, null, null, null, null);
-INSERT INTO `sysuser` VALUES ('safe', '安全管理员', 'secadmin', 'Guanli2018', '3', '绝密', null, '启用', '是', '61f88b780aa1682ed6d1545d69c9d0b9', '0', '1528626025', null, null, '1528110584', 'safe', null, '0', null, null, null, null, '', '::1');
+INSERT INTO `sysuser` VALUES ('system', '系统管理员', 'sysadmin', '1', '1', '绝密', null, '启用', '是', null, '0', '1559206875', null, null, '1528354890', 'safe', '1528348089', '0', null, null, null, null, '', '::1');
+INSERT INTO `sysuser` VALUES ('audit', '审计管理员', 'auditadmin', 'Guanli2018', '2', '绝密', null, '启用', '是', '07b3c32099f3f28b0a9c92ae6dd035e3', '0', '1526548169', null, null, '1526548202', 'audit', '1525913729', '0', null, null, null, null, '', '::1');
+INSERT INTO `sysuser` VALUES ('safe', '安全管理员', 'secadmin', 'Guanli2018', '3', '绝密', null, '启用', '是', '61f88b780aa1682ed6d1545d69c9d0b9', '0', '1596528202', null, null, '1528110584', 'safe', null, '0', null, null, null, null, '', '::1');
 INSERT INTO `sysuser` VALUES ('system1', '系统管理员', 'sysadmin1', '1', '1', null, null, '启用', '是', null, '0', '1559206875', null, null, '1528354890', 'safe', '0', '0', null, null, null, null, '', '::1');
+INSERT INTO `sysuser` VALUES ('opadmin', '操作用户', 'opadmin', '1', 'T6DC140B1FDD24849B2212C91', null, null, '启用', '否', null, '0', null, null, null, null, null, '0', '0', null, null, null, null, '14ftsigpbecmb4br0apuftp6m1', '::1');
 
 -- ----------------------------
 -- Table structure for userauth
@@ -294,6 +302,7 @@ CREATE TABLE `userauth` (
 INSERT INTO `userauth` VALUES ('safe', '3', 'safe', null, null, null, null);
 INSERT INTO `userauth` VALUES ('system', '1', 'system', null, null, null, null);
 INSERT INTO `userauth` VALUES ('system1', '1', 'system1', null, null, null, null);
+INSERT INTO `userauth` VALUES ('T40BAA55FAF534E03BEF66CE6', 'T6DC140B1FDD24849B2212C91', 'opadmin', '1591183391', 'safe', null, null);
 
 -- ----------------------------
 -- Table structure for votesetting
@@ -370,20 +379,20 @@ CREATE TABLE `xmps_xmrelation` (
   `xr_user_id` varchar(50) NOT NULL,
   `xr_xm_id` varchar(50) NOT NULL,
   `xr_status` varchar(255) DEFAULT NULL,
-  `ps_item1` decimal(8,0) DEFAULT NULL,
-  `ps_item2` decimal(8,2) DEFAULT NULL,
-  `ps_item3` decimal(8,2) DEFAULT NULL,
-  `ps_item4` decimal(8,2) DEFAULT NULL,
-  `ps_item5` decimal(8,2) DEFAULT NULL,
-  `ps_item6` decimal(8,2) DEFAULT NULL,
-  `ps_item7` decimal(8,2) DEFAULT NULL,
-  `ps_item8` decimal(8,2) DEFAULT NULL,
-  `ps_item9` decimal(8,2) DEFAULT NULL,
-  `ps_item10` decimal(8,2) DEFAULT NULL,
+  `ps_item1` decimal(8,3) DEFAULT NULL,
+  `ps_item2` decimal(8,3) DEFAULT NULL,
+  `ps_item3` decimal(8,3) DEFAULT NULL,
+  `ps_item4` decimal(8,3) DEFAULT NULL,
+  `ps_item5` decimal(8,3) DEFAULT NULL,
+  `ps_item6` decimal(8,3) DEFAULT NULL,
+  `ps_item7` decimal(8,3) DEFAULT NULL,
+  `ps_item8` decimal(8,3) DEFAULT NULL,
+  `ps_item9` decimal(8,3) DEFAULT NULL,
+  `ps_item10` decimal(8,3) DEFAULT NULL,
   `ps_zz` varchar(255) DEFAULT NULL COMMENT '资助意见',
   `ps_detail` varchar(500) DEFAULT NULL COMMENT '与战斗力关联程度/专家意见',
   `ps_time` varchar(255) DEFAULT NULL COMMENT '保存时间（时间戳，现在未使用）',
-  `ps_total` decimal(8,0) DEFAULT NULL COMMENT '打分总分',
+  `ps_total` decimal(8,3) DEFAULT NULL COMMENT '打分总分',
   `avgvalue` float(8,3) DEFAULT NULL COMMENT '平均得分',
   `ishuibi` varchar(255) DEFAULT '0' COMMENT '是否回避',
   `vote1` varchar(8) DEFAULT NULL COMMENT '第一轮投票结果',
@@ -400,4 +409,52 @@ CREATE TABLE `xmps_xmrelation` (
 
 -- ----------------------------
 -- Records of xmps_xmrelation
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for xmps_xmrelation_new
+-- ----------------------------
+DROP TABLE IF EXISTS `xmps_xmrelation_new`;
+CREATE TABLE `xmps_xmrelation_new` (
+  `xr_id` varchar(255) DEFAULT NULL,
+  `xr_user_id` varchar(50) NOT NULL,
+  `xr_xm_id` varchar(50) NOT NULL,
+  `xr_status` varchar(255) DEFAULT NULL,
+  `ps_zz` varchar(255) DEFAULT NULL,
+  `ps_detail` varchar(500) DEFAULT NULL,
+  `ps_time` varchar(255) DEFAULT NULL,
+  `ps_isdown` varchar(255) DEFAULT NULL COMMENT '是否降为一般项目',
+  PRIMARY KEY (`xr_user_id`,`xr_xm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of xmps_xmrelation_new
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for xmps_xm_new
+-- ----------------------------
+DROP TABLE IF EXISTS `xmps_xm_new`;
+CREATE TABLE `xmps_xm_new` (
+  `xm_id` varchar(255) NOT NULL,
+  `xm_code` varchar(255) DEFAULT NULL,
+  `xm_name` varchar(255) DEFAULT NULL,
+  `xm_company` varchar(255) DEFAULT NULL,
+  `xm_createuser` varchar(255) DEFAULT NULL,
+  `xm_class` varchar(255) DEFAULT NULL,
+  `xm_year` decimal(8,0) DEFAULT NULL,
+  `xm_status` varchar(255) DEFAULT NULL,
+  `xm_tmfs` varchar(255) DEFAULT '',
+  `xm_ordernum` int(10) DEFAULT '0' COMMENT '排序号',
+  `xm_type` varchar(255) DEFAULT NULL COMMENT '项目分类',
+  `xm_target` mediumtext COMMENT '研究目标',
+  `xm_expect` varchar(255) DEFAULT NULL COMMENT '预期成果',
+  `xm_cycle` varchar(255) DEFAULT NULL COMMENT '研究周期',
+  `xm_funds` varchar(255) DEFAULT NULL COMMENT '经费概算',
+  `xm_remark` varchar(10240) DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`xm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of xmps_xm_new
 -- ----------------------------
