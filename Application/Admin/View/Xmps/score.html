@@ -141,6 +141,8 @@
     });
 	var h = $(window).height()-40;
 	$('table').attr('data-height',h);
+	var expandids = [];// 记住专家打开明细的行
+    var tablePosition = null;// 记住表格位置
     $('#atpbiztable').bootstrapTable({
         url: '__CONTROLLER__/getData',
         method: 'post',
@@ -158,7 +160,7 @@
         minimumCountColumns: 2,
         clickToSelect: true,
         uniqueId: "xr_id",
-        detailView: false,
+        detailView: true,
         detailFormatter: "detailFormatter",
         rowStyle:function(row,index){
 	        var style = {
@@ -200,8 +202,8 @@
             var len    = tableValue.length;
             for(var i=0;i<len;i++){
                 var ishuibi = tableValue[i].ishuibi;
-                // 非回避
-                if(ishuibi == 1){
+                // 回避
+                  if(ishuibi == 1){
                     for(var j=0;j<markFieldJson.length;j++){
                         var temp = $(table).eq(i).find('a[data-name="'+markFieldJson[j]+'"]');
                         $(temp).editable('disable');
@@ -211,6 +213,17 @@
                     var ps_total = $(table).eq(i).find('a[data-name="ps_total"]');
                     $(ps_total).editable('disable');
                 }
+
+                // 记住打开的明细
+                if(expandids.length != 0){
+                    var rid = tableValue[i]['xr_id'];
+                    if($.inArray(rid,expandids)>-1){
+                        $('#atpbiztable').bootstrapTable('expandRow',i);
+                    }
+                }
+            }
+            if(tablePosition != null){
+                $('#atpbiztable').bootstrapTable('scrollTo',parseFloat(tablePosition));
             }
         },
         onLoadSuccess:function(){
@@ -227,6 +240,28 @@
                 editable.input.$input.css('width',width);
                 $el.parent("td").css('width',widthprt);
             },50);
+            tablePosition = $('#atpbiztable').bootstrapTable("getScrollPosition");
+        },
+        onExpandRow:function(index ,row,$detail){
+            var rid = row['xr_id'];
+            if(expandids.length == 0){
+                expandids.push(rid);
+            }else{
+                if($.inArray(rid,expandids)<0){
+                    expandids.push(rid);
+                }
+            }
+            return false;
+        },
+        onCollapseRow:function(index ,row){
+            var rid = row['xr_id'];
+            if(expandids.length != 0){
+                for(var i=0;i<expandids.length;i++){
+                    if(expandids[i] == rid){
+                        expandids.splice(i,1);
+                    }
+                }
+            }
         }
     });
 
@@ -720,7 +755,7 @@
         return f;
     }
     function XMlook(id){
-        window.open("__MODULE__/XM/listindex?xm_id="+id);
+        window.open("__MODULE__/XM/listindexs?xm_id="+id);
     }
 </script>
 </body>

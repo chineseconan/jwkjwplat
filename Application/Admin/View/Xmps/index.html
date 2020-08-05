@@ -102,7 +102,7 @@
                                 <p class="tip">评审要点及打分标准：</p>
                                 {$markRule}
                             </div>
-                            <div style="width: 6%;float: left;position: absolute;top: 159px;right: 12px;">
+                            <div style="width: 6%;float: left;position: absolute;top: 52px;right: 12px;">
                                 <input type="hidden" name="xr_status" id="xr_status" value="完成"/>
                                 <button class="btn btn-info btn-green" style="margin-left: 12px;float:right;" type="button" id="sys_refresh"><i class="fa fa-refresh "></i>&nbsp;刷新</button>
                                 <input type="hidden" id="xm_type" name="xm_type" value="{$xmType}"/>
@@ -144,7 +144,7 @@
         minimumCountColumns: 2,             //最少允许的列数
         clickToSelect: true,                //是否启用点击选中行
         uniqueId: "xr_id",                     //每一行的唯一标识，一般为主键列
-        detailView: false,                   //是否显示父子表
+        detailView: true,                   //是否显示父子表
         detailFormatter: "detailFormatter",                   //是否显示父子表
         columns: tableColumn(),
         onLoadSuccess:function(){
@@ -301,7 +301,7 @@
         return f;
     }
     function XMlook(id){
-        window.open("__MODULE__/XM/listindex?xm_id="+id);
+        window.open("__MODULE__/XM/listindexs?xm_id="+id);
     }
 </script>
 </body>
