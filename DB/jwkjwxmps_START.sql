@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 100119
 File Encoding         : 65001
 
-Date: 2020-08-05 10:33:06
+Date: 2020-10-14 16:10:09
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -121,6 +121,7 @@ INSERT INTO `modelinfo` VALUES ('T8A86398AC5FC4F39944FDBA1', '日志查询', '15
 INSERT INTO `modelinfo` VALUES ('T8FF84931BD364BB6B0D5FD5C', '字典类型管理页面', '1522372818', 'safe', null, null, '16', 'Admin/DicType/index', '是', '页面类型', '2', '否');
 INSERT INTO `modelinfo` VALUES ('T94277F330BAE48E0AE1C9BFA', '角色管理', '1522202373', 'safe', null, null, '77', 'Admin/RoleInfo/index', '是', null, null, '否');
 INSERT INTO `modelinfo` VALUES ('TA4DD108FFD824F34A15F8CFC', '专家查看', '1596530637', 'safe', null, null, '93', 'Admin/jdQuery/viewExpert', null, '页面类型', '', '否');
+INSERT INTO `modelinfo` VALUES ('TA5D28C0420E846C286FD3FA3', '项目审查（浏览）', '1602580710', 'safe', null, null, '1', 'Admin/XM/view', null, '页面类型', 'T3A62E07E49B94413BF9C8E5E', '否');
 INSERT INTO `modelinfo` VALUES ('TB1F58C240D2A4C47AD58E377', '数据交互', '1528967210', 'safe', null, null, '203', 'Admin/DataCollect/index', null, '页面类型', '', '否');
 INSERT INTO `modelinfo` VALUES ('TBA684FA78040438C946D2B31', '项目评审', '1559294478', 'system', '1581528706', 'safe', '2', 'Admin/Xmps/markIndex', null, '页面类型', '', '否');
 INSERT INTO `modelinfo` VALUES ('TBBEE81C030EA4D529920AAE8', '进度查询', '1528418383', 'safe', null, null, '91', 'Admin/JdQuery/index', null, '页面类型', '', '否');
@@ -187,6 +188,7 @@ INSERT INTO `roleauth` VALUES ('T9F441B2ADD31470184863E7C', '3', 'T8FF84931BD364
 INSERT INTO `roleauth` VALUES ('TA4777F9CB90544E9A2EBF77D', '3', 'T3A62E07E49B94413BF9C8E5E', '1528354752', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TCC20A141DD7F4C82A68E6F49', '', 'T94277F330BAE48E0AE1C9BFA', '1528355281', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TD3D455415853482DA1C4AB32', '3', 'T68588C53EC674BB389EFE3BB', '1528355827', 'safe', null, null);
+INSERT INTO `roleauth` VALUES ('TD4469CF7762848BA9651EDE2', 'TC0956A46AAEB448DB04EE0C0', 'TA5D28C0420E846C286FD3FA3', '1602662957', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TF2CC39500CD04FA4AB1B497E', '1', 'T6CBD13D50B8B4DF5946A29CE', '1596594745', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TF690FFDF86C14E2486FA7313', '3', 'TD2E907966B824F72ACE07E55', '1528436061', 'safe', null, null);
 INSERT INTO `roleauth` VALUES ('TFEC6A9CF20274090B6F99B61', 'TEA7ECCADA3784874A074E57D', 'TBA684FA78040438C946D2B31', '1559555615', 'TC8728CA511A34A07ACE8C7F3', null, null);
@@ -276,16 +278,11 @@ CREATE TABLE `sysuser` (
 -- ----------------------------
 -- Records of sysuser
 -- ----------------------------
-INSERT INTO `sysuser` VALUES ('system', '系统管理员', 'sysadmin', '1', '1', '绝密', null, '启用', '是', null, '0', '1559206875', null, null, '1528354890', 'safe', '1528348089', '0', null, null, null, null, '', '::1');
+INSERT INTO `sysuser` VALUES ('system', '系统管理员', 'sysadmin', '1', '1', '绝密', null, '启用', '是', null, '0', '1559206875', null, null, '1528354890', 'safe', '1528348089', '0', null, null, null, null, 'ls8tn8i0mb6n3otitvh2el7ej0', '::1');
 INSERT INTO `sysuser` VALUES ('audit', '审计管理员', 'auditadmin', 'Guanli2018', '2', '绝密', null, '启用', '是', '07b3c32099f3f28b0a9c92ae6dd035e3', '0', '1526548169', null, null, '1526548202', 'audit', '1525913729', '0', null, null, null, null, '', '::1');
-INSERT INTO `sysuser` VALUES ('safe', '安全管理员', 'secadmin', 'Guanli2018', '3', '绝密', null, '启用', '是', '61f88b780aa1682ed6d1545d69c9d0b9', '0', '1596594732', null, null, '1528110584', 'safe', null, '0', null, null, null, null, '', '::1');
+INSERT INTO `sysuser` VALUES ('safe', '安全管理员', 'secadmin', 'Guanli2018', '3', '绝密', null, '启用', '是', '61f88b780aa1682ed6d1545d69c9d0b9', '0', '1602662940', null, null, '1528110584', 'safe', null, '0', null, null, null, null, '', '::1');
 INSERT INTO `sysuser` VALUES ('system1', '系统管理员', 'sysadmin1', '1', '1', null, null, '启用', '是', null, '0', '1559206875', null, null, '1528354890', 'safe', '0', '0', null, null, null, null, '', '::1');
 INSERT INTO `sysuser` VALUES ('opadmin', '操作用户', 'opadmin', '1', 'T6DC140B1FDD24849B2212C91', null, null, '启用', '否', null, '0', null, null, null, null, null, '0', '0', null, null, null, null, '', '::1');
-INSERT INTO `sysuser` VALUES ('TEDA1A5F0F8294D15BB693E66', '1', '1', '1', 'TCAAB0FF33F1D45348204EB46', null, '单位1', '启用', '否', null, '0', null, '1596532235', 'system', null, null, '0', '0', '航空', '/', null, '/', '', '::1');
-INSERT INTO `sysuser` VALUES ('T8FA58F5853C245A8A1ED36EF', '2', '2', '1', 'TCAAB0FF33F1D45348204EB46', null, '单位2', '启用', '否', null, null, null, '1596532235', 'system', null, null, '0', '0', '航空', '/', null, '/', null, null);
-INSERT INTO `sysuser` VALUES ('T2966D5064FBB49CCA0CE595B', '3', '3', '1', 'TCAAB0FF33F1D45348204EB46', null, '单位3', '启用', '否', null, null, null, '1596532235', 'system', null, null, '0', '0', '航空', '/', null, '/', null, null);
-INSERT INTO `sysuser` VALUES ('TAB314AB9E2164B21AA6D1E42', '4', '4', '1', 'TCAAB0FF33F1D45348204EB46', null, '单位4', '启用', '否', null, null, null, '1596532235', 'system', null, null, '0', '0', '航空', '/', null, '/', null, null);
-INSERT INTO `sysuser` VALUES ('TC4D1A260F1C041759657AE94', '5', '5', '1', 'TCAAB0FF33F1D45348204EB46', null, '单位5', '启用', '否', null, null, null, '1596532235', 'system', null, null, '0', '0', '航空', '/', null, '/', null, null);
 
 -- ----------------------------
 -- Table structure for userauth
