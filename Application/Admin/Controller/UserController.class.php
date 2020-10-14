@@ -40,7 +40,7 @@ public $viewid;
 
         $model = M('sysuser');
         if(!$isExport){
-            $data = $model->field('user_id,user_password,user_zhiwu,user_zhicheng,user_mobile,user_orgid,user_realusername,user_class,user_name,user_secretlevel,user_createtime,user_lastmodifytime,user_secretlevelcode')
+            $data = $model->field('user_id,user_password,user_zhiwu,user_zhicheng,user_mobile,user_orgid,user_realusername,user_class,user_name,user_secretlevel,user_createtime,user_lastmodifytime,user_secretlevelcode,user_sessionid')
                 ->where($where)
                 ->order("$queryParam[sort] $queryParam[sortOrder]")
                 ->limit($queryParam['offset'], $queryParam['limit'])
@@ -70,6 +70,15 @@ public $viewid;
         }
     }
 
+    /**
+     * 根据专家域账号清除登录存储的session
+     */
+    function clearLogin(){
+        $userId = I('post.id');
+        if(empty($userId)) exit(makeStandResult(1,'参数缺失，请刷新重试'));
+        M('sysuser')->where("user_id='%s'",$userId)->setField(['user_sessionid'=>null]);
+        exit(makeStandResult(0,'操作成功'));
+    }
 
     /**
      * 用户添加或修改

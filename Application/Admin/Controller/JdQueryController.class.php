@@ -557,7 +557,12 @@ class JdQueryController extends BaseController
             ->find();
         $maxpsnum = $maxpsnum['c'];
         foreach ($data as $key => $d) {
-            $relationdata = $relationmodel->field("0+cast(ps_total as char) as ps_total,user_realusername,ps_zz,ps_detail,0+cast(avgvalue as char) as avgvalue")
+            $relationdata = $relationmodel->field("
+            case when ishuibi = 0 then 0+cast(ps_total as char) else '回避' end ps_total,
+            user_realusername,
+            case when ishuibi = 0 then ps_zz else '回避' end ps_zz,
+            case when ishuibi = 0 then ps_detail else '回避' end ps_detail,
+            0+cast(avgvalue as char) as avgvalue")
                 ->join("left join sysuser on xr_user_id=user_id")
                 ->where("xr_xm_id='" . $d["xm_id"] . "'")
                 ->select();

@@ -179,16 +179,8 @@ function excelExport($tableHeader = array(), $result = array(), $isAjaxDown = tr
     if (empty($result)) return json_encode(array('code' => -2, 'message' => '数据为空'));
     if ($tableHeader[0] != '序号' && $tableHeader[0] != '项目序号') array_unshift($tableHeader, '序号');
     $headerLength = count($tableHeader);
-    if ($headerLength > 52) return json_encode(array('code' => -3, 'message' => '最多支持导出52列'));
-    $letter = getEnglishLetter(); //获取excel列名
-    if ($headerLength > 26) { //根据传入的表头的长度获取需要写入的excel列头
-        $moreThan = $headerLength - 26; //压入超过26列后的列头
-        $moreColumn = [];
-        for ($i = 0; $i < $moreThan; $i++) {
-            $moreColumn[] = 'A' . $letter[$i];
-        }
-        $letter = array_merge($letter, $moreColumn);
-    }
+    if ($headerLength > 200) return json_encode(array('code' => -3, 'message' => '最多支持导出200列'));
+    $letter = getEnglishLetter($headerLength); //获取excel列名
 
     vendor("PHPExcel.PHPExcel");
     $excel = new \PHPExcel();
@@ -326,12 +318,30 @@ function excelExport($tableHeader = array(), $result = array(), $isAjaxDown = tr
  */
 function getEnglishLetter($length = 26, $upperCase = true)
 {
-    $data = array();
-    $end = $length + 65;
+    $data     = [];
     $function = $upperCase ? 'strtoupper' : 'strtolower';
+    $start    = 65;
+    if($length <= 26){
+        $end = $start + $length;
+    }else{
+        $end = 91;
+    }
     for ($i = 65; $i < $end; $i++) {
         $data[] = $function(chr($i));
     }
+    if($length > 26){
+        $diff     = $length - 26;
+        $count    = 0;
+        $initData = [];
+        foreach ($data as $letter) {
+            foreach ($data as $le) {
+                if($count == $diff) break;
+                $initData[] = $letter . $le;
+                $count++;
+            }
+        }
+        $data = array_merge($data,$initData);
+    }    
     return $data;
 }
 

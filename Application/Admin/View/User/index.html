@@ -120,16 +120,29 @@
             },
             {field: 'user_realusername', title: '姓名', sortable: true,width:70},
             {field: 'user_name', title: '账号', sortable: true,width:100},
-            {field:'user_password',title:'密码',width:100},
+            {field:'user_password',title:'密码',width:85},
             {field: 'user_zhiwu', title: '职务/职称', sortable: true,width:70},
             {field: 'user_mobile', title: '联系方式', sortable: true,width:100},
             {field: 'user_orgid', title: '单位', sortable: true,width:100},
-            {field: 'user_class', title: '分组', sortable: true,width:100, visible:true},
-            {field: 'user_id', title: '操作', sortable: false,width:100,
+            {field: 'user_class', title: '分组', sortable: true,width:70, visible:true},
+            {field: 'user_sessionid', title: '是否登录', sortable: false,width:85, visible:true,
+                formatter: function (value, row, index) {
+                    if(value == '' || value == null){
+                        return '否'
+                    }else{
+                        return '是'
+                    }
+                }},
+            {field: 'user_id', title: '操作', sortable: false,width:120,
                 formatter: function (value, row, index) {
                     var inp = "'"+  value +"'";
+                    var user_sessionid = row['user_sessionid'];
                     var a = '<a style="height:25px;line-height:22px;" class="btn btn-info btn-xs" onclick="updateInRow('+ inp +')">编辑</a>';
                     a += '<a style="height:25px;line-height:22px;margin-left: 5px;" class="btn btn-info btn-xs" onclick="setXM('+ inp +')">选择项目</a>';
+                    if(user_sessionid != '' && user_sessionid != null){
+                        a += '<a style="height:25px;line-height:22px;margin-left: 5px;" class="btn btn-info btn-xs" onclick="clearLogin('+ inp +')">清除登陆锁定</a>';
+                    }
+
                     return a;
                 }
             }
@@ -158,6 +171,28 @@
             user_class:$("#class").val()
         };
         return temp;
+    }
+    function clearLogin(id)
+    {
+        layer.confirm('确认清除该专家的登录锁定信息吗？',{},function(){
+            $.ajax({
+                type:'post',
+                url:'__CONTROLLER__/clearLogin',
+                data:{id: id},
+                dataType :'json',
+                success:function(data){
+//                    console.log(data);return ;
+                    if(data.code == 0){
+                        layer.msg('操作成功');
+                        $('#zjTable').bootstrapTable('refresh')
+                    }else{
+                        layer.alert(data.message);
+                        $('#zjTable').bootstrapTable('refresh')
+                    }
+
+                }
+            })
+        })
     }
     /**
      * 添加浏览专家

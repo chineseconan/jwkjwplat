@@ -71,7 +71,7 @@
         <p class="title">{$title}</p>
             <?php if(!empty($notice)){ ?>
             <div class="notice">
-                <p class="tip">注意事项:</p>
+                <span class="tip">注意事项:</span>
                 {$notice}
             </div>
             <?php }?>
@@ -107,7 +107,7 @@
                                 <?php }?>
                             </select>
                         <?php }else{?>
-                            <input typt="text" class="ps_input" style="width:80%;" id="<?php echo $value['field'];?>" maxVal="<?php echo $value['maxVal'];?>" defaultvalue="<?php echo $data[$value['field']];?>" decimalpoint="<?php echo isset($value['decimalpoint'])?intval($value['decimalpoint']):0;?>" value="<?php echo $data[$value['field']];?>"/>
+                            <input typt="text" class="ps_input" style="width:80%;" id="<?php echo $value['field'];?>" maxVal="<?php echo $value['maxVal'];?>" minVal="<?php echo $value['minVal'];?>" defaultvalue="<?php echo $data[$value['field']];?>" decimalpoint="<?php echo isset($value['decimalpoint'])?intval($value['decimalpoint']):0;?>" value="<?php echo $data[$value['field']];?>"/>
                         <?php }?>
                     </td>
                 </tr>
@@ -157,14 +157,18 @@
         layer = layui.layer;
     });
     var markField = eval('{$markField}'); // 打分字段
+    var isRound   = {$isRound};           // 是否四舍五入
     $(".ps_input").change(function(){
         var ss           = $(this);
         if(ss[0].type == 'text'){
             var decimalpoint = ss.attr('decimalpoint');
             var maxVal       = parseInt(ss.attr('maxVal'));
+            var minVal       = 0;
+            if(typeof(ss.attr('minVal')) != 'undefined' && ss.attr('minVal') != '' && ss.attr('minVal') != null){
+                minVal = parseInt(ss.attr('minVal'));
+            }
             var value        = ss.val();
-
-            if(value != "" && value != 0) {
+            if(value != "") {
                 var preg = /[^\d\.]+/g;
                 var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
                 if(value.match(preg) != null){ // 1.先去掉不是数字的部分
@@ -177,14 +181,26 @@
                     }
                     alert("输入数值必须为数字！");
                 }
-                if(!preg1.test(value)){ // 2.再判断小数点
-                    var f  = parseFloat(value);
-                    $(this).val(f.toFixed(decimalpoint));
-                }
-                if (value > maxVal || value < 0) { // 3.最后判断最大值
+                if (value > maxVal || value < minVal) { // 3.最后判断最大值最小值
                     ss.val("");
-                    alert("输入数值必须在 0-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
+                    if(decimalpoint == 0){
+                        alert("输入数值必须为 "+minVal+"-"+  maxVal+'之间的整数！');
+                    }else{
+                        alert("输入数值必须在 "+minVal+"-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
+                    }
                     return;
+                }
+                if(!preg1.test(value)){ // 2.再判断小数点
+                    if(isRound == 0 && decimalpoint == 0){
+                        alert("输入数值必须为整数！");
+                        return;
+                    }else if(isRound == 0){
+                        alert("输入数值最多保留"+decimalpoint+"位小数！");
+                        return;
+                    }else{
+                        var f  = parseFloat(value);
+                        $(this).val(f.toFixed(decimalpoint));
+                    }
                 }
             }
         }
@@ -198,101 +214,117 @@
     });
 //        保存
         // $("#submit").on("click",submitData());
-        function submitData() {
-            var ps_inputObj = $(".ps_input");
-            if(ps_inputObj.length>0){
-                for(var i=0;i<ps_inputObj.length;i++){
-                    var ss           = $(ps_inputObj[i]);
-                    var decimalpoint = ss.attr('decimalpoint');
-                    var maxVal       = parseInt(ss.attr('maxVal'));
-                    var value        = ss.val();
-            // console.log(value);
+    function submitData() {
+        var ps_inputObj = $(".ps_input");
+        if(ps_inputObj.length>0){
+            for(var i=0;i<ps_inputObj.length;i++){
+                var ss           = $(ps_inputObj[i]);
+                var decimalpoint = ss.attr('decimalpoint');
+                var maxVal       = parseInt(ss.attr('maxVal'));
+                var minVal       = 0;
+                if(typeof(ss.attr('minVal')) != 'undefined' && ss.attr('minVal') != '' && ss.attr('minVal') != null){
+                    minVal = parseInt(ss.attr('minVal'));
+                }
+                var value        = ss.val();
+        // console.log(value);
 
-                    if(value != "" && value != 0) {
-                        var preg = /[^\d\.]+/g;
-                        var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
-                        if(value.match(preg) != null){ // 1.先去掉不是数字的部分
-                            ss.val(ss.val().replace(preg,""));
-                            if(ss.val().replace(preg,"") == ''){
-                                ss.val(null)
-                                value = 0;
-                            }else{
-                                value = ss.val().replace(preg,"");
-                            }
+                if(value != "") {
+                    var preg = /[^\d\.]+/g;
+                    var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
+                    if(value.match(preg) != null){ // 1.先去掉不是数字的部分
+                        ss.val(ss.val().replace(preg,""));
+                        if(ss.val().replace(preg,"") == ''){
+                            ss.val(null)
+                            value = 0;
+                        }else{
+                            value = ss.val().replace(preg,"");
                         }
-                        if(!preg1.test(value)){ // 2.再判断小数点
-                            var f  = parseFloat(value);
-                            ss.val(f.toFixed(decimalpoint));
+                    }
+                    if (value > maxVal || value < minVal) { // 3.最后判断最大值最小值
+                        ss.val("");
+                        if(decimalpoint == 0){
+                            layer.msg("输入数值必须为 "+minVal+"-"+  maxVal+"之间的整数！");
+                        }else{
+                            layer.msg("输入数值必须在 "+minVal+"-"+  maxVal+"之间，且最多保留"+decimalpoint+"位小数！");
                         }
-                        if (value > maxVal || value < 0) { // 3.最后判断最大值
-                            ss.val("");
-                            layer.msg("输入数值必须在 0-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
+                        return;
+                    }
+                    if(!preg1.test(value)){ // 2.再判断小数点
+                        if(isRound == 0 && decimalpoint == 0){
+                            alert("输入数值必须为整数！");
                             return;
+                        }else if(isRound == 0){
+                            alert("输入数值最多保留"+decimalpoint+"位小数！");
+                            return;
+                        }else{
+                            var f  = parseFloat(value);
+                            $(this).val(f.toFixed(decimalpoint));
                         }
                     }
                 }
             }
-            var ps_zz     = ($("#ps_zz").length == 1)?$("#ps_zz").val():null;
-            var ps_detail = ($("#ps_detail").length == 1)?$("#ps_detail").val():null;
-            var xr_id     = $("#xr_id").val();
-            var xm_id     = $("#xm_id").val();
-            var xm_type   = $("#xm_type").val();
-            var data      = {
-                ps_zz: ps_zz,
-                ps_detail: ps_detail,
-                xr_id: xr_id,
-                xm_id: xm_id,
-                xm_type: xm_type
-            };
-            for(var i=0;i<markField.length;i++){
-                var temp  = ($("#"+markField[i]).length == 1)?$("#"+markField[i]).val():null;
-                data[markField[i]] = temp;
-                $("#"+markField[i]).attr("defaultvalue",temp);
-            }
-            // console.log(data);return ;
-            $("#ps_zz").attr("defaultvalue",ps_zz);
-            $("#ps_detail").attr("defaultvalue",ps_detail);
-            $.post('__CONTROLLER__/saveps',data, function (rep) {
-                if (rep.code == 0) {
-                    layer.msg("保存成功！");
-                    return true;
-                }
-            },'json');
         }
+        var ps_zz     = ($("#ps_zz").length == 1)?$("#ps_zz").val():null;
+        var ps_detail = ($("#ps_detail").length == 1)?$("#ps_detail").val():null;
+        var xr_id     = $("#xr_id").val();
+        var xm_id     = $("#xm_id").val();
+        var xm_type   = $("#xm_type").val();
+        var data      = {
+            ps_zz: ps_zz,
+            ps_detail: ps_detail,
+            xr_id: xr_id,
+            xm_id: xm_id,
+            xm_type: xm_type
+        };
+        for(var i=0;i<markField.length;i++){
+            var temp  = ($("#"+markField[i]).length == 1)?$("#"+markField[i]).val():null;
+            data[markField[i]] = temp;
+            $("#"+markField[i]).attr("defaultvalue",temp);
+        }
+        // console.log(data);return ;
+        $("#ps_zz").attr("defaultvalue",ps_zz);
+        $("#ps_detail").attr("defaultvalue",ps_detail);
+        $.post('__CONTROLLER__/saveps',data, function (rep) {
+            if (rep.code == 0) {
+                layer.msg("保存成功！");
+                return true;
+            }
+        },'json');
+    }
 //        返回（验证是否有未保存数据）
-        $("#back").on("click",function(){
-            var check = false;
-            for(var i=0;i<markField.length;i++){
-                if($("#"+markField[i]).length == 1 && $("#"+markField[i]).attr("defaultvalue")!=$("#"+markField[i]).val()){
-                    // console.log($("#"+markField[i]).attr("defaultvalue")+"---"+$("#"+markField[i]).val());
-                    check = true;
-                }
-            }
-            if(check ||
-            ($("#ps_zz").length == 1 && $("#ps_zz").attr("defaultvalue")!=$("#ps_zz").val())||
-            ($("#ps_detail").length == 1 && $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val())) {
-                layer.confirm("有评审项尚未保存，是否保存？", function () {
-                    var res = submitData();
-                    if (res !== false) location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
-                    return ;
-                },function(){
-                    location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
-                });
-            }else{
-                location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
-            }
-        });
-        $("#back1").on("click",function(){
-            $("#back").click();
-        });
-        $("#submit1").on("click",function(){
-            $("#submit").click();
-        });
+	$("#back").on("click",function(){
+		var check = false;
+		for(var i=0;i<markField.length;i++){
+			if($("#"+markField[i]).length == 1 && $("#"+markField[i]).attr("defaultvalue")!=$("#"+markField[i]).val()){
+				// console.log($("#"+markField[i]).attr("defaultvalue")+"---"+$("#"+markField[i]).val());
+				check = true;
+			}
+		}
+		if(check ||
+		($("#ps_zz").length == 1 && $("#ps_zz").attr("defaultvalue")!=$("#ps_zz").val())||
+		($("#ps_detail").length == 1 && $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val())) {
+			layer.confirm("有评审项尚未保存，是否保存？", function () {
+				var res = submitData();
+				if (res !== false) location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
+				return ;
+			},function(){
+				location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
+			});
+		}else{
+			location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
+		}
+	});
+	$("#back1").on("click",function(){
+		$("#back").click();
+	});
+	$("#submit1").on("click",function(){
+		$("#submit").click();
+	});
 
-        $("#fileshow").on("click",function(){
-            window.open('__MODULE__/XM/listindexs?xm_id=' + $("#xm_id").val());
-        });
-    </script>
+	$("#fileshow").on("click",function(){
+		window.open('__MODULE__/XM/listindexs?xm_id=' + $("#xm_id").val());
+	});
+</script>
 
 </body>
 </html>

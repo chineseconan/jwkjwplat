@@ -109,7 +109,23 @@
                         }else{
                             return value;
                         }
-                    }}
+                    }},
+
+                {field: 'user_sessionid', title: '是否登录', sortable: false,width:95, visible:true,
+                    formatter: function (value, row, index) {
+                        if(value == '' || value == null){
+                            return '否'
+                        }else{
+                            return '是'
+                        }
+                    }},
+                {field: 'user_id', title: '操作', sortable: false,width:60,
+                    formatter: function (value, row, index) {
+                        var inp = "'"+  value +"'";
+                        var a = '<a style="height:25px;line-height:22px;margin-left: 5px;" class="btn btn-info btn-xs" onclick="clearLogin('+ inp +')">清除登陆锁定</a>';
+                        return a;
+                    }
+                }
             ]
         });
     $('#sys_refresh').on('click',function() {
@@ -124,6 +140,29 @@
             xm_user: $("#xm_user").val()
         };
         return temp;
+    }
+
+    function clearLogin(id)
+    {
+        layer.confirm('确认清除该专家的登录锁定信息吗？',{},function(){
+            $.ajax({
+                type:'post',
+                url:'__MODULE__/User/clearLogin',
+                data:{id: id},
+                dataType :'json',
+                success:function(data){
+//                    console.log(data);return ;
+                    if(data.code == 0){
+                        layer.msg('操作成功');
+                        $('#atpbiztable').bootstrapTable('refresh')
+                    }else{
+                        layer.alert(data.message);
+                        $('#atpbiztable').bootstrapTable('refresh')
+                    }
+
+                }
+            })
+        })
     }
     $('#sys_export').on('click',function() {
         $('#loading').modal('show');

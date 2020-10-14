@@ -1,0 +1,194 @@
+<include file="Public:tableheader" />
+<style>
+    .bootstrap-table .table:not(.table-condensed) > tbody > tr > td {
+        padding: 3px;
+    }
+    th{
+        text-align: center;
+    }
+    td{
+        text-align: center;
+    }
+    .wrapper .wrapper-content{
+        padding-bottom: 0;
+    }
+    .form-control{
+        display: inline-block;
+        width: 270px;
+    }
+    ._box>input{
+        width: 120px;height: 32px;display: inline-block;margin-bottom: 10px;
+    }
+    ._box>label{
+        margin-left:10px;
+    }
+</style>
+<body class="gray-bg"  style="font-family: 微软雅黑;" >
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="ibox-content">
+        <div class="row row-lg">
+            <div class="col-sm-12">
+                <p class="name"  style="text-align: left;font-size:  22px;background-color:;border-left:5px solid green;padding-left: 10px;font-family: 微软雅黑;">待审查协议清单</p>
+                <div class="_box" style="margin-top: -5px;padding-left:20px;">
+                    <label>项目编号:</label>
+                    <input type="text" id="code"  class="form-control"/>
+                    <label>项目名称:</label>
+                    <input type="text" id="name" class="form-control"/>
+<!--                    <label>分组:</label>-->
+<!--                    <select id="class" class="chosen-select">-->
+<!--                        <option value="">全部</option>-->
+<!--                        <foreach name="xmClass" item="val">-->
+<!--                            <option>{$val}</option>-->
+<!--                        </foreach>-->
+<!--                    </select>-->
+<!--                    <label>类别:</label>-->
+<!--                    <select id="type" class="chosen-select">-->
+<!--                        <option value="">全部</option>-->
+<!--                        <foreach name="xmType" item="val">-->
+<!--                            <option>{$val}</option>-->
+<!--                        </foreach>-->
+<!--                    </select>-->
+                    <label>申请人:</label>
+                    <input type="text" id="createuser" class="form-control"/>
+                    <label>依托单位:</label>
+                    <input type="text" id="company" class="form-control"/>
+    <!--                <input type="hidden" id="xm_type" name="xm_type" value="{$xmType}"/>-->
+                </div>
+                <table id="xmTable"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+</body>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script src="__PUBLIC__/vendor/jquery/jquery.form.js"> </script>
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true,width:'120px'});
+    $(".chosen-select").on("change",function(){
+        $('#xmTable').bootstrapTable("refresh");
+    });
+    $("#name").on("keyup",function(){
+        $('#xmTable').bootstrapTable("refresh");
+    });
+    $("#code").on("keyup",function(){
+        $('#xmTable').bootstrapTable("refresh");
+    });
+    $("#createuser").on("keyup",function(){
+        $('#xmTable').bootstrapTable("refresh");
+    });
+    $("#company").on("keyup",function(){
+        $('#xmTable').bootstrapTable("refresh");
+    });
+    $('#xmTable').bootstrapTable({
+        url: '__CONTROLLER__/getData',         //请求后台的URL（*）
+        method: 'post',                      //请求方式（*）
+        // toolbar: '#atpbiztoolbar',                //工具按钮用哪个容器
+        striped: true,                      //是否显示行间隔色
+        cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+        pagination: true,                   //是否显示分页（*）
+        iconSize: 'outline',
+        sortable: true,                     //是否启用排序
+        sortName:"xm_class",
+        sortOrder: "asc,xm_ordernum asc",                   //排序方式
+        queryParams: queryParams,//传递参数（*）
+        sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+        pageNumber: 1,                       //初始化加载第一页，默认第一页
+        pageSize: 10,                       //每页的记录行数（*）
+        pageList: [5,10, 25, 50, 100],        //可供选择的每页的行数（*）
+        minimumCountColumns: 2,             //最少允许的列数
+        clickToSelect: true,                //是否启用点击选中行
+        uniqueId: "xm_id",                     //每一行的唯一标识，一般为主键列
+        detailView: false,                   //是否显示父子表
+        detailFormatter: "detailFormatter",
+        rowStyle:function(row,index){
+            return style = {
+                css:{
+                    'font-size':'15px'
+                }
+            }
+        },
+        columns: [
+            [
+                {checkbox:true},
+                {
+                    title: '序号', width: 40,
+                    formatter: function (value, row, index) {
+                        var option = $('#xmTable').bootstrapTable("getOptions");
+                        return option.pageSize * (option.pageNumber - 1) + index + 1;                                }
+                },
+                {field: 'xm_ordernum', title: '答辩顺序', width:80,sortable: true},
+                {field: 'xm_code', title: '项目编号', width:100,sortable: true},
+                {field: 'xm_name', title: '项目名称', width: 200},
+                {field: 'xm_company', title: '依托单位', width:200,sortable: true},
+                {field: 'xm_createuser', title: '申请人', width:80},
+                // {field: 'xm_class', title: '分组', width:60,sortable: true},
+                // {field: 'xm_type', title: '类别', width:60,sortable: true},
+                {field: 'xm_group', title: '单位类型', width:90,sortable: true},
+                {field: 'xm_tmfs', title: '推荐方式', width:90,sortable: true},
+                {field: 'xm_id', title: '操作', width: 90,
+                    formatter: function (value, row, index) {
+                        var inp     = "'" + value + "'";
+                        var classes = "'" + row.xm_class + "'";
+                        var a = '';
+                        // a += '<a style="height:25px;line-height:23px;margin-top:5px;margin-left:5px;" class="btn btn-info btn-xs" onclick="XMlook(' + inp + ')">项目预览</a>';
+                         a += '<a style="height:25px;line-height:23px;margin-top:5px;margin-left:5px;" class="btn btn-info btn-xs" onclick="XMlooks(' + inp + ')">项目预览</a>';
+                        return a;
+                    }
+                }
+            ]
+        ]
+    });
+    function queryParams(params) {
+        param =  {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+            limit: params.limit,   //页面大小
+            offset: params.offset,  //页码
+            sort: params.sort,  //排序列名
+            sortOrder: params.order,//排位命令（desc，asc）
+            'class': $("#class").val(),
+            name: $("#name").val(),
+            code:$("#code").val(),
+            'createuser':$("#createuser").val(),
+            'company':$("#company").val(),
+            'type':$("#type option:selected").val(),
+            'group':$("#group").val()
+        };
+        return param;
+    }
+
+    /**
+     * 详情表
+     */
+    function detailFormatter(index, row) {
+        var html = [];
+        html.push("<div class='ibox-content'>");
+        html.push("<table class='table'>");
+        html.push("<tbody>");
+        html.push("<tr><td><b>研究目标</b></td><td>" + row['xm_target'] + "</td><td><b>预期成果</b></td><td>" + row['xm_expect'] + "</td></tr>");
+        html.push("<tr><td><b>研究周期</b></td><td>" + row['xm_cycle'] + "</td><td><b>经费概算（万元）</b></td><td>" + row['xm_funds'] + "</td></tr>");
+        html.push("<tr><td><b>原分组</b></td><td>" + row['xm_oldfenzu'] + "</td><td><b>原排名</b></td><td>" + row['xm_oldrank'] + "</td></tr>");
+        html.push("<tr><td><b>原得分</b></td><td>" + row['xm_oldscore'] + "</td><td><b>原资助意见</b></td><td>" + row['xm_oldcommand'] + "</td></tr>");
+        html.push("<tr><td><b>备注</b></td><td colspan='3'>" + row['xm_remark'] + "</td></tr>");
+        html.push("</tbody>");
+        html.push("</table>");
+        html.push("</div>");
+        return html.join('').replace(/null/g, "").replace(/undefined/g, "");
+    }
+    /**
+     * 项目预览（查看材料）
+     */
+    function  XMlook(id){
+        window.open('__CONTROLLER__/listindex?xm_id=' + id);
+    }
+
+    /**
+     * 项目预览（查看材料）
+     */
+    function  XMlooks(id){
+        window.open('__CONTROLLER__/listindexs?xm_id=' + id);
+    }
+</script>
+</html>

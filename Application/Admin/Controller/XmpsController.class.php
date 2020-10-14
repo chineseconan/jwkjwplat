@@ -99,7 +99,56 @@ class XmpsController extends BaseController {
 //            }
 //        }
         $count = $model->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')->where($where)->count();
-        echo json_encode(array( 'total' => $count,'rows' => $data));
+        // 计算评审完成的项目个数(函评)
+        if(C('LOAD_EXT_CONFIG.mark') == 'mark_config_hanping'){
+            $weiwanchengNum = $this->getWeiwanchengNum();
+            echo json_encode(array( 'total' => $count,'rows' => $data,'weiwanchengNum' => $weiwanchengNum));
+        }else{
+            echo json_encode(array( 'total' => $count,'rows' => $data));
+        }
+    }
+
+    /**
+     * 计算评审完成的项目个数(函评)
+     * @param $xmType 项目类别
+     */
+    function getWeiwanchengNum($xmType=''){
+        $model = M('xmps_xmrelation');
+        $relationdata = $model
+            ->alias('t')
+            ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
+            ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中' and ishuibi != 1")
+            ->order("xm_type,xm_ordernum")
+            ->select();
+        $data           = [];
+        $remarkConfig   = C('mark.REMARK_OPTION');
+        $str            = "";
+        $weiwanchengNum = 0;
+        foreach ($relationdata as $rd) {
+            $markField = [];
+            $xm_type   = $rd['xm_type'];
+            if($remarkConfig[$xm_type]['评价内容']){
+                $markField = $remarkConfig[$xm_type]['评价内容'];
+                $markField = array_column($markField, 'field');
+            }else{
+                exit(makeStandResult(1,$xm_type."类型下评价内容缺失"));
+            }
+            $isZiZhu   = empty($remarkConfig[$xm_type]['定性评价'])?0:1;
+            $isDetail  = C("isDetail");
+            if($isZiZhu) array_push($markField,'ps_zz');
+            if($isDetail) array_push($markField,'ps_detail');
+            $sign = true;
+            foreach($markField as $field){
+                if($rd[$field] == ""){
+                    $sign = false;
+                    break;
+                }
+            }
+            if(!$sign){
+                $weiwanchengNum++;
+            }
+        }
+        return $weiwanchengNum;
     }
 
     /**
@@ -134,6 +183,7 @@ class XmpsController extends BaseController {
             }
         }
         $this->assign("data",$data);
+        $this->assign("isRound",C('isRound'));
         $this->assign("offset",I("get.offset"));
         $this->assign("limit",I("get.limit"));
         $this->assign("position",I("get.position"));
@@ -158,8 +208,9 @@ class XmpsController extends BaseController {
 //            dump($remarkConfig);die;
             if($remarkConfig){
                 $this->assign("title",$remarkConfig['title']);// 标题
+                $this->assign("mainpoint",$remarkConfig['评价要点']);// 评价要点
                 $this->assign("standrad",$remarkConfig['评价内容']);// 评价内容
-                $this->assign("notice","<p>".implode("</p><p>",$remarkConfig['注意事项'])."</p>");// 注意事项
+                $this->assign("notice",implode("",$remarkConfig['注意事项']));// 注意事项
                 $this->assign("advise",$remarkConfig['评审意见']);// 评审意见
                 $ziZhu = empty($remarkConfig['定性评价'])?0:1;
                 $this->assign("isZiZhu",$remarkConfig['定性评价']);// 定性评价
@@ -248,7 +299,9 @@ class XmpsController extends BaseController {
         $data['ps_detail'] = null;
         $data['ishuibi']   = I('post.ishuibi',0);
         M('xmps_xmrelation')->where("xr_id='".$xr_id."'")->setField($data);
-        exit(makeStandResult(0,''));
+        // 计算评审完成的项目个数(函评)
+        $weiwanchengNum = $this->getWeiwanchengNum();
+        exit(makeStandResult(0,$weiwanchengNum));
     }
 
     /**

@@ -39,6 +39,34 @@
         font-size: 20px;
         font-weight: normal;
     }
+    .tips{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 13px;
+        /*font-weight: bold;*/
+        margin-left: 2px;
+        margin-bottom:15px;
+        color: #2f4050;
+        margin-top: -12px;
+    }
+    .tip{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 18px;
+        font-weight: bold;
+        margin-left: 10px;
+        margin-bottom:15px;
+        color: #2f4050;
+    }
+    .notice{
+        /*margin-left:100px;*/
+        background-color: bisque;
+        padding: 8px 10px 2px 7px;
+        margin-bottom:5px;
+        width:100%;
+        float:left;
+        font-size: 17px;
+    }
 </style>
 <body  style="font-family: 微软雅黑;">
     <div class="btns">
@@ -47,11 +75,13 @@
     </div>
     <div style="margin:30px 0px 0px 150px;width:80%;font-size: 18px;">
         <p class="title">{$title}</p>
-        <?php if($data['ishuibi'] == 1){?><p class="huibi">（已回避）</p><?php }?>    
+        <?php if($data['ishuibi'] == 1){?><p class="huibi">（已回避）</p><?php }?>
+        <?php if(!empty($notice)){ ?>
         <div class="notice">
-            <p style="font-weight: bold;">注意事项:</p>
+            <span class="tip">注意事项:</span>
             {$notice}
         </div>
+        <?php }?>
         <table class="table" data-toggle="table" data-height="600" style="font-size: 18px;">
             <thead>
             <tr>
@@ -73,7 +103,8 @@
             </tr>
             <?php foreach($standrad as $key=>$value){?>
             <tr>
-                <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo ($key+1).".".$value['mainpoints']."（0-".$value['maxVal']."分）";?></td>
+<!--                <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo ($key+1).".".$value['mainpoints']."（0-".$value['maxVal']."分）";?></td>-->
+                <td colspan="2" style="text-align: left;vertical-align: middle;"><?php echo $mainpoint[$key];?></td>
                 <td colspan="5" style="text-align: left;vertical-align: middle;"><?php echo $value['content'];?></td>
                 <td style="text-align: center;vertical-align: middle;"><?php echo $data[$value['field']];?></td>
             </tr>
