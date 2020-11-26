@@ -1,0 +1,395 @@
+<include file="Public:header" />
+<style>
+    .btns{
+        padding: 10px 120px 10px 10px;
+        width:100%;
+        height:20px;
+    }
+    .btns .btn{
+        margin: 0 6px;
+        padding: 8px 20px;
+        box-sizing: border-box;
+    }
+    .title{
+        text-align:center;
+        font-size: 26px;
+        font-weight: bold;
+    }
+    .table{
+        text-align:center;
+        border: 2px solid #dddddd!important;
+        table-layout: fixed;
+        margin-bottom: 10px;
+    }
+    table tr{
+        height:30px;
+        line-height: 30px;
+    }
+    table td{
+        width:14%;
+        border-left: 1px solid #dddddd!important;
+    }
+    table p{
+        margin:0px;
+    }
+    .tips{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 13px;
+        /*font-weight: bold;*/
+        margin-left: 2px;
+        margin-bottom:15px;
+        color: #2f4050;
+        margin-top: -12px;
+    }
+    .tip{
+        text-align: left;
+        text-indent: 2em;
+        font-size: 18px;
+        font-weight: bold;
+        margin-left: 10px;
+        margin-bottom:15px;
+        color: #2f4050;
+    }
+    .notice{
+        /*margin-left:100px;*/
+        /*background-color: bisque;*/
+        padding: 8px 10px 2px 7px;
+        margin-bottom:5px;
+        width:100%;
+        float:left;
+		font-size: 17px;
+    }
+    .notice>p{
+        text-indent: 3em;
+    }
+    #tables{
+        text-align:left;
+        table-layout: fixed;
+        margin: 10px auto;
+        font-size: 18px;
+        border: none!important;
+        width: 92%;
+    }
+    #tables> thead > tr > th {
+        text-align:right;
+        vertical-align: bottom;
+        border: none;
+        padding: 4px;
+    }
+    .bottomline{
+        border-bottom:2px #777 solid!important;
+        font-weight: normal;
+        text-align:center!important;
+    }
+</style>
+<body  style="font-family: 微软雅黑;">
+    <div class="btns">
+        <a class="btn btn-danger"  id="back" style="float:right;">返回项目列表</a>
+        <button class="btn btn-warning" id="submit" style="float:right;" onclick="submitData();">保存</button>
+        <button class="btn btn-success" id="fileshow" style="float:right;">查看申报材料</button>
+    </div>
+    <div style=''>
+        <div style="margin:30px 10% 0px 10%;width:80%;font-size: 18px;">
+        <p class="title">{$title}</p>
+        <table class="table" id="tables" data-toggle="table" data-height="600">
+            <thead>
+            <tr style="display:;">
+                <th style="width: 10%;"></th>
+                <th style="width: 40%;"></th>
+                <th style="width:12%;"></th>
+                <th style="width: 40%;"></th>
+            </tr>
+            <tr>
+                <th >项目名称：</th>
+                <th style="text-align:left;"><p class="bottomline">{$data.xm_name}</p></th>
+                <th>申报书编号：</th>
+                <th><p class="bottomline">{$data.xm_code}</p></th>
+            </tr>
+            <tr>
+                <th>所属专项：</th>
+                <th style="text-align:left;"><p class="bottomline">先进技术</p></th>
+                <th>指南方向：</th>
+                <th><p class="bottomline">{$data.xm_group}</p></th>
+            </tr>
+            <tr>
+                <th style="text-align:left;">申报单位：</th>
+                <th><p class="bottomline">{$data.xm_company}</p></th>
+                <th>项目负责人：</th>
+                <th><p class="bottomline">{$data.xm_createuser}</p></th>
+            </tr>
+            </thead>
+        </table>
+        <table class="table" data-toggle="table" data-height="600" style="font-size: 18px;">
+            <thead>
+<!--            <tr>-->
+<!--                <td colspan="1" style="width: 60px;vertical-align: middle;"><p style="font-weight: bold;">项目编号</p></td>-->
+<!--                <td colspan="1" style="width: 5%;vertical-align: middle;">{$data.xm_code}</td>-->
+<!--                <td colspan="2" style="width:60px;vertical-align: middle;"><p style="font-weight: bold;">项目名称</p></td>-->
+<!--                <td colspan="4" style="width: 20%;vertical-align: middle;">{$data.xm_name}</td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <td colspan="1" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">申请人</p></td>-->
+<!--                <td colspan="1" style="text-align: center;vertical-align: middle;">{$data.xm_createuser}</td>-->
+<!--                <td colspan="2" style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">依托单位</p></td>-->
+<!--                <td colspan="4" style="text-align: center;vertical-align: middle;">{$data.xm_company}</td>-->
+<!--            </tr>-->
+            <tr>
+                <td style="text-align: center;vertical-align: middle;width:20%"><p style="font-weight: bold;">评价内容</p></td>
+                <td style="text-align: center;vertical-align: middle;width:50%"><p style="font-weight: bold;">评价指标</p></td>
+                <td style="text-align: center;vertical-align: middle;width:10%"><p style="font-weight: bold;">分值</p></td>
+                <td style="text-align: center;vertical-align: middle;width:20%"><p style="font-weight: bold;">得分</p></td>
+            </tr>
+            <?php foreach($standrad as $key=>$value){?>
+                <tr>
+                    <td style="text-align: left;vertical-align: middle;"><?php echo $mainpoint[$key];?></td>
+                    <td style="text-align: left;vertical-align: middle;"><?php echo $value['content'];?></td>
+                    <td style="text-align: center;vertical-align: middle;"><?php echo $value['maxVal'];?></td>
+                    <td style="text-align: center;vertical-align: middle;">
+                        <?php if($value['type'] == 'select'){?>
+                            <select class="ps_input" style="width:80%;" id="<?php echo $value['field'];?>" defaultvalue="<?php echo $data[$value['field']];?>">
+                                <option value=""></option>
+                                <?php foreach($value['source'] as $optionval){?>
+                                    <option <?php if($optionval == $data[$value['field']] && $data[$value['field']] != '') echo "selected";?>><?php echo $optionval;?></option>
+                                <?php }?>
+                            </select>
+                        <?php }else{?>
+                            <input typt="text" class="ps_input" style="width:80%;" id="<?php echo $value['field'];?>" maxVal="<?php echo $value['maxVal'];?>" minVal="<?php echo $value['minVal'];?>" defaultvalue="<?php echo $data[$value['field']];?>" decimalpoint="<?php echo isset($value['decimalpoint'])?intval($value['decimalpoint']):0;?>" value="<?php echo $data[$value['field']];?>"/>
+                        <?php }?>
+                    </td>
+                </tr>
+            <?php }?>
+            <tr style="height:20px;">
+                <td colspan="3" style="text-align: center;vertical-align: middle;"><p style="float:right;font-weight: bold;">总分&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td >
+                    <label id="total" style="text-align: center;vertical-align: middle;">{$data.ps_total}</label>
+                </td>
+            </tr>
+            <if condition="$isZiZhu eq 1">
+                <tr>
+                    <td style="text-align: center;font-weight:bold;vertical-align: middle;">评审结论</td>
+                    <td colspan="3"  style="vertical-align: middle;">
+                        <input type="radio" value="1" name="ps_zz" id="ps_zz1" <if condition="('1' eq $data[ps_zz])">checked</if>/><label for="ps_zz1">&nbsp;建议立项</label>&emsp;&emsp;&emsp;
+                        <input type="radio" value="0" name="ps_zz" id="ps_zz2" <if condition="('0' eq $data[ps_zz])">checked</if>/><label for="ps_zz2">&nbsp;建议不立项</label>
+                        <input type="hidden" id="ps_zz" defaultvalue="{$data.ps_zz}" value="{$data.ps_zz}"/>
+                    </td>
+                </tr>
+            </if>
+            <tr>
+                <td style="vertical-align: middle;"><p style="font-weight:bold">评价意见</p>
+				<span style="font-size:17px" >{$advise}</span></td>
+                <td colspan="3" style="height:280px">
+                    <textarea style="width:98%;height:280px;"  id="ps_detail" defaultvalue="{$data.ps_detail}">{$data.ps_detail}</textarea>
+                </td>
+            </tr>
+            </thead>
+        </table>
+        <?php if(!empty($notice)){ ?>
+            <div class="notice">
+<!--                <span class="tip">备注:</span>-->
+                {$notice}
+            </div>
+        <?php }?>
+        <input type="hidden" id="xr_id" value="{$data.xr_id}" />
+        <input type="hidden" id="xm_id" value="{$data.xm_id}" />
+        <input type="hidden" id="xm_type" value="{$data.xm_type}" />
+    </div>
+    </div>
+    <div class="btns">
+        <a class="btn btn-danger"  id="back1" style="float:right;" >返回项目列表</a>
+        <button class="btn btn-warning" id="submit1" style="float:right;" >保存</button>
+    </div>
+    <script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+    <script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+    var markField = eval('{$markField}'); // 打分字段
+    var isRound   = {$isRound};           // 是否四舍五入
+    $(".ps_input").change(function(){
+        var ss           = $(this);
+        if(ss[0].type == 'text'){
+            var decimalpoint = ss.attr('decimalpoint');
+            var maxVal       = parseInt(ss.attr('maxVal'));
+            var minVal       = 0;
+            if(typeof(ss.attr('minVal')) != 'undefined' && ss.attr('minVal') != '' && ss.attr('minVal') != null){
+                minVal = parseInt(ss.attr('minVal'));
+            }
+            var value        = ss.val();
+            if(value != "") {
+                var preg = /[^\d\.]+/g;
+                var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
+                if(value.match(preg) != null){ // 1.先去掉不是数字的部分
+                    $(this).val($(this).val().replace(preg,""));
+                    if($(this).val().replace(preg,"") == ''){
+                        $(this).val(null)
+                        value = 0;
+                    }else{
+                        value = $(this).val().replace(preg,"");
+                    }
+                    alert("输入数值必须为 "+minVal+"-"+  maxVal+"之间的整数！");
+                }
+                if (value > maxVal || value < minVal) { // 3.最后判断最大值最小值
+                    ss.val("");
+                    if(decimalpoint == 0){
+                        alert("输入数值必须为 "+minVal+"-"+  maxVal+'之间的整数！');
+                    }else{
+                        alert("输入数值必须在 "+minVal+"-"+  maxVal+'之间，且最多保留'+decimalpoint+'位小数！');
+                    }
+                    return;
+                }
+                if(!preg1.test(value)){ // 2.再判断小数点
+                    if(isRound == 0 && decimalpoint == 0){
+                        alert("输入数值必须为整数！");
+                        return;
+                    }else if(isRound == 0){
+                        alert("输入数值最多保留"+decimalpoint+"位小数！");
+                        return;
+                    }else{
+                        var f  = parseFloat(value);
+                        $(this).val(f.toFixed(decimalpoint));
+                    }
+                }
+            }
+        }
+        var ps_total = 0;
+        for(var i=0;i<markField.length;i++){
+            var temp = ($("#"+markField[i]).length == 1)?$("#"+markField[i]).val():0;
+            ps_total += temp*1;
+        }
+        ps_total =  Math.round(ps_total*100000)/100000;
+        $("#total").html(ps_total);
+    });
+//        保存
+        // $("#submit").on("click",submitData());
+    function submitData() {
+        var ps_inputObj = $(".ps_input");
+        if(ps_inputObj.length>0){
+            for(var i=0;i<ps_inputObj.length;i++){
+                var ss           = $(ps_inputObj[i]);
+                var decimalpoint = ss.attr('decimalpoint');
+                var maxVal       = parseInt(ss.attr('maxVal'));
+                var minVal       = 0;
+                if(typeof(ss.attr('minVal')) != 'undefined' && ss.attr('minVal') != '' && ss.attr('minVal') != null){
+                    minVal = parseInt(ss.attr('minVal'));
+                }
+                var value        = ss.val();
+        // console.log(value);
+
+                if(value != "") {
+                    var preg = /[^\d\.]+/g;
+                    var preg1 = new RegExp("^[0-9]{1,}(\.[0-9]{0,"+decimalpoint+"})?$");
+                    if(value.match(preg) != null){ // 1.先去掉不是数字的部分
+                        ss.val(ss.val().replace(preg,""));
+                        if(ss.val().replace(preg,"") == ''){
+                            ss.val(null)
+                            value = 0;
+                        }else{
+                            value = ss.val().replace(preg,"");
+                        }
+                    }
+                    if (value > maxVal || value < minVal) { // 3.最后判断最大值最小值
+                        ss.val("");
+                        if(decimalpoint == 0){
+                            layer.msg("输入数值必须为 "+minVal+"-"+  maxVal+"之间的整数！");
+                        }else{
+                            layer.msg("输入数值必须在 "+minVal+"-"+  maxVal+"之间，且最多保留"+decimalpoint+"位小数！");
+                        }
+                        return;
+                    }
+                    if(!preg1.test(value)){ // 2.再判断小数点
+                        if(isRound == 0 && decimalpoint == 0){
+                            alert("输入数值必须为整数！");
+                            return;
+                        }else if(isRound == 0){
+                            alert("输入数值最多保留"+decimalpoint+"位小数！");
+                            return;
+                        }else{
+                            var f  = parseFloat(value);
+                            $(this).val(f.toFixed(decimalpoint));
+                        }
+                    }
+                }
+            }
+        }
+        // var ps_zz     = ($("#ps_zz").length == 1)?$("#ps_zz").val():null;
+        var ps_zz     = ($("input[name='ps_zz']").length > 0)?$("input[name='ps_zz']:checked").val():null;
+        var ps_detail = ($("#ps_detail").length == 1)?$("#ps_detail").val():null;
+        var xr_id     = $("#xr_id").val();
+        var xm_id     = $("#xm_id").val();
+        var xm_type   = $("#xm_type").val();
+        var data      = {
+            ps_zz: ps_zz,
+            ps_detail: ps_detail,
+            xr_id: xr_id,
+            xm_id: xm_id,
+            xm_type: xm_type
+        };
+        for(var i=0;i<markField.length;i++){
+            var temp  = ($("#"+markField[i]).length == 1)?$("#"+markField[i]).val():null;
+            data[markField[i]] = temp;
+        }
+        var res = true;
+        $.ajax({
+            type:'post',
+            url: '__CONTROLLER__/savepsbxyz',
+            data:data,
+            dataType:'json',
+            async:false,
+            success:function(rep){
+                if (rep.code == 0) {
+                    for(var i=0;i<markField.length;i++){
+                        var temp  = ($("#"+markField[i]).length == 1)?$("#"+markField[i]).val():null;
+                        $("#"+markField[i]).attr("defaultvalue",temp);
+                    }
+                    // console.log(data);return ;
+                    $("#ps_zz").attr("defaultvalue",ps_zz);
+                    $("#ps_detail").attr("defaultvalue",ps_detail);
+                    layer.msg("保存成功！");
+                }else{
+                    layer.alert(rep.message);
+                    res =  false;
+                }
+            }
+        });
+        return res;
+    }
+//        返回（验证是否有未保存数据）
+	$("#back").on("click",function(){
+		var check = false;
+		for(var i=0;i<markField.length;i++){
+			if($("#"+markField[i]).length == 1 && $("#"+markField[i]).attr("defaultvalue")!=$("#"+markField[i]).val()){
+				// console.log($("#"+markField[i]).attr("defaultvalue")+"---"+$("#"+markField[i]).val());
+				check = true;
+			}
+		}
+		if(check ||
+		($("#ps_zz").length == 1 && !($("#ps_zz").attr("defaultvalue")=='' && typeof($("input[name='ps_zz']:checked").val()) == 'undefined') && $("#ps_zz").attr("defaultvalue")!=$("input[name='ps_zz']:checked").val())||
+		($("#ps_detail").length == 1 && $("#ps_detail").attr("defaultvalue")!=$("#ps_detail").val())) {
+			layer.confirm("有评审项尚未保存，是否保存？", function () {
+				var res = submitData();
+				// alert(res);
+				if (res !== false) location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
+				return ;
+			},function(){
+				location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
+			});
+		}else{
+			location.href = "__CONTROLLER__/markIndex?offset={$offset}&limit={$limit}&position={$position}";
+		}
+	});
+	$("#back1").on("click",function(){
+		$("#back").click();
+	});
+	$("#submit1").on("click",function(){
+		$("#submit").click();
+	});
+
+	$("#fileshow").on("click",function(){
+		window.open('__MODULE__/XM/listindexs?xm_id=' + $("#xm_id").val());
+	});
+</script>
+
+</body>
+</html>
