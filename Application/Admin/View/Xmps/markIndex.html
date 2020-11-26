@@ -11,8 +11,8 @@
         font-weight: bolder;
         font-size: 20px;
     }
-    #weiwanchengNum{
-        color: orange;
+    #wanchengNum{
+        color: forestgreen;
         font-weight: bolder;
         font-size: 20px;
     }
@@ -33,7 +33,7 @@
                         <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-refresh">&nbsp;</i>刷新</button>
                         <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_wancheng"><i class="fa fa-check">&nbsp;</i>提交</button>
                         <span style="float:right;font-size: 18px;">
-                            共 <span id="totalNum"></span> 个项目，未评审完成 <span id="weiwanchengNum"></span> 个项目
+                            共 <span id="totalNum"></span> 个项目，已评审完成 <span id="wanchengNum"></span> 个项目
                         </span>
                     </div>
                     <table id="atpbiztable" style="font-size:15px;"></table>
@@ -134,7 +134,9 @@
             ],
             onLoadSuccess:function(data){
                 $("#totalNum").text(data.total);
-                $("#weiwanchengNum").text(data.weiwanchengNum);
+                var weiwanchengNum = data.weiwanchengNum;
+                var wanchengNum = data.total - weiwanchengNum;
+                $("#wanchengNum").text(parseInt(wanchengNum));
                 if("{$Think.config.isZZ}" == 1){
                     $('#atpbiztable').bootstrapTable('showColumn','ps_zz');
                 }
@@ -176,7 +178,9 @@
                     index:index,
                     row:data
                 });
-                $("#weiwanchengNum").text(rep.message);
+                var totalNum = $("#totalNum").text();
+                var wanchengNum = totalNum - rep.message;
+                $("#wanchengNum").text(parseInt(wanchengNum));
             }
         },'json');
     }
@@ -192,7 +196,7 @@
                             layer.msg("提交成功");
                             $('#atpbiztable').bootstrapTable('refresh');
                         } else {
-                            layer.msg("提交失败，请稍候重试！");
+                            layer.alert(rep.message);
                         }
                     }, 'json');
                 });

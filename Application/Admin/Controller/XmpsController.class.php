@@ -159,7 +159,7 @@ class XmpsController extends BaseController {
         $model      = M('xmps_xm');
         $markField  = $this->getAllMarkFieldFormat();
         $markField  = implode(",",$markField);
-        $data  = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xr_id,'.$markField.',ps_zz,ps_detail,0+cast(ps_total as char) as ps_total')
+        $data  = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xm_group,xr_id,'.$markField.',ps_zz,ps_detail,0+cast(ps_total as char) as ps_total')
             ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->where("xr_id='".$id."'")
             ->find();
@@ -175,7 +175,7 @@ class XmpsController extends BaseController {
                 $markField = removeArrKey($remarkConfig['评价内容'],'field');
                 $this->assign('markField',json_encode($markField));
 
-                $this->assign("notice","<p>".implode("</p><p>",$remarkConfig['注意事项'])."</p>");// 注意事项
+                $this->assign("notice","<p style='text-indent: 0em;'><b>备注：</b>".implode("</p><p>",$remarkConfig['注意事项'])."</p>");// 注意事项
                 $this->assign("advise",$remarkConfig['评审意见']);// 评审意见
                 $ziZhu = empty($remarkConfig['定性评价'])?0:1;
                 $this->assign("isZiZhu",$remarkConfig['定性评价']);// 定性评价
@@ -191,6 +191,35 @@ class XmpsController extends BaseController {
     }
 
     /**
+     * 项目打分页面（函评）
+     */
+    public function markingbx(){
+        $model      = M('xmps_xm');
+        $markField  = $this->getAllMarkFieldFormat();
+        $markField  = implode(",",$markField);
+        $where      = [];
+        $where['xr_user_id']   = array('eq' ,session("user_id"));
+        $where['voteoptionbx'] = array('eq' ,'1');
+        $data = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xm_group,xr_id,'.$markField.',ishuibi,ps_zz,ps_detail,0+cast(ps_total as char) as ps_total,vote1,bx_detail,bx_time,vote1status,0+cast(avgvalue as char) as avgvalue,agreecount')
+            ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
+            ->join("left join (select xr_xm_id,count(xr_id) agreecount from xmps_xmrelation where ps_zz = 1 group by xr_xm_id) c on xmps_xm.xm_id=c.xr_xm_id") // 查询同意票数
+            ->where($where)
+            ->order("agreecount desc,avgvalue desc")
+            ->select();
+        if(empty($data)){
+            exit("并行投票未开始！");
+        }else{
+            $this->assign('data',$data);
+            if($data[0]['vote1status'] == '进行中'){
+                $this->display();
+            }else{
+                $this->display('showmarkingbx');
+            }
+        }
+//        dump($data);
+    }
+
+    /**
      * 项目打分页面查看结果（函评）
      */
     public function showmarking(){
@@ -198,7 +227,7 @@ class XmpsController extends BaseController {
         $model = M('xmps_xm');
         $markField  = $this->getAllMarkFieldFormat();
         $markField  = implode(",",$markField);
-        $data = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xr_id,'.$markField.',ps_zz,ps_detail,ishuibi,0+cast(ps_total as char) as ps_total')
+        $data = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xm_group,xr_id,'.$markField.',ps_zz,ps_detail,ishuibi,0+cast(ps_total as char) as ps_total')
             ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
             ->where("xr_id='".$id."'")
             ->find();
@@ -211,6 +240,7 @@ class XmpsController extends BaseController {
                 $this->assign("mainpoint",$remarkConfig['评价要点']);// 评价要点
                 $this->assign("standrad",$remarkConfig['评价内容']);// 评价内容
                 $this->assign("notice",implode("",$remarkConfig['注意事项']));// 注意事项
+//                $this->assign("notice","<p style='text-indent: 0em;'><b>备注：</b>".implode("</p><p>",$remarkConfig['注意事项'])."</p>");// 注意事项
                 $this->assign("advise",$remarkConfig['评审意见']);// 评审意见
                 $ziZhu = empty($remarkConfig['定性评价'])?0:1;
                 $this->assign("isZiZhu",$remarkConfig['定性评价']);// 定性评价
@@ -274,6 +304,151 @@ class XmpsController extends BaseController {
             }
             exit(makeStandResult(0,''));
         }catch (Exception $e){
+            exit(makeStandResult(1,'错误信息'.$e));
+        }
+    }
+
+    /**
+     * 保存评审结果（函评）（并行验证）
+     * 1.验证建议立项总分 >= 75
+     * 2.验证建议立项评分 应高于其不建议立项的项目
+     * 3.验证建议立项投票总数
+     */
+    public function savepsbxyz(){
+        $data = I("post.");
+        foreach($data as $key=>$d) {
+            if ($d == "")
+                $data[$key] = null;
+        }
+        // 获取所有打分字段求和
+        $remarkConfig = C('mark.REMARK_OPTION')[trim($data['xm_type'])]['评价内容'];
+        $markField    = removeArrKey($remarkConfig,'field');
+        $ps_total = 0;
+        foreach($markField as $field){
+            if(!isset($data[$field])) continue;
+            $ps_total += $data[$field];
+        }
+        // 验证建议立项总分 >= 75
+        if($data['ps_zz'] == 1 && $ps_total<75){
+            exit(makeStandResult(2,"对于建议立项的项目，评分应不低于75分且高于其不建议立项的项目！"));
+        }
+        $model = M('xmps_xmrelation');
+        if($data['ps_zz'] == 1){
+            // 验证建议立项评分 应高于其不建议立项的项目
+            $where = [];
+            $where['xr_id']      = ['neq',$data['xr_id']];
+            $where['xr_user_id'] = ['eq' ,session("user_id")];
+            $where['xm_type']    = ['eq' ,$data['xm_type']];
+            $where['ps_zz']      = ['eq' ,0];
+            $maxBLX = $model->join("inner join xmps_xm on xmps_xm.xm_id=xmps_xmrelation.xr_xm_id")->where($where)->getField('max(ps_total)');
+            if(!empty($maxBLX) && ($maxBLX >= $ps_total)){
+                exit(makeStandResult(3,"对于建议立项的项目，评分应不低于75分且高于其不建议立项的项目！"));
+            }
+            // 验证建议立项投票总数
+            $where = [];
+            $where['xr_user_id'] = ['eq' ,session("user_id")];
+            $where['xm_type']    = ['eq' ,$data['xm_type']];
+            $xmTotalNum = $model->join("inner join xmps_xm on xmps_xm.xm_id=xmps_xmrelation.xr_xm_id")->where($where)->count();
+            $maxVoteNum = floor($xmTotalNum/2); // >= 5个项目时
+            if($xmTotalNum < 5){ // < 5个项目时
+                $maxVoteNum = C('mark.REMARK_OPTION')[trim($data['xm_type'])]['拟支持最大项目数'];
+            }
+            $where['xr_id']      = ['neq',$data['xr_id']];
+            $where['ps_zz']      = ['eq' ,1];
+            $xmVoteNum = $model->join("inner join xmps_xm on xmps_xm.xm_id=xmps_xmrelation.xr_xm_id")->where($where)->count();
+            if($xmVoteNum + 1 > $maxVoteNum){
+                exit(makeStandResult(5,"建议立项投票总数已大于本方向拟支持的最大项目数：<b>".$maxVoteNum."</b>，请返回修改！"));
+            }
+        }
+
+//        dump($data);die;
+        $data["ps_detail"] = trim($data['ps_detail']);
+        $data["ps_total"]  = $ps_total;
+        $data["ps_time"]   = time();
+        try {
+            $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+            // 求平均
+            $xmid    = $data["xm_id"];
+            $xmtotal = $model->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0")->order("ps_total")->select();
+//            echo $model->_sql();
+//            dump($xmtotal);die;
+            $xmcount = count($xmtotal);
+            if($xmcount>2) {
+                unset($xmtotal[0]);
+                unset($xmtotal[$xmcount - 1]);
+                $total = 0;
+                foreach ($xmtotal as $t) {
+                    $total += floatval($t["ps_total"]);
+                }
+                $model->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),2, '.', ''));
+            }
+            exit(makeStandResult(0,''));
+        }catch (Exception $e){
+            exit(makeStandResult(1,'错误信息'.$e));
+        }
+    }
+
+    /**
+     * 保存并行评审结果（函评）（并行）
+     */
+    public function savepsbx(){
+        $data = I("post.");
+//        dump($data);die;
+        $vote1     = $data['vote1'];
+        $bx_detail = $data['bx_detail'];
+        $bx_time   = $data['bx_time'];
+        $model     = M('xmps_xmrelation');
+        try {
+            $where      = [];
+            $where['xr_user_id']   = ['eq' ,session("user_id")];
+            $where['voteoptionbx'] = ['eq' ,'1'];
+            $xrData = $model->field('xr_id,xm_id')
+                ->join('xmps_xm on xr_xm_id=xmps_xm.xm_id')
+                ->where($where)
+                ->select();
+            $xr_ids = array_column($xrData,'xr_id');
+            $xm_ids = array_column($xrData,'xm_id');
+            $model->where(["xr_id"=>['in',$xr_ids]])->save($data);
+//            echo $model->_sql();
+//            dump($xrData);die;
+            // 计算并行的得票率
+            $xmtotal = $model
+                ->field("count(*) totalnum,
+                sum(case when vote1 = 1 then 1 else 0 end) votenum")
+                ->where("xr_xm_id='".$xm_ids[0]."' and vote1 is not null and ishuibi=0")
+                ->group("xr_xm_id")
+                ->find();
+//        dump($xmtotal);die;
+            $xmcount = $xmtotal['totalnum'];
+            $votenum = $xmtotal['votenum'];
+            if($xmcount>0) {
+                $voterate = round($votenum/$xmcount,2);
+                $model->where(['xr_xm_id'=>['in',$xm_ids]])->setField("vote1rate",  number_format($voterate,2, '.', ''));
+//                echo $Model->_sql();
+            }
+            exit(makeStandResult(0,''));
+        }catch (\Exception $e){
+            exit(makeStandResult(1,'错误信息'.$e));
+        }
+    }
+
+    /**
+     * 并行投票提交
+     */
+    public function submitpsbx(){
+        $model     = M('xmps_xmrelation');
+        try {
+            $where      = [];
+            $where['xr_user_id']   = ['eq' ,session("user_id")];
+            $where['voteoptionbx'] = ['eq' ,'1'];
+            $xrData = $model->field('xr_id')
+                ->join('xmps_xm on xr_xm_id=xmps_xm.xm_id')
+                ->where($where)
+                ->select();
+            $xr_ids = array_column($xrData,'xr_id');
+            $model->where(["xr_id"=>['in',$xr_ids]])->setField(['vote1status'=>'完成']);
+            exit(makeStandResult(0,''));
+        }catch (\Exception $e){
             exit(makeStandResult(1,'错误信息'.$e));
         }
     }
@@ -560,7 +735,7 @@ class XmpsController extends BaseController {
             if($isDetail) array_push($markField,'ps_detail');
             foreach($markField as $field){
                 if($rd[$field] == ""){
-                    $str .='<li>'.$rd['xm_code'] . '</li>';
+                    $str .='<li>'.$rd['xm_code'] . '-'.$rd['xm_name'].'</li>';
                     break;
                 }
             }
@@ -571,6 +746,7 @@ class XmpsController extends BaseController {
         }
         exit(makeStandResult(0,''));
     }
+
     /**
      * 专家打分提交（改状态）(函评)
      */
@@ -586,6 +762,92 @@ class XmpsController extends BaseController {
                 ->select();
             $xr_ids = removeArrKey($relationdata,'xr_id');
             if(!empty($xr_ids)){
+                $model->where(["xr_id"=>['in',$xr_ids]])->save(["xr_status"=>"完成"]);
+                // 求平均
+                $xm_ids = removeArrKey($relationdata,'xr_xm_id');
+                foreach ($xm_ids as $xmid){
+                    $xmtotal = $model->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0")->order("ps_total")->select();
+                    $xmcount = count($xmtotal);
+                    if($xmcount>2) {
+                        unset($xmtotal[0]);
+                        unset($xmtotal[$xmcount - 1]);
+                        $total = 0;
+                        foreach ($xmtotal as $t) {
+                            $total += floatval($t["ps_total"]);
+                        }
+                        $model->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
+                    }
+                }
+            }
+            $model->commit();
+            exit(makeStandResult(0,''));
+        } catch (Exception $e) {
+            $model->rollback();
+            exit(makeStandResult(1,'错误信息'.$e));
+        }
+    }
+    /**
+     * 专家打分提交（改状态）(函评)（并行）
+     * 1.验证建议立项总分 >= 75
+     * 2.验证建议立项评分 应高于其不建议立项的项目
+     * 3.验证建议立项投票总数
+     */
+    public function savepswanchenghanbx()
+    {
+        $model = M('xmps_xmrelation');
+        $model->startTrans();
+        try {
+            $relationdata = $model
+                ->alias('t')
+                ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
+                ->where("xr_user_id='" . session("user_id") . "' and xr_status='进行中'")
+                ->select();
+            $xr_ids = removeArrKey($relationdata,'xr_id');
+            if(!empty($relationdata)){
+
+                $xmTotalNum = count($relationdata); // 项目总数
+                $maxBLX     = 0;                    // 不建议立项的 项目最高分
+                $xmVoteNum  = 0;                    // 已投 建议立项 总票数
+                foreach($relationdata as $key=>$item){
+                    $ishuibi  = $item['ishuibi'];
+                    if($ishuibi != 1){
+                        $ps_zz    = $item['ps_zz'];
+                        $ps_total = $item['ps_total'];
+                        if($ps_zz == 1){
+                            // 验证建议立项总分 >= 75
+                            if($ps_total < 75){
+                                exit(makeStandResult(2,"建议立项的项目评分应不低于75分，请修改！"));
+                            }
+                            $xmVoteNum ++;
+                        }else{
+                            if($ps_total>$maxBLX) $maxBLX = $ps_total;
+                        }
+                    }
+                }
+                // 验证建议立项评分 应高于其不建议立项的项目
+                foreach($relationdata as $key=>$item){
+                    $ishuibi  = $item['ishuibi'];
+                    if($ishuibi != 1){
+                        $ps_zz    = $item['ps_zz'];
+                        $ps_total = $item['ps_total'];
+                        if($ps_zz == 1){
+                            // 验证建议立项总分 >= 75
+                            if($maxBLX >= $ps_total){
+                                exit(makeStandResult(3,"建议立项的项目评分应高于不建议立项的项目，请修改！"));
+                            }
+                        }
+                    }
+                }
+                if($xmTotalNum < 5){ // < 5个项目时
+                    $maxVoteNum = C('mark.REMARK_OPTION')[trim($item['xm_type'])]['拟支持最大项目数'];
+                }else{ // >= 5个项目时
+                    $maxVoteNum = floor($xmTotalNum/2);
+                }
+                if($xmVoteNum > $maxVoteNum){
+                    exit(makeStandResult(5,"建议立项投票总数已大于本方向拟支持的最大项目数：<b>".$maxVoteNum."</b>，请返回修改！"));
+                }
+            }
+            if(!empty($xr_ids)){
 				$model->where(["xr_id"=>['in',$xr_ids]])->save(["xr_status"=>"完成"]);
 				// 求平均
 				$xm_ids = removeArrKey($relationdata,'xr_xm_id');
@@ -599,7 +861,7 @@ class XmpsController extends BaseController {
 						foreach ($xmtotal as $t) {
 							$total += floatval($t["ps_total"]);
 						}
-						$model->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
+						$model->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),2, '.', ''));
 					}
 				}
 			}

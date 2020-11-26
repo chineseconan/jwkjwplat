@@ -89,13 +89,15 @@ class MxQueryController extends BaseController
      */
     public function expertexport()
     {
+        $type      = I('get.type');
         $userModel = M("sysuser");
-        $where = [];
+        $where     = [];
         $where['user_isdelete'] = ['eq', '0'];
         $where['user_issystem'] = ['eq', '否'];
         $where['user_role']     = ['eq',$this->professorid];
         $data = $userModel->field('user_id,user_name,user_realusername')->where($where)->select();
         $this->assign("user", $data);
+        $this->assign("type", $type);
         $this->display();
     }
 
@@ -276,6 +278,101 @@ class MxQueryController extends BaseController
         $title = C('ExportTitle')."专家评审意见汇总表";
 
         echo excelExport($header, $data, true,$width,true,true,true,$title,"分组：".$username["user_class"]."          评审专家：".$username["user_realusername"],array(1,3),$username["user_realusername"]);
+    }
+
+    /**
+     * 专家评审表格导出
+     * @throws \PHPExcel_Writer_Exception
+     */
+    public function exportForExpertDetail()
+    {
+        $queryParam = I('post.');
+        $xm_id = trim($queryParam['xm_id']);
+        $where = [];
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        if (!empty($queryParam['xm_class'])) {
+            $where['xm_class'] = ['like', '%'.$queryParam['xm_class'].'%'];
+        }
+        if (!empty($queryParam['xm_user'])) {
+            $where['xr_user_id'] = ['eq', $queryParam['xm_user']];
+        }
+        $map['user_id'] = Array("eq",$queryParam['xm_user']);
+        $username = M("sysuser")->where($map)->find();
+//        dump($username);die;
+        $model = M('xmps_xm');// 专家是否打完分
+        $isFinish = M('xmps_xmrelation')
+            ->alias('t')
+            ->join('left join xmps_xm m on m.xm_id=t.xr_xm_id')
+            ->where("xr_user_id='%s' and xr_status='进行中'",$queryParam['xm_user'])
+            ->count();
+        if($isFinish != 0) exit(makeStandResult(0,'当前专家未提及，请等专家提交后再导出签字表！'));
+
+        import("Vendor.PHPWord.PHPWord");
+        // 拼接列
+
+        $markField  = $this->getAllMarkFieldFormat();
+        $markField  = implode(",",$markField);
+        $data       = $model->field('xm_id,xm_code,xm_name,xm_company,xm_createuser,xm_type,xm_group,ishuibi,'.$markField.',ps_zz,ps_detail,0+cast(ps_total as char) as ps_total')
+            ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
+            ->where("xr_user_id='%s'",$queryParam['xm_user'])
+            ->order("xm_ordernum")
+            ->select();
+        $count      = count($data);
+//        dump($data);dump($count);die;
+        $PHPWord = new \PHPWord();
+//        $document = $PHPWord->loadTemplate('Public/template/template10.docx');
+        $document = $PHPWord->loadTemplate('Public/template/template'.$count.'.docx');
+        $pathInfo = [];
+        foreach($data as $key=>$val){
+            $number  = $key+1;
+            $ishuibi = $val['ishuibi'];
+            $document->setValue('xm_name'.$number, $val['xm_name']);
+            $document->setValue('xm_code'.$number, $val['xm_code']);
+            $document->setValue('xm_type'.$number, $val['xm_group']);
+            $document->setValue('xm_company'.$number, $val['xm_company']);
+            $document->setValue('xm_createuser'.$number, $val['xm_createuser']);
+            $document->setValue('date'.$number, date("Y年m月d日"));
+            if($ishuibi == 1){
+                $document->setValue('huibi'.$number, '（已回避）');
+                $document->setValue('ps_item1'.$number, '-');
+                $document->setValue('ps_item2'.$number, '-');
+                $document->setValue('ps_item3'.$number, '-');
+                $document->setValue('ps_item4'.$number, '-');
+                $document->setValue('ps_item5'.$number, '-');
+                $document->setValue('ps_total'.$number, '-');
+                $document->setValue('ps_zz'.$number, '-');
+                $document->setValue('ps_detail'.$number, '-');
+            }else{
+                $document->setValue('huibi'.$number, '');
+                $document->setValue('ps_item1'.$number, $val['ps_item1']);
+                $document->setValue('ps_item2'.$number, $val['ps_item2']);
+                $document->setValue('ps_item3'.$number, $val['ps_item3']);
+                $document->setValue('ps_item4'.$number, $val['ps_item4']);
+                $document->setValue('ps_item5'.$number, $val['ps_item5']);
+                $document->setValue('ps_total'.$number, $val['ps_total']);
+                $document->setValue('ps_detail'.$number, $val['ps_detail']);
+                if($val['ps_zz'] == 1){
+                    $document->setValue('ps_zz'.$number, '■ 建议立项  □ 建议不立项');
+                }else{
+                    $document->setValue('ps_zz'.$number, '□ 建议立项  ■ 建议不立项');
+                }
+            }
+
+        }
+        $filename = $username['user_realusername']."-".$val['xm_group'].".doc";
+        $savePath = 'Public/upload/word/' . date('Y-m-d');
+        if (!is_dir($savePath)) mkdir($savePath, 0777, true);
+        $filePath = $savePath . '/' . $filename;
+        if(!@rename('测试编码.txt',  '测试编码修改.txt') && !@rename('测试编码修改.txt',  '测试编码.txt')){
+            $filePath = iconv('UTF-8','gbk',$filePath);
+        }
+        $document->save($filePath);
+        $fileRootPath = getWebsiteRootPath();
+        $filePath = $savePath . '/' . $filename;
+        exit(json_encode(array('code' => 1, 'message' => $fileRootPath . $filePath)));
+//        exit(json_encode(array('code' => 1, 'message' => $filePath)));
     }
 
 }

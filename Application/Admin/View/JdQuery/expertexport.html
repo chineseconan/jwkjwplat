@@ -132,8 +132,8 @@
                 xm_user:name
             };
             var t = "__CONTROLLER__/exportForExpert";
-            if('{$type}' == 'detail'){
-                t = "__CONTROLLER__/exportForExpertDetail";
+            if('{$type}' != ''){
+                t = "__CONTROLLER__/{$type}";
             }
             t = encodeURI(t);
             $.ajax({
@@ -143,16 +143,33 @@
                 dataType:'json',
                 success:function(data){
 //                    console.log(data);
-                    if(data.code > 0){
-                        location.href = data.message;
-                        var index = parent.layer.getFrameIndex(window.name);
-                        parent.layer.close(index);
+//                     if(data.code > 0){
+//                         location.href = data.message;
+//                         var index = parent.layer.getFrameIndex(window.name);
+//                         parent.layer.close(index);
+//                     }else{
+//                         parent.layer.msg(data.message);
+//                     }
+                    if(data.code == 0){
+                        var fileInfo = data.message;
+                        downLoadFiles(fileInfo);
                     }else{
-                        parent.layer.msg(data.message);
+                        parent.layer.alert(data.message);
                     }
                 }
             })
         }
     });
+    function downLoadFiles(fileInfo){
+        var i=0;
+        var res = setInterval(function(){
+            if(i<fileInfo.length){
+                location.href = fileInfo[i];
+                i++;
+            }else{
+                clearInterval(res);
+            }
+        },500);
+    }
 </script>
 </html>

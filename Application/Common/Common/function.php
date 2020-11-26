@@ -276,9 +276,13 @@ function excelExport($tableHeader = array(), $result = array(), $isAjaxDown = tr
             $j++;
         }
     }
-    if($footer){
-        //设置页脚
+    //设置页脚
+    if($footer===true){
+
         $excel->getActiveSheet()->getHeaderFooter()->setOddFooter("专家签字：                                                        日期：&R &P")->setAlignWithMargins(true);
+        $excel->getActiveSheet()->getPageMargins()->setFooter("0.5");
+    }elseif ($footer !== false){
+        $excel->getActiveSheet()->getHeaderFooter()->setOddFooter($footer)->setAlignWithMargins(true);
         $excel->getActiveSheet()->getPageMargins()->setFooter("0.5");
     }
     if(!empty($repeat)) {//跨页 重复显示  固定头用
@@ -302,6 +306,7 @@ function excelExport($tableHeader = array(), $result = array(), $isAjaxDown = tr
         $fileRootPath = getWebsiteRootPath();
         $filePath = $savePath . '/' . $filename;
         exit(json_encode(array('code' => 1, 'message' => $fileRootPath . $filePath)));
+//        return $fileRootPath . $filePath;
     } else {
         header("Pragma: public");
         header('Content-Disposition:attachment;filename=' .$filename . '.xlsx');

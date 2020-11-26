@@ -1,0 +1,140 @@
+﻿<include file="Public:tableheader" />
+<style>
+    #detailtable th{
+        text-align: center;
+        vertical-align: middle;
+    }
+    .wrapper .wrapper-content{
+        padding-bottom: 0;
+    }
+    .control-label{
+        font-size: 16px!important;
+    }
+</style>
+<body class="gray-bg">
+<div class="wrapper wrapper-content " style="overflow: hidden">
+    <div class="ibox-content">
+        <table id="detailtable" ></table>
+    </div>
+    <div class="tc" style="height:50px;margin-top: 20px;float: left;text-align: center;width: 100%;position:absolute;bottom:0;">
+        <a class="btn btn-success" id="sys_dlg_submit">开启并行投票</a>
+    </div>
+</div>
+<div class="modal fade" id="loading" role="dialog" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">处理中</h4>
+            </div>
+            <div class="modal-body">
+                <img src="__PUBLIC__/img/loading/loading8.gif" style="display:block;margin:0 auto;"/>
+                <div id="loadingText" style="text-align:center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var h = $(window).height()-120;
+    $('table').attr('data-height',h);
+    $('#detailtable').bootstrapTable({
+        url: '__CONTROLLER__/getvotexmdata',
+        method: 'post',
+        striped: true,
+        cache: false,
+        pagination: false,
+        iconSize: 'outline',
+        sortable: true,
+        sortName:"agreecount",
+        sortOrder: "desc",
+        queryParams: queryParams,
+        sidePagination: "server",
+        pageNumber: 1,
+        pageSize: 10,
+        pageList: [25, 50, 100],
+        minimumCountColumns: 2,
+        clickToSelect: true,
+        uniqueId: "xm_id",
+        detailView: false,
+        columns: [
+            {checkbox:true},
+            {title: '序号', width: 40,
+                formatter: function (value, row, index)
+                {
+                    var option =  $('#detailtable').bootstrapTable("getOptions");
+                    return option.pageSize * (option.pageNumber - 1) + index + 1;
+                }
+            },
+            {field: 'xm_ordernum', title: '答辩顺序', sortable: true,width:70,align:'center'},
+            {field: 'xm_code', title: '项目编号', sortable: true,width:70,align:'center'},
+            {field: 'xm_name', title: '项目名称', sortable: true,width:100},
+            {field: 'xm_company', title: '申请单位', sortable: true,width:80},
+            {field: 'xm_createuser', title: '申请人', sortable: true,width:70,align:'center'},
+            {field: 'agreecount', title: '得票数', sortable: true, width:70,align:'center'},
+            {field: 'avgvalue', title: '平均分', sortable: true,width:70,align:'center'},
+
+        ],
+        onLoadSuccess:function(){
+
+        }
+    });
+    function queryParams(params) {
+        var temp = {
+            xmgroup:"{$xmGroup}",
+            sort: params.sort,
+            sortOrder: params.order
+        };
+        return temp;
+    }
+    $("#sys_dlg_submit").on("click", saveData);
+    function saveData() {
+        var data    =  $('#detailtable').bootstrapTable('getAllSelections');
+        if (data.length == 0) {
+            alert("请选择要开启并行投票的项目！");
+            return false;
+        }
+        if (data.length < 2) {
+            alert("只能选择两个及以上项目开启并行投票，请修改！");
+            return false;
+        }
+        var res = confirm("确定开启并行投票吗？");
+        if(res){
+            $('#loading').modal('show');
+            var t = "__CONTROLLER__/beginVoteBX";
+            t = encodeURI(t);
+            $.ajax({
+                type:'post',
+                url: t,
+                data:{xmGroup:"{$xmGroup}",data:data},
+                dataType:'json',
+                success:function(data){
+                    $('#loading').modal('hide');
+                    if(data.code == 0){
+                        parent.layer.msg("并行投票开启成功");
+                    }else{
+                        alert(data.message);
+                    }
+                    parent.$('#atpbiztable').bootstrapTable('refresh');
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                }
+            });
+        }
+    }
+    /**
+     * 格式化小数
+     */
+    function fomatFloat(number){
+        if(isNaN(number) || (number == '') || (number == null)){
+            return parseInt(0);
+        }
+        var f  = parseFloat(number);
+        return Math.round(f*100)/100;
+    }
+</script>
+</body>
+
+</html>
+
+
+
+

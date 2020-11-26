@@ -21,6 +21,10 @@
         background-color: forestgreen;
         border-color: forestgreen;
     }
+    #sys_export_detail{
+        background-color: #31708f;
+        border-color: #31708f;
+    }
 </style>
 <body class="gray-bg" style="font-family: 微软雅黑;">
 <div class="wrapper wrapper-content animated fadeInRight">
@@ -76,6 +80,7 @@
                         <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-search"></i>查询</button>
                         <button class="btn btn-danger" style="margin-left: 8px;" type="button" id="sys_export"><i class="fa fa-download"></i>导出</button>
                         <button class="btn btn-danger" style="margin-left: 4px;" type="button" id="sys_export_expert"><i class="fa fa-download"></i>签字表导出</button>
+                        <button class="btn btn-danger" style="margin-left: 4px;" type="button" id="sys_export_detail"><i class="fa fa-do/wnload"></i>导出专家评审表格</button>
                     </div>
                     <table id="atpbiztable" ></table>
                 </div>
@@ -190,21 +195,21 @@
                 field: 'xm_type',
                 title: '课题分类',
                 sortable: true,
-                width:100,
+                width:80,
                 align:'center'
             },
             {
                 field: 'user_realusername',
                 title: '评审专家',
                 sortable: true,
-                width:95,
+                width:85,
                 align:'center'
             },
             {
                 field: 'ps_total',
                 title: '总分',
                 sortable: true,
-                width:50,
+                width:60,
                 formatter:function(value, row, index){
                     if(row.ishuibi == 1){
                         return '回避'
@@ -239,6 +244,10 @@
                 formatter:function(value, row, index){
                     if(row.ishuibi == 1){
                         return '回避'
+                    }else if(value == 1){
+                        return '建议支持';
+                    }else if(value == 0){
+                        return '建议不支持';
                     }else{
                         return value;
                     }
@@ -371,6 +380,17 @@
             type: 2,
             shadeClose:false,
             content:'__CONTROLLER__/expertexport',
+            area: ['500px', '300px']
+        });
+    });
+
+    $('#sys_export_detail').on('click',function() {
+        layer.open({
+            title:'选择导出专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/expertexport?type=detail',
             area: ['500px', '300px']
         });
     });

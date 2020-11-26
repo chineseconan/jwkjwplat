@@ -167,6 +167,64 @@ class XMController extends BaseController
     }
 
     /**
+     * 项目信息保存方法(不验证是否存在相同的项目编号)
+     */
+    public function saveXmSameCode(){
+        $param         = I("post.");
+        $Model         = M("xmps_xm");
+        $relationModel = M("xmps_xmrelation");
+        $userModel     = M("sysuser");
+        // 查询同分类下的专家
+        $userMap['is_delete']   = Array("eq","0");
+        $userMap['is_enable']   = Array("eq","启用");
+        $userMap['is_issystem'] = Array("eq","否");
+        $userMap['user_class']  = Array("like","%".$param['xm_class']."%");
+        $userData = $userModel->where($userMap)->select();
+        try{
+            $Model->startTrans();
+            if (!$param['xm_id']) { // 新增
+                $param['xm_id'] = makeGuid();
+                $Model->add($param);
+                foreach($userData as $user){
+                    $item['xr_id'] = makeGuid();
+                    $item['xr_user_id'] = $user['user_id'];
+                    $item['xr_xm_id'] = $param['xm_id'];
+                    $item['xr_status'] = "进行中";
+                    $relationModel->add($item);
+                }
+            } else { // 修改
+                $xm_class = $Model->where("xm_id='".$param['xm_id']."'")->getField("xm_class");
+                $Model->where("xm_id='".$param['xm_id']."'")->save($param);
+                if($xm_class!=$param['xm_class']){ // 若修改了项目分类
+                    $relationModel->where("xr_xm_id='".$param['xm_id']."'")->delete();
+                    foreach($userData as $user){
+                        $item['xr_id'] = makeGuid();
+                        $item['xr_user_id'] = $user['user_id'];
+                        $item['xr_xm_id'] = $param['xm_id'];
+                        $item['xr_status'] = "进行中";
+                        $relationModel->add($item);
+                    }
+                }
+            }
+            // 查询同分组下是否答辩顺序重复
+            $count = $Model
+                ->where("xm_class='".$param['xm_class']."' and xm_ordernum='".$param['xm_ordernum']."' and xm_type = '".$param['xm_type']."'")
+                ->count();
+            $isSame = 0;
+            if($count>1) $isSame = 1;
+            $Model->commit();
+            if($isSame == 0){
+                echo makeStandResult("0", "保存成功!");die;
+            }else{
+                echo makeStandResult("99", "保存成功，当前分组下答辩顺序重复");die;
+            }
+        }catch(Exception $e){
+            $Model->rollback();
+            echo makeStandResult("2", "保存失败,请关闭重试");die;
+        }
+    }
+
+    /**
      * 项目选择评委页面
      */
     public function setExt(){
@@ -355,6 +413,80 @@ class XMController extends BaseController
             $this->display();
         }
     }
+    /**
+     * 项目导入（不验证是否存在相同的项目编号）
+     */
+    public function importSameCode(){
+        if(IS_POST){
+            $Model = M("xmps_xm");
+            try{
+                $file = uploadFile("file",1024*1024*10);
+                $path = "./Public/".$file['message'];
+                $import = excelImport($path);
+
+                $column = Array("项目编号","项目名称","申报单位","申请人","分组","指南方向","答辩顺序");
+                $len = count($column);
+                for($i=0;$i<$len;$i++){
+                    if($column[$i]!=$import['column'][$i]){
+//                        dump($column[$i]);
+//                        dump($import['column'][$i]);
+                        die("请按照模板填写导入数据，保持列头一致");
+                    }
+                }
+                $str  = "";
+
+                foreach($import['data'] as $val){
+                    if($val['B']!=NULL && $val['A']!=NULL  ){
+//                        $xm_code = $Model
+//                            ->field("xm_code,xm_id")
+//                            ->where("xm_code='".$val['A']."'")
+//                            ->getField("xm_code");
+//                        if($xm_code!=""){
+//                            $str .= $val['A'].",";
+//                        }else{
+                        $data['xm_id'] = makeGuid();
+                        $data['xm_code'] = $val['A'];
+                        $data['xm_name'] = $val['B'];
+                        $data['xm_company'] = $val['C'];
+                        $data['xm_createuser'] = $val['D'];
+                        $data['xm_class'] = $val['E'];
+                        $data['xm_type'] = '默认分类';
+                        $data['xm_group'] = $val['F'];
+//                            $data['xm_tmfs'] = $val['F'];
+                        $data['xm_ordernum'] = $val['G'];
+                        $data['xm_year'] = date("Y",time());
+                        $Model->add($data);
+
+                        $userModel = M("sysuser");
+                        $userMap['is_delete']   = Array("eq","0");
+                        $userMap['is_enable']   = Array("eq","启用");
+                        $userMap['is_issystem'] = Array("eq","否");
+                        $userMap['user_class']  = Array("eq",$data['xm_class']);
+                        $userData = $userModel->where($userMap)->select();
+
+                        $relationModel = M("xmps_xmrelation");
+                        foreach($userData as $user){
+                            $item['xr_id']       = makeGuid();
+                            $item['xr_user_id'] = $user['user_id'];
+                            $item['xr_xm_id']   = $data['xm_id'];
+                            $item['xr_status']  = "进行中";
+                            $relationModel->add($item);
+                        }
+//                        }
+                    }
+                }
+//                if($str!=""){
+//                    echo "已存在的项目编号:".rtrim($str,",");
+//                }else{
+                echo "ok";
+//                }
+            }catch(\Exception $e){
+                echo "fail:$e";
+            }
+        }else{
+            $this->display();
+        }
+    }
 
     /**
      * 项目导出
@@ -394,6 +526,92 @@ class XMController extends BaseController
             $Model->rollback();
             echo makeStandResult("1", "删除失败,错误信息：$e");
         }
+    }
+
+    /**
+     * 项目预览
+     * 多个文件（包含在项目编号名称的文件夹中依次为文件名包含“指南”、“预算申报书”、“项目申报书”的展示）
+     */
+    public function listindexzd()
+    {
+        $xm_id    = I("get.xm_id");
+        $model = M('xmps_xm');
+        $xmdata=$model->where("xm_id='".$xm_id."'")->find();
+        $xm_code        = trim($xmdata["xm_code"]);
+
+        $parent_getpath = './Public/'. C("xmfilepath");
+        $parent_pathcha = $parent_getpath;
+        if(!@rename('测试编码.txt',  '测试编码修改.txt') && !@rename('测试编码修改.txt',  '测试编码.txt')){
+            $parent_pathcha = iconv('UTF-8','gb2312',$parent_getpath);
+        }
+        $parent_file = scandir($parent_pathcha);
+        foreach($parent_file as $key=>$val){
+            if($val!='.' && $val!='..') {
+                $encode = mb_detect_encoding($val, array("UTF-8", "GB2312"));
+                if ($encode != "UTF-8") {
+                    $val = iconv('gbk', 'utf-8', $val);
+                }
+                // 文件路径为文件夹名称等于项目编号
+                if($val===$xm_code){
+                    $path     = './Public/'. C("xmfilepath")."/".$val;
+                    break;
+                }
+            }
+        }
+
+        $pathcha = $path;
+        if(!@rename('测试编码.txt',  '测试编码修改.txt') && !@rename('测试编码修改.txt',  '测试编码.txt')){
+            $pathcha = iconv('UTF-8','gb2312',$path);
+        }
+
+        $file = scandir($pathcha);
+        $menu=array();
+        $relativePath = $_SERVER['SCRIPT_NAME'];
+        array_multisort($file);
+        $hetongshu=array();
+        $jianyishu=array();
+        $xiangmujihua=array();
+        foreach($file as $key=>$val){
+            if($val!='.' && $val!='..') {
+                $encode = mb_detect_encoding($val, array("UTF-8", "GB2312"));
+                if ($encode != "UTF-8") {
+                    $val = iconv('gbk', 'utf-8', $val);
+                }
+
+                if(strpos(strtolower($val),'.pdf')!==false){
+                    if(strpos(trim($val),'指南')!==false){
+                        $child = array(
+                            'title' => '指南', //标题
+                            'icon' => '&#xe63c;',//图标
+                            'href' => '.' . $path . "/" . $val,//链接
+                        );
+                        array_push($hetongshu,$child);
+                    }else if(strpos(trim($val),'申报')!==false){
+                        $child = array(
+                            'title' => '项目申报书', //标题
+                            'icon' => '&#xe63c;',//图标
+                            'href' => '.' . $path . "/" . $val,//链接
+                        );
+                        array_push($jianyishu,$child);
+                    }else if(strpos(trim($val),'预算')!==false){
+                        $child = array(
+                            'title' => '预算申报书', //标题
+                            'icon' => '&#xe63c;',//图标
+                            'href' => '.' . $path . "/" . $val,//链接
+                        );
+                        array_push($xiangmujihua,$child);
+                    }
+                }
+            }else{
+                unset($file[$key]);
+            }
+        }
+        $menu=array_merge($hetongshu,$xiangmujihua);
+        $menu=array_merge($menu,$jianyishu);
+        $this->assign('relativePath',$relativePath);
+        $this->assign('ds_menu', json_encode($menu));
+        $this->assign('showlable', $xmdata["xm_createuser"]."(".$xmdata["xm_company"].")".$xmdata["xm_code"]."_".$xmdata["xm_name"]);
+        $this->display('listindex');
     }
 
     /**
@@ -472,7 +690,7 @@ class XMController extends BaseController
 
     /**
      * 项目预览
-     * 指定文件（展示pdf格式且文件名称为项目名称的文件）
+     * 单个文件（展示pdf格式且文件名称为项目名称的文件）
      */
     public function listindex()
     {

@@ -1,0 +1,472 @@
+﻿<include file="Public:tableheader" />
+<style>
+        th{
+            text-align: center;
+        }
+        .form-control{
+            display: inline-block;
+            width: 250px;
+        }
+        .wrapper,.wrapper-content{
+            padding: 0;
+        }
+        #sys_buchong{
+            background-color:#bd6770;
+            border-color: #bd6770;
+        }
+        #sys_yjianexport{
+            background-color:#428bca;
+            border-color: #428bca;
+        }
+        #sys_resultsort{
+            background-color:#68941e;
+            border-color: #68941e;
+        }
+        .ibox-content{
+            padding-bottom: 0;
+        }
+        .ibox-content>table{
+            text-align: center;
+        }
+        .ibox-content>table>tbody>tr>th{
+            background-color: #c1d9e8;
+        }
+        .ibox-content>table a{
+            font-weight: bold;
+        }
+        .btn-bx{
+            background-color: #d2e8f6;
+            border-color: #1c84c6;
+            color: #1c84c6;
+        }
+        .jxz{
+            color: #36759d;
+            font-size: 14px;
+            font-weight: bold
+        }
+        .wc{
+            color: forestgreen;
+            font-size: 14px;
+            font-weight: bold
+        }
+        .ibox,.fixed-table-pagination div.pagination, .fixed-table-pagination .pagination-detail{
+              margin-bottom: 0;
+        }
+    </style>
+</head>
+<body class="gray-bg" style="font-family: 微软雅黑;">
+<div class="wrapper wrapper-content " style="overflow: hidden">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content">
+            <div class="row">
+                <div class="col-sm-12">
+<!--                    <div>-->
+<!--                        <p class="name" style="text-align: left;font-size:  22px;background-color:;border-left:5px solid green;padding-left: 10px;font-family: 微软雅黑;">投票统计</p>-->
+<!--                    </div>-->
+                    <div class="_box" style="margin: 5px 0;">
+                        <label class="control-label" style="margin-left:15px;">项目编号：</label>
+                        <select id="xm_code" class="chosen-select" >
+                            <option value="">&nbsp;</option>
+                            <foreach name="xmdata" item="val" >
+                                <option value="{$val.xm_id}" >{$val.xm_codes}</option>
+                            </foreach>
+                        </select>
+
+                        <label class="control-label" style="margin-left:15px;">项目名称：</label>
+                        <select id="xm_id" class="chosen-select" >
+                            <option value="">&nbsp;</option>
+                            <foreach name="xmdata" item="val" >
+                                <option value="{$val.xm_id}" >{$val.xm_names}</option>
+                            </foreach>
+                        </select>
+
+                        <button class="btn btn-info" style="margin-left: 10px;" type="button" id="sys_refresh"><i class="fa fa-search"></i> &nbsp;查询</button>
+                        <button class="btn btn-warning" style="margin-left: 10px;" type="button" id="sys_huitui"><i class="fa fa-wrench"></i>&nbsp;回退</button>
+                        <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_huizongexport"><i class="fa fa-download"></i>&nbsp;专家意见汇总表导出</button>
+                        <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_yjianexport"><i class="fa fa-download"></i>&nbsp;答辩评审专家个人意见表</button>
+                        <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_resultsort"><i class="fa fa-download"></i>评审结果排序表导出</button>
+                        <button class="btn btn-danger" style="margin-left: 10px;" type="button" id="sys_buchong"><i class="fa fa-download"></i>专家补充意见表</button>
+                    </div>
+                    <table id="atpbiztable" ></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="sys_dlg" role="dialog" class="modal fade "></div>
+<script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
+<script>
+    layui.use('layer', function() {
+        layer = layui.layer;
+    });
+    var h = $(window).height()-65;
+    $('table').attr('data-height',h);
+    $(".chosen-select").chosen({disable_search_threshold: 0, search_contains: true, width: '200px'});
+    $('#atpbiztable').bootstrapTable({
+            url: '__CONTROLLER__/getDataVote',
+            method: 'post',
+            // toolbar: '#atpbiztoolbar',
+            striped: true,
+            cache: false,
+            pagination: true,
+            iconSize: 'outline',
+            sortable: true,
+            sortName:"xm_code",
+            sortOrder: "asc",
+            queryParams: queryParams,
+            sidePagination: "server",
+            pageNumber: 1,
+            pageSize: 20,
+            pageList: [5, 25, 50, 100],
+            uniqueId: "xr_id",
+            detailView: true,
+            detailFormatter: "detailFormatter",
+            rowStyle:function(row,index){
+                return style = {
+                    css:{
+                        'font-size':'15px'
+                    }
+                }
+            },
+            columns: [
+                {title: '序号', width: 40,align:'center',
+                    formatter: function (value, row, index)
+                    {
+                        var option =  $('#atpbiztable').bootstrapTable("getOptions");
+                        return option.pageSize * (option.pageNumber - 1) + index + 1;
+                    }
+                },
+                {field: 'xm_group', title: '指南方向', sortable: true,width:200,align:'center'},
+                {field: '', title: '操作', sortable: true, width:90,align:'center',formatter:function(value, row, index){
+                    // if(row['mxData'].length < 2) return '-';
+                    var xrstatusall    = row['xrstatusall'];
+                    var vote1statusall = row['vote1statusall'];
+                    var inp         = "'" + row['xm_group'] + "'";
+                    if(xrstatusall !=null && xrstatusall.indexOf('进行中')<0 && vote1statusall.indexOf('进行中')<0 && vote1statusall.indexOf('完成')<0){
+                        var a = '<a  class="btn btn-bx btn-sm" onclick="beginVoteBX(' + inp + ')">开启并行投票</a>&nbsp;';
+                        return a;
+                    }else if(vote1statusall != null && vote1statusall.indexOf('进行中')>-1){
+                        var a = '<span class="jxz">并行投票中&nbsp;<i class="fa fa-circle-o-notch fa-spin" style="font-size:12px;"></i></span>&nbsp;';
+                        return a;
+                    }else if(vote1statusall != null && vote1statusall.indexOf('进行中')<0 && vote1statusall.indexOf('完成')>-1){
+                        console.log(vote1statusall);
+                        var a = '<span class="wc">并行投票完成&nbsp;<i class="fa fa-check" style="font-size:12px;"></i></span>&nbsp;';
+                        return a;
+                    }
+                    return value;
+
+                }},
+            ],
+            onLoadSuccess:function(){
+                $('#atpbiztable').bootstrapTable('expandAllRows')
+            }
+        });
+    $('#sys_refresh').on('click',function() {
+        $('#atpbiztable').bootstrapTable('refresh')
+    });
+    function queryParams(params) {  //配置参数
+        var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+            limit: params.limit,   //页面大小
+            offset: params.offset,  //页码
+            sort: params.sort,  //排序列名
+            sortOrder: params.order,//排位命令（desc，asc）
+            xm_id: $("#xm_id").val(),//排位命令（desc，asc）
+            xm_code:$("#xm_code").val()
+        };
+        return temp;
+    }
+    function detailFormatter(index, row) {
+        var vote1statusall = row['vote1statusall'];
+        var mxData = row['mxData'];
+        var html = [];
+        html.push("<div class='ibox-content'>");
+        html.push("<table class='table'>");
+        html.push("<tbody>");
+        html.push("<tr><th><b>项目编号</b></th><th><b>项目名称</b></th><th><b>申请单位</b></th><th><b>申请人</b></th><th><b>分组</b></th><th><b>进度</b></th><th><b>同意票数</b></th><th><b>平均分</b></th>");
+        if(vote1statusall != '' && vote1statusall != null && (vote1statusall.indexOf('进行中')>-1 || vote1statusall.indexOf('完成')>-1)){
+            html.push("<th><b>并行投票进度</b></th><th><b>同意“并行”</b></th><th><b>“并行”得票率</b></th><th><b>并行时间统计</b></th></tr>");
+        }else{
+            html.push("</tr>");
+        }
+        for(var i=0;i<mxData.length;i++){
+            var all = mxData[i]["allcount"];
+            var ok  = mxData[i]["wanchengcount"];
+            var jdStr = '';
+            if(ok != '0'){
+                jdStr += '<a class=" " onclick="getpingshen(\''+mxData[i]["xm_id"] + '\',\'ok\')">'+ok+'</a>&nbsp;';
+            }else{
+                jdStr += '0&nbsp;';
+            }
+            if(all != '0'){
+                jdStr += '/&nbsp;<a class=" " onclick="getpingshen(\''+mxData[i]["xm_id"]+ '\',\'all\')">'+all+'</a>';
+            }else{
+                jdStr += '/&nbsp;0';
+            }
+            var voterate        = mxData[i]["voterate"];
+            var vote1rate       = mxData[i]["vote1rate"];
+            var bxtime1count    = mxData[i]["bxtime1count"];
+            var bxtime2count    = mxData[i]["bxtime2count"];
+            var wanchengcountbx = mxData[i]["wanchengcountbx"];
+            var vote1status     = mxData[i]["vote1status"];
+            var avgvalue        = mxData[i]["avgvalue"];
+            if(avgvalue != null) avgvalue = parseFloat(avgvalue);
+            if(voterate != null && voterate != '') voterate = fomatFloat(voterate);
+            if(vote1rate != null && vote1rate != '') vote1rate = fomatFloat(vote1rate);
+            if(wanchengcountbx != null && wanchengcountbx != '') wanchengcountbx = wanchengcountbx+"&nbsp;/&nbsp;" + all;
+            html.push("<tr><td>" + mxData[i]['xm_code'] + "</td><td>" + mxData[i]['xm_name'] + "</td><td>" + mxData[i]['xm_company'] + "</td><td>" + mxData[i]['xm_createuser'] + "</td><td>" + mxData[i]['xm_class'] + "</td><td>" + jdStr + "</td><td>" + mxData[i]['agreecount'] + "</td><td>" + avgvalue + "</td>");
+            if(vote1statusall != '' && vote1statusall != null && (vote1statusall.indexOf('进行中')>-1 || vote1statusall.indexOf('完成')>-1)){
+                if(vote1status != '' && vote1status != null && (vote1status.indexOf('进行中')>-1 || vote1status.indexOf('完成')>-1)){
+                    html.push("<td>"+wanchengcountbx + "</td><td>" + mxData[i]['agreecountbx'] + "</td><td>" + vote1rate + "</td><td><b>1年：</b>" + bxtime1count + "<b><br/>2年：</b>" + bxtime2count + "</td></tr>");
+                }else{
+                    html.push("<td></td><td></td><td></td><td></td></tr>");
+                }
+            }else{
+                html.push("</tr>");
+            }
+        }
+        html.push("</tbody>");
+        html.push("</table>");
+        html.push("</div>");
+        return html.join('').replace(/null/g, "").replace(/undefined/g, "");
+    }
+    function getpingshen(id,status) {
+        layer.open({
+            title: '信息',
+            closeBtn: 1,
+            type: 2,
+            shadeClose: false,
+            content: '__CONTROLLER__/getpingshen?xm_id=' + id+'&status='+status,
+            area: ['900px', '500px']
+        });
+    }
+    function beginVoteBX(xmGroup){
+        layer.confirm("确定指南方向为“"+xmGroup+"”的项目要开启并行投票吗？",function(index){
+            layer.close(index);
+            layer.open({
+                title: '选择项目',
+                closeBtn: 1,
+                type: 2,
+                shadeClose: false,
+                content: '__CONTROLLER__/votechoosexm?xmGroup=' + xmGroup,
+                area: ['900px', '575px']
+            });
+
+        });
+    }
+    $('#sys_export').on('click',function() {
+        $('#loading').modal('show');
+        var data= {
+            xm_id: $('#xm_id').val(),
+            xm_class:$("#xm_class").val()
+        }
+        var t = "__CONTROLLER__/export";
+        t = encodeURI(t);
+        $.ajax({
+            type:'post',
+            url: t,
+            data:data,
+            dataType:'json',
+            success:function(data){
+                $('#loading').modal('hide');
+                if(data.code > 0){
+                    location.href = data.message;
+                }else{
+                    layer.msg(data.message);
+                }
+            }
+        })
+    });
+
+    $('#sys_exportxx').on('click',function() {
+        $('#loading').modal('show');
+        var data= {
+            xm_id: $('#xm_id').val(),
+            xm_class:$("#xm_class").val()
+        }
+        var t = "__CONTROLLER__/exportxx";
+        t = encodeURI(t);
+        $.ajax({
+            type:'post',
+            url: t,
+            data:data,
+            dataType:'json',
+            success:function(data){
+                $('#loading').modal('hide');
+                if(data.code > 0){
+                    location.href = data.message;
+                }else{
+                    layer.msg(data.message);
+                }
+            }
+        })
+    });
+    $('#sys_huitui').on('click',function() {
+        layer.open({
+            title:'回退选择专家和项目',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/huitui',
+            area: ['500px', '350px']
+        });
+    });
+    $('#sys_huizongexport').on('click',function() {
+        layer.confirm("确定导出所有项目的评审专家意见汇总表吗？",function(index){
+            layer.close(index);
+            $.ajax({
+                type:'post',
+                url: "__CONTROLLER__/huizongexportvote",
+                data:{},
+                dataType:'json',
+                beforeSend:function(){
+                    $("#loadingText").html("正在处理请稍候");
+                    $('#loading').modal('show');
+                },
+                success:function(data){
+                    if(data.code > 0){
+                        location.href = data.message;
+                    }else{
+                        layer.alert(data.message);
+                    }
+                },
+                complete:function(){
+                    $('#loading').modal('hide');
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                }
+            });
+        })
+    });
+    $('#sys_resultsort').on('click',function() {
+        layer.confirm("确定导出项目评审结果排序表吗？",function(index){
+            layer.close(index);
+            $.ajax({
+                type:'post',
+                url: "__CONTROLLER__/resultsortexportvote",
+                data:{},
+                dataType:'json',
+                beforeSend:function(){
+                    $("#loadingText").html("正在处理请稍候");
+                    $('#loading').modal('show');
+                },
+                success:function(data){
+                    if(data.code > 0){
+                        location.href = data.message;
+                    }else{
+                        layer.alert(data.message);
+                    }
+                },
+                complete:function(){
+                    $('#loading').modal('hide');
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                }
+            });
+        })
+    });
+    $('#sys_yjianexport').on('click',function() {
+        layer.open({
+            title:'选择导出专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/expertexport?type=yijianexportvote',
+            area: ['500px', '300px']
+        });
+    });
+    // $('#sys_yjianexport').on('click',function() {
+    //     layer.confirm("确定导出所有答辩评审专家个人意见表吗？",function(index){
+    //         layer.close(index);
+    //         $.ajax({
+    //             type:'post',
+    //             url: "__CONTROLLER__/yijianexportvote",
+    //             data:{},
+    //             dataType:'json',
+    //             beforeSend:function(){
+    //                 $("#loadingText").html("正在处理请稍候");
+    //                 $('#loading').modal('show');
+    //             },
+    //             success:function(data){
+    //                 if(data.code == 0){
+    //                     var fileInfo = data.message;
+    //                     downLoadFiles(fileInfo);
+    //                 }else{
+    //                     layer.alert(data.message);
+    //                 }
+    //             },
+    //             complete:function(){
+    //                 $('#loading').modal('hide');
+    //                 var index = parent.layer.getFrameIndex(window.name);
+    //                 parent.layer.close(index);
+    //             }
+    //         });
+    //     })
+    // });
+    $('#sys_buchong').on('click',function() {
+        layer.open({
+            title:'选择导出专家',
+            closeBtn:1,
+            type: 2,
+            shadeClose:false,
+            content:'__CONTROLLER__/expertexport?type=buchongexportvote',
+            area: ['500px', '300px']
+        });
+    });
+    // $('#sys_buchong').on('click',function() {
+    //     layer.confirm("确定导出所有评审专家的补充意见表吗？",function(index){
+    //         layer.close(index);
+    //         $.ajax({
+    //             type:'post',
+    //             url: "__CONTROLLER__/buchongexportvote",
+    //             data:{},
+    //             dataType:'json',
+    //             beforeSend:function(){
+    //                 $("#loadingText").html("正在处理请稍候");
+    //                 $('#loading').modal('show');
+    //             },
+    //             success:function(data){
+    //                 if(data.code == 0){
+    //                     var fileInfo = data.message;
+    //                     // console.log(fileInfo);return ;
+    //                     downLoadFiles(fileInfo);
+    //                 }else{
+    //                     layer.alert(data.message);
+    //                 }
+    //             },
+    //             complete:function(){
+    //                 $('#loading').modal('hide');
+    //                 var index = parent.layer.getFrameIndex(window.name);
+    //                 parent.layer.close(index);
+    //             }
+    //         });
+    //     })
+    // });
+    function downLoadFiles(fileInfo){
+        var i=0;
+        var res = setInterval(function(){
+            if(i<fileInfo.length){
+                location.href = fileInfo[i];
+                i++;
+            }else{
+                clearInterval(res);
+            }
+        },500);
+    }
+    /**
+     * 格式化小数
+     */
+    function fomatFloat(number){
+        if(isNaN(number) || (number == '') || (number == null)){
+            return parseInt(0);
+        }
+        var f  = parseFloat(number);
+        return Math.round(f*100)/100;
+    }
+</script>
+</body>
+
+</html>
+
+
+
+

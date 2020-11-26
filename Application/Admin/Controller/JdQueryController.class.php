@@ -4,6 +4,10 @@ use Think\Controller;
 class JdQueryController extends BaseController
 {
 
+    function _initialize(){
+        $this->professorid = C('PROFESSERID');
+    }
+
     /**
      * 进度查询页
      */
@@ -16,6 +20,22 @@ class JdQueryController extends BaseController
         $this->getDic();
         $this->display();
     }
+    /**
+     * 投票统计(相同xm_group合并显示)
+     */
+    public function voteIndex()
+    {
+        $model = M('xmps_xm');
+        $where = [];
+        $data = $model->field('xm_id,xm_name,xm_code,xm_createuser')->order("xm_code asc")->where($where)->select();
+        foreach($data as $key=>$val){
+            $data[$key]['xm_codes'] = $val['xm_code'] . '-' . $val['xm_createuser'];
+            $data[$key]['xm_names'] = $val['xm_name'] . '-' . $val['xm_createuser'];
+        }
+        $this->assign("xmdata", $data);
+        $this->display();
+    }
+
     /**
      * 进度查询页
      */
@@ -136,6 +156,162 @@ class JdQueryController extends BaseController
 //        echo $model->_sql();die;
         $count = $model->where($where)->count();
         echo json_encode(array('total' => $count, 'rows' => $data));
+    }
+
+    /**
+     * 获取投票统计列表
+     */
+    public function getDataVote()
+    {
+        $queryParam = json_decode(file_get_contents("php://input"), true);
+        $where = [];
+        $xm_id = trim($queryParam['xm_id']);
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        if (!empty($queryParam['xm_code'])) {
+            $where['xm_id'] = ['eq', $queryParam['xm_code']];
+        }
+        $model = M('xmps_xm');
+        $xmData = $model->field("xm_group,group_concat(xr_status) xrstatusall,group_concat(vote1status) vote1statusall")
+            ->join("left join (select xr_xm_id,xr_status,vote1status from xmps_xmrelation) t on xm_id = t.xr_xm_id ")
+            ->where($where)
+            ->order($queryParam['sort'] . " " . $queryParam['sortOrder'])
+            ->limit($queryParam['offset'], $queryParam['limit'])
+            ->group('xm_group')
+            ->select();
+//        echo $model->_sql();
+//        dump($xmData);die;
+        $count = $model->field("xm_group")->where($where)->group('xm_group')->select();
+        foreach($xmData as $key=>$xmInfo){
+            $xm_group = $xmInfo['xm_group'];
+            $where['xm_group'] = ['eq', $xm_group];
+            $data = $model->field("xm_id,xm_code,xm_tmfs,xm_name,xm_company,xm_createuser,xm_class,voteoptionbx,
+        case when wanchengcount is null then 0 else wanchengcount end wanchengcount,
+        case when allcount is null then 0 else allcount end allcount,
+        case when agreecount is null then 0 else agreecount end agreecount,
+        voterate,avgvalue")
+                ->join("left join (select xr_xm_id,count(xr_id) wanchengcount from xmps_xmrelation where xr_status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id") // 查询投票完成数量
+                ->join("left join (select xr_xm_id,count(xr_id) allcount,max(voterate) as voterate,max(avgvalue) as avgvalue from xmps_xmrelation group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id") // 查询全部专家任务数量、得票率、平均分
+                ->join("left join (select xr_xm_id,count(xr_id) agreecount  from xmps_xmrelation where ps_zz = 1 group by xr_xm_id) c on xmps_xm.xm_id=c.xr_xm_id") // 查询同意票数
+                ->where($where)
+                ->order("agreecount desc,avgvalue desc,xm_ordernum asc")
+                ->select();
+//            echo $data;die;
+//            并行投票拼接列
+            foreach($data as $k=>$item){
+                if($item['voteoptionbx'] == '1'){ // 若开启了并行投票
+                    $wheres = $where;
+                    $wheres['xm_id'] = ['eq',$item['xm_id']];
+                    $bxDetail = $model->field("
+        case when wanchengcountbx is null then 0 else wanchengcountbx end wanchengcountbx,
+        case when agreecountbx is null then 0 else agreecountbx end agreecountbx,
+        vote1rate,vote1status,bxtime1count,bxtime2count")
+                        ->join("left join (select xr_xm_id,count(xr_id) wanchengcountbx from xmps_xmrelation a where vote1status='完成' group by xr_xm_id) a on xmps_xm.xm_id=a.xr_xm_id") // 查询投票完成数量
+                        ->join("left join (select xr_xm_id,max(vote1rate) as vote1rate,group_concat(vote1status) vote1status from xmps_xmrelation a group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id") // 查询得票率
+                        ->join("left join (select 
+                                xr_xm_id,
+                                count(xr_id) agreecountbx,
+                                sum(CASE WHEN bx_time = 1 THEN 1 ELSE 0 END) bxtime1count,  
+                                sum(CASE WHEN bx_time = 2 THEN 1 ELSE 0 END) bxtime2count
+                            from xmps_xmrelation a where vote1 = '1' group by xr_xm_id) c on xmps_xm.xm_id=c.xr_xm_id") // 查询同意“并行”票数，支持时间得票数
+                        ->where($wheres)
+                        ->find();
+//                    echo $model->_sql();die;
+                    $data[$k] = $data[$k]+$bxDetail;
+                }
+            }
+
+            $xmData[$key]['mxData'] = $data;
+        }
+        echo json_encode(array('total' => count($count), 'rows' => $xmData));
+    }
+
+    /**
+     * 选择并行投票的项目（投票）
+     */
+    public function votechoosexm()
+    {
+        $xmGroup = I('get.xmGroup');
+        if(empty($xmGroup)) exit(makeStandResult(2,'参数缺失，请刷新页面重试！'));
+        $this->assign('xmGroup', $xmGroup);
+        $this->display();
+    }
+
+    /**
+     * 选择并行投票的项目列表数据（投票）
+     */
+    public function getvotexmdata()
+    {
+        $queryParam = json_decode(file_get_contents("php://input"), true);
+        $where = [];
+        $where['xm_group']   = ['eq', trim($queryParam['xmgroup'])];
+        $model = M('xmps_xm');
+        if($queryParam['sort'] == 'agreecount' && $queryParam['sortOrder'] == 'desc'){
+            $order = "agreecount desc,avgvalue desc";
+        }else{
+            $order = $queryParam['sort'] . " " . $queryParam['sortOrder'];
+        }
+        $data = $model->field("xm_id,xm_code,xm_tmfs,xm_name,xm_ordernum,xm_company,xm_createuser,xm_class,agreecount,avgvalue")
+            ->join("inner join (select xr_xm_id,max(avgvalue) as avgvalue from xmps_xmrelation where xr_status = '完成' group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id")
+            ->join("left join (select xr_xm_id,count(xr_id) agreecount from xmps_xmrelation where ps_zz = 1 and xr_status = '完成' group by xr_xm_id) c on xmps_xm.xm_id=c.xr_xm_id") // 查询同意票数
+            ->where($where)
+            ->order($order)
+            ->select();
+//        echo $data;die;
+        echo json_encode(array('total' => count($data), 'rows' => $data));
+    }
+
+
+    /**
+     * 开启并行投票（重点）
+     */
+    public function beginVoteBX(){
+        $xmGroup = I('post.xmGroup');
+        $data    = I('post.data');
+        if(empty($xmGroup) || empty($data)) exit(makeStandResult(1,"参数缺失，请联系管理员！"));
+        $model   = M('xmps_xmrelation');
+        try {
+            $model->startTrans();
+            // 验证是否已经开启过投票
+            $where = [];
+            $where['xm_group']    = ['eq', $xmGroup];
+//            $where['vote_res']    = ['eq', '并行投票'];
+            $where['xr_status']   = ['eq', '完成'];
+            $where['vote1status'] = ['neq', '未开始'];
+            $isStartBX = $model->join("xmps_xm on xm_id = xr_xm_id")->where($where)->count();
+            if ($isStartBX != 0) {
+                $model->commit();
+                exit(makeStandResult(2, '该项目编号的项目已开启过并行投票，不能重复开启！'));
+            }
+            // 验证是否打分完成
+            $where = [];
+            $where['xm_group']    = ['eq', $xmGroup];
+            $where['xr_status']   = ['neq', '完成'];
+            $isStartBX = $model->join("xmps_xm on xm_id = xr_xm_id")->where($where)->count();
+            if ($isStartBX != 0) {
+                $model->commit();
+                exit(makeStandResult(3, '该项目编号的项目有未提交打分的专家，不能开启并行投票！'));
+            }
+            // 设置relation表状态为进行中
+            $xm_ids = array_column($data,'xm_id');
+            $xmData = [];
+            $xmData['vote1status'] = '进行中';
+            $model->where(['xr_xm_id'=>['in',$xm_ids]])->setField($xmData);
+            M('xmps_xm')->where(['xm_id'=>['in',$xm_ids]])->setField(['voteoptionbx'=>'1']);
+
+            // 设置relation表 已回避的专家 状态为 完成
+            $xmData = [];
+            $xmData['vote1status'] = '完成';
+            $model->where(['xr_xm_id'=>['in',$xm_ids],'ishuibi'=>['eq','1']])->setField($xmData);
+//            dump($xmCode);
+
+            $model->commit();
+            exit(makeStandResult(0,''));
+        } catch (\Exception $e) {
+            $model->rollback();
+            exit(makeStandResult(3,'开启失败，错误信息：'.$e));
+        }
     }
 
     //表格导出
@@ -271,7 +447,7 @@ class JdQueryController extends BaseController
                 if(count($relationdata)<1000){
                     $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["xr_status"] = "进行中";
-                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
                 }else{
                     foreach ($relationdata as $rd) {
                         $data["xr_status"] = "进行中";
@@ -291,7 +467,7 @@ class JdQueryController extends BaseController
                 if(count($relationdata)<1000){
                     $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["vote1status"] = "进行中";
-                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
                 }else{
                     foreach ($relationdata as $rd) {
                         $data["vote1status"] = "进行中";
@@ -312,7 +488,7 @@ class JdQueryController extends BaseController
                 if(count($relationdata)<1000){
                     $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["vote2status"] = "进行中";
-                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
                 }else{
                     foreach ($relationdata as $rd) {
                         $data["vote2status"] = "进行中";
@@ -333,7 +509,7 @@ class JdQueryController extends BaseController
                 if(count($relationdata)<1000){
                     $xr_ids = removeArrKey($relationdata,'xr_id');
                     $data["vote3status"] = "进行中";
-                    $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
                 }else{
                     foreach ($relationdata as $rd) {
                         $data["vote3status"] = "进行中";
@@ -348,6 +524,676 @@ class JdQueryController extends BaseController
             $model->rollback();
             exit(makeStandResult(1,'回退失败，错误详情：'.$e));
         }
+    }
+
+    /**
+     * 回退提交处理（并行）
+     * 验证若已开启过并行投票则不能回退
+     */
+    public function huituiSubmitbx()
+    {
+        $user_id  = I("post.user_id");
+//        $classid  = I("post.classid");
+        $xmType   = I("post.xmType"); // 课题分类
+        $type     = I("post.type");   // 回退类型
+        $model   = M('xmps_xmrelation');
+        try {
+            $model->startTrans();
+            if($type == ''){ // 打分回退
+
+                // 验证若已开启过并行投票则不能回退
+                $where = [];
+                $where['xr_status']   = ['eq','完成'];
+                $where['vote1status'] = ['neq','未开始'];
+                $isStartBX = $model->join("inner join xmps_xm on xm_id = xr_xm_id")->where($where)->count();
+                if($isStartBX != 0){
+                    $model->commit();
+                    exit(makeStandResult(1,'所选项目中有项目已开启过并行投票，不能回退！'));
+                }
+
+                $where = [];
+                $where['xr_user_id'] = ['eq',$user_id];
+                $where['xr_status']  = ['eq','完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
+                    $data["xr_status"] = "进行中";
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["xr_status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
+                }
+            }else if($type == 'vote1'){ // 第一轮投票回退
+                $where = [];
+                $where['xr_user_id']  = ['eq',$user_id];
+                $where['vote1status'] = ['eq','已完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
+                    $data["vote1status"] = "进行中";
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["vote1status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
+                }
+            }else if($type == 'vote2'){ // 第二轮投票回退
+                $where = [];
+                $where['xr_user_id']  = ['eq',$user_id];
+                $where['vote2status'] = ['eq','已完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+//                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote2status='已完成'")->select();
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
+                    $data["vote2status"] = "进行中";
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["vote2status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
+                }
+            }else if($type == 'vote3'){ // 第三轮投票回退
+                $where = [];
+                $where['xr_user_id']  = ['eq',$user_id];
+                $where['vote3status'] = ['eq','已完成'];
+                if($xmType){
+                    $where['xr_xm_id'] = ['exp'," in (select xm_id from xmps_xm where xm_type = '".$xmType."')"];
+                }
+//                $relationdata = $model->where("xr_user_id='" . $user_id . "' and xr_xm_id in (select xm_id from xmps_xm where xm_type = '$xmType') and vote3status='已完成'")->select();
+                $relationdata = $model->where($where)->select();
+                $data = [];
+                if(count($relationdata)<1000){
+                    $xr_ids = removeArrKey($relationdata,'xr_id');
+                    $data["vote3status"] = "进行中";
+                    if($xr_ids) $model->where(['xr_id'=>['in',$xr_ids]])->setField($data);
+                }else{
+                    foreach ($relationdata as $rd) {
+                        $data["vote3status"] = "进行中";
+                        $data["xr_id"] = $rd["xr_id"];
+                        $model->where("xr_id='" . $data["xr_id"] . "'")->save($data);
+                    }
+                }
+            }
+            $model->commit();
+            exit(makeStandResult(0,''));
+        } catch (\Exception $e) {
+            $model->rollback();
+            exit(makeStandResult(1,'回退失败，错误详情：'.$e));
+        }
+    }
+
+    /**
+     * 评审专家意见汇总表格导出（重点）
+     * @throws \PHPExcel_Writer_Exception
+     */
+    public function huizongexportvote()
+    {
+        $queryParam = json_decode(file_get_contents("php://input"), true);
+        $where = [];
+        $xm_id = trim($queryParam['xm_id']);
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        // 获取指南方向
+        $model   = M('xmps_xm');
+        $xmGroup = $model->field("distinct xm_group")
+            ->where($where)
+            ->find();
+        $xmGroup = $xmGroup['xm_group'];
+
+        // 验证评审完成
+        $where = [];
+        $where['xm_group']  = $xmGroup;
+        $where['xr_status'] = '进行中';
+        $Sum = M('xmps_xmrelation r')->where($where)->count();
+        if($Sum>0){
+            exit(makeStandResult('2','当前有未提交的专家,请等专家提交后再导出结果表！'));
+        }
+//        echo $model->_sql();
+
+        // 汇总数据查询
+        $where = [];
+        $where['xm_group'] = ['eq', $xmGroup];
+        $data = $model->field("xm_id,xm_code,xm_tmfs,xm_name,xm_company,xm_createuser,xm_class,xm_group,
+    case when youxiaocount is null then 0 else youxiaocount end youxiaocount,
+    case when allcount is null then 0 else allcount end allcount,
+    case when agreecount is null then 0 else agreecount end agreecount,
+    case when disagreecount is null then 0 else disagreecount end disagreecount,
+    voterate,avgvalue")
+            ->join("left join (select xr_xm_id,
+                    count(xr_id) youxiaocount,
+                    sum(CASE WHEN ishuibi = '1' then 0 when ps_zz = 1 THEN 1 ELSE 0 END) agreecount,  
+                    sum(CASE WHEN ishuibi = '1' then 0 when ps_zz = 0 THEN 1 ELSE 0 END) disagreecount,  
+                    sum(CASE WHEN bx_time = 2 THEN 1 ELSE 0 END) bxtime2count
+                from xmps_xmrelation where xr_status='完成' and ishuibi = '0' group by xr_xm_id
+            ) a on xmps_xm.xm_id=a.xr_xm_id") // 查询投票完成数量，同意票数，不同意票数
+            ->join("left join (select xr_xm_id,count(xr_id) allcount,max(voterate) as voterate,max(avgvalue) as avgvalue from xmps_xmrelation group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id") // 查询全部专家任务数量、得票率、平均分
+            ->where($where)
+            ->order("agreecount desc,avgvalue desc,xm_ordernum asc")
+            ->select();
+//            echo $data;die;
+//            拼接专家分数列
+        foreach($data as $k=>$item){
+            $wheres = $where;
+            $wheres['xm_id'] = ['eq',$item['xm_id']];
+            $mxDetail = $model->field("
+case when ishuibi = '1' then '回避' else 0+cast(ps_total as char) end ps_total,
+case when ishuibi = '1' then '回避' when ps_zz = '0' then '建议不立项'  when ps_zz = '1' then '建议立项' else ps_zz end ps_zz,
+case when ishuibi = '1' then '回避' else ps_detail end ps_detail")
+                ->join("inner join xmps_xmrelation a on xmps_xm.xm_id=a.xr_xm_id")
+                ->where($wheres)
+                ->order("ishuibi asc,ps_total+0 desc")// 评分从高到低，回避排最后
+                ->select();
+//                    echo $model->_sql();die;
+            $data[$k]['mxdata'] = $mxDetail;
+        }
+//        dump($data);
+//        dump($mxDetail);
+        import("Vendor.PHPWord.PHPWord");
+        $count      = count($data);
+//        dump($data);dump($count);die;
+        $PHPWord = new \PHPWord();
+//        $document = $PHPWord->loadTemplate('Public/template/template10.docx');
+        $document = $PHPWord->loadTemplate('Public/template/huizong'.$count.'.docx');
+        $pathInfo = [];
+        foreach($data as $key=>$val){
+            $number  = $key+1;
+            $document->setValue('xm_name'.$number, $val['xm_name']);
+            $document->setValue('xm_code'.$number, $val['xm_code']);
+            $document->setValue('xm_type'.$number, $val['xm_group']);
+            $document->setValue('xm_company'.$number, $val['xm_company']);
+            $document->setValue('xm_createuser'.$number, $val['xm_createuser']);
+            $document->setValue('allcount'.$number, $val['allcount']);
+            $document->setValue('youxiaocount'.$number, $val['youxiaocount']);
+            $document->setValue('agreecount'.$number, $val['agreecount']);
+            $document->setValue('disagreecount'.$number, $val['disagreecount']);
+
+            foreach($val['mxdata'] as $k=>$v){
+                $document->setValue('ps_total'.$k.$number, $v['ps_total']);
+                $document->setValue('ps_zz'.$k.$number, $v['ps_zz']);
+
+                if(($k == count($val['mxdata'])-1) && ($k<18)){
+                    for($i=$k+1;$i<19;$i++){
+                        $document->setValue('ps_total'.$i.$number, '');
+                        $document->setValue('ps_zz'.$i.$number, '');
+                    }
+                }
+            }
+
+            $ps_detail = array_column($val['mxdata'],'ps_detail');
+            $ps_detail = implode("<w:br />",$ps_detail);
+            $document->setValue('ps_detail'.$number, $ps_detail);
+//            dump($ps_detail);die;
+        }
+        $filename = "评审专家意见汇总表.doc";
+        $savePath = 'Public/upload/word/' . date('Y-m-d');
+        if (!is_dir($savePath)) mkdir($savePath, 0777, true);
+        $filePath = $savePath . '/' . $filename;
+        if(!@rename('测试编码.txt',  '测试编码修改.txt') && !@rename('测试编码修改.txt',  '测试编码.txt')){
+            $filePath = iconv('UTF-8','gbk',$filePath);
+        }
+        $document->save($filePath);
+        $fileRootPath = getWebsiteRootPath();
+        $filePath = $savePath . '/' . $filename;
+        exit(json_encode(array('code' => 1, 'message' => $fileRootPath . $filePath)));
+//        exit(json_encode(array('code' => 1, 'message' => $filePath)));
+    }
+
+    /**
+     * 评审结果排序表导出(重点)
+     * @throws \PHPExcel_Writer_Exception
+     */
+    public function resultsortexportvote()
+    {
+        $queryParam = json_decode(file_get_contents("php://input"), true);
+        $where = [];
+        $xm_id = trim($queryParam['xm_id']);
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        // 获取指南方向
+        $model   = M('xmps_xm');
+        $xmGroup = $model->field("distinct xm_group")
+            ->where($where)
+            ->find();
+        $xmGroup = $xmGroup['xm_group'];
+
+        // 验证评审完成
+        $where = [];
+        $where['xm_group']  = $xmGroup;
+        $where['xr_status'] = '进行中';
+        $Sum = M('xmps_xmrelation r')->join("xmps_xm on xm_id = xr_xm_id")->where($where)->count();
+        if($Sum>0){
+            exit(makeStandResult('2','当前有未提交的专家,请等专家提交后再导出评审结果排序表！'));
+        }
+//        echo M('xmps_xmrelation r')->_sql();die;
+
+        // 汇总数据查询
+        $where = [];
+        $where['xm_group'] = ['eq', $xmGroup];
+        $data = $model->field("xm_id,xm_code,xm_tmfs,xm_name,xm_company,xm_createuser,xm_class,xm_group,
+    case when youxiaocount is null then 0 else youxiaocount end youxiaocount,
+    case when allcount is null then 0 else allcount end allcount,
+    case when agreecount is null then 0 else agreecount end agreecount,
+    case when disagreecount is null then 0 else disagreecount end disagreecount,
+    voterate,0+cast(avgvalue as char) as avgvalue")
+            ->join("left join (select xr_xm_id,
+                    count(xr_id) youxiaocount,
+                    sum(CASE WHEN ishuibi = '1' then 0 when ps_zz = 1 THEN 1 ELSE 0 END) agreecount,  
+                    sum(CASE WHEN ishuibi = '1' then 0 when ps_zz = 0 THEN 1 ELSE 0 END) disagreecount,  
+                    sum(CASE WHEN bx_time = 2 THEN 1 ELSE 0 END) bxtime2count
+                from xmps_xmrelation where xr_status='完成' and ishuibi = '0' group by xr_xm_id
+            ) a on xmps_xm.xm_id=a.xr_xm_id") // 查询投票完成数量，同意票数，不同意票数
+            ->join("left join (select xr_xm_id,count(xr_id) allcount,max(voterate) as voterate,max(avgvalue) as avgvalue from xmps_xmrelation group by xr_xm_id) b on xmps_xm.xm_id=b.xr_xm_id") // 查询全部专家任务数量、得票率、平均分
+            ->where($where)
+            ->order("agreecount desc,avgvalue desc,xm_ordernum asc")
+            ->select();
+//            dump($data);die;
+        import("Vendor.PHPWord.PHPWord");
+        $count      = count($data);
+//        dump($data);dump($count);die;
+        $PHPWord = new \PHPWord();
+//        $document = $PHPWord->loadTemplate('Public/template/template10.docx');
+        $document = $PHPWord->loadTemplate('Public/template/resultsort.docx');
+//            拼接专家分数列
+        $document->setValue('xm_group', $xmGroup);
+        $document->setValue('date', date("Y年m月d日"));
+        foreach($data as $key=>$val){
+            $number  = $key+1;
+            $document->setValue('xm_code'.$number, $val['xm_code']);
+            $document->setValue('xm_name'.$number, $val['xm_name']);
+            $document->setValue('xm_createuser'.$number, $val['xm_createuser']);
+            $document->setValue('xm_company'.$number, $val['xm_company']);
+            $document->setValue('agreecount'.$number, $val['agreecount']);
+            $document->setValue('disagreecount'.$number, $val['disagreecount']);
+            $document->setValue('avgvalue'.$number, $val['avgvalue']);
+
+            if(($key == count($data)-1) && ($key<9)){
+                for($i=$key+1;$i<19;$i++){
+                    $document->setValue('xm_code'.$i, '');
+                    $document->setValue('xm_name'.$i, '');
+                    $document->setValue('xm_createuser'.$i, '');
+                    $document->setValue('xm_company'.$i, '');
+                    $document->setValue('agreecount'.$i, '');
+                    $document->setValue('disagreecount'.$i, '');
+                    $document->setValue('avgvalue'.$i, '');
+                }
+            }
+        }
+        $filename = "评审结果排序表.doc";
+        $savePath = 'Public/upload/word/' . date('Y-m-d');
+        if (!is_dir($savePath)) mkdir($savePath, 0777, true);
+        $filePath = $savePath . '/' . $filename;
+        if(!@rename('测试编码.txt',  '测试编码修改.txt') && !@rename('测试编码修改.txt',  '测试编码.txt')){
+            $filePath = iconv('UTF-8','gbk',$filePath);
+        }
+        $document->save($filePath);
+        $fileRootPath = getWebsiteRootPath();
+        $filePath = $savePath . '/' . $filename;
+        exit(json_encode(array('code' => 1, 'message' => $fileRootPath . $filePath)));
+//        exit(json_encode(array('code' => 1, 'message' => $filePath)));
+    }
+
+    /**
+     * 导出专家签字表选择专家页面
+     */
+    public function expertexport()
+    {
+        $type      = I('get.type');
+        $userModel = M("sysuser");
+        $where     = [];
+        $where['user_isdelete'] = ['eq', '0'];
+        $where['user_issystem'] = ['eq', '否'];
+        $where['user_role']     = ['eq',$this->professorid];
+        $data = $userModel->field('user_id,user_name,user_realusername')->where($where)->select();
+        $this->assign("user", $data);
+        $this->assign("type", $type);
+        $this->display();
+    }
+    /**
+     * 答辩评审专家个人意见表导出（重点）
+     * @throws \PHPExcel_Writer_Exception
+     */
+    public function yijianexportvote()
+    {
+        $queryParam = I("post.");
+        $where   = [];
+        $xm_id   = trim($queryParam['xm_id']);
+        $user_id = trim($queryParam['xm_user']);
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        // 获取指南方向
+        $model   = M('xmps_xm');
+        $xmGroup = $model->field("distinct xm_group")
+            ->where($where)
+            ->find();
+        $xmGroup = $xmGroup['xm_group'];
+
+        // 验证评审完成
+        $where = [];
+        $where['xm_group']  = $xmGroup;
+        $where['xr_status'] = '进行中';
+        if (!empty($user_id)) {
+            $where['xr_user_id'] = ['eq', $user_id];
+        }
+        $Sum = M('xmps_xmrelation r')->join("xmps_xm on xm_id = xr_xm_id")->where($where)->count();
+        if($Sum>0){
+            exit(makeStandResult('2','当前有未提交的项目,请等专家提交后再导出专家个人意见表！'));
+        }
+//        echo $model->_sql();
+        // 查询专家
+        $where = [];
+        $where['xm_group']  = $xmGroup;
+        $where['xr_status'] = '完成';
+        if (!empty($user_id)) {
+            $where['xr_user_id'] = ['eq', $user_id];
+        }
+        $userInfo = M('xmps_xmrelation r')
+            ->field("distinct user_realusername,user_id")
+            ->join("xmps_xm on xm_id = xr_xm_id")
+            ->join("inner join sysuser u on u.user_id = r.xr_user_id")
+            ->where($where)->select();
+//        echo  M('xmps_xmrelation r')
+//            ->_sql();
+//        dump($userInfo);die;
+        $header = ['项目名称','指南方向','申报编号',"项目\r负责人",'研究内容',"目标设置\r与技术路\r线","任务分解\r和进度安\r排","研发团队\r及工作基\r础","预期成果\r与风险分\r析","总分","评审结论\r意见","评审意见"];
+        $width  = ["5","15","8","10","7","8","9","9","9","9","6","15","11"];
+        $title  = "先进技术答辩评审专家个人意见表";
+        $pathInfo = [];
+        foreach($userInfo as $key=>$userData){
+            // 汇总数据查询
+            $where = [];
+            $where['xm_group']   = ['eq', $xmGroup];
+            $where['xr_user_id'] = ['eq', $userData['user_id']];
+//            $markField  = $this->getAllMarkFieldFormat();
+//            $markField  = implode(",",$markField);
+            $data = $model->field("xm_name,xm_group,xm_code,xm_createuser,
+        case when ishuibi = 0 then 0 + cast(ps_item1 AS CHAR) else '回避' end ps_item1,
+	    case when ishuibi = 0 then 0 + cast(ps_item2 AS CHAR) else '回避' end ps_item2,
+	    case when ishuibi = 0 then 0 + cast(ps_item3 AS CHAR) else '回避' end ps_item3,
+	    case when ishuibi = 0 then 0 + cast(ps_item4 AS CHAR) else '回避' end ps_item4,
+	    case when ishuibi = 0 then 0 + cast(ps_item5 AS CHAR) else '回避' end ps_item5,
+        case when ishuibi = 0 then 0+cast(ps_total as char) else '回避' end ps_total,
+        case when ishuibi = 1 then '回避' when ps_zz = 1 then '建议立项'  when ps_zz = 0 then '建议不立项' else ps_zz end ps_zz,
+        case when ishuibi = 0 then ps_detail else '回避' end ps_detail")
+                ->join("left join xmps_xmrelation a on xmps_xm.xm_id=a.xr_xm_id")
+                ->where($where)
+                ->order("xm_ordernum desc")
+                ->select();
+//            echo $model->_sql();
+            $res = excelExport($header, $data, true,$width,true,true,"(".$data[0]['xm_group'].")    (".$userData["user_realusername"].")    "."专家签字：                                                        日期：".date('Y年m月d日')."&R &P",$title,"",[],$userData["user_realusername"]);
+//            echo $res;
+            $pathInfo[] = $res;
+        }
+//        dump($pathInfo);
+//        die;
+        exit(json_encode(array('code' => 0, 'message' => $pathInfo)));
+    }
+
+    /**
+     * 评审专家补充意见表导出（并行）
+     * @throws \PHPExcel_Writer_Exception
+     */
+    public function buchongexportvote()
+    {
+        $queryParam = I("post.");
+        $where   = [];
+        $xm_id   = trim($queryParam['xm_id']);
+        $user_id = trim($queryParam['xm_user']);
+        if (!empty($xm_id)) {
+            $where['xm_id'] = ['eq', $xm_id];
+        }
+        // 获取指南方向
+        $model   = M('xmps_xm');
+        $xmGroup = $model->field("distinct xm_group")
+            ->where($where)
+            ->find();
+        $xmGroup = $xmGroup['xm_group'];
+
+        // 验证评审完成
+        $where = [];
+        $where['xm_group']     = ['eq',$xmGroup];
+        $where['vote1status']  = ['neq','未开始'];
+        $Sum = M('xmps_xmrelation r')->join("xmps_xm on xm_id = xr_xm_id")->where($where)->count();
+//        echo M('xmps_xmrelation r')->_sql();die;
+        if($Sum == 0){
+            exit(makeStandResult('2','并行投票还未开始！'));
+        }
+        $where = [];
+        $where['xm_group']     = $xmGroup;
+        $where['voteoptionbx'] = '1';
+        $where['vote1status']  = '进行中';
+        if (!empty($user_id)) {
+            $where['xr_user_id'] = ['eq', $user_id];
+        }
+        $Sum = M('xmps_xmrelation r')->join("xmps_xm on xm_id = xr_xm_id")->where($where)->count();
+        if($Sum>0){
+            exit(makeStandResult('2','当前有未提交并行投票的项目,请等专家提交后再导出补充意见表！'));
+        }
+
+        // 查询专家
+        $where = [];
+        $where['xm_group']  = $xmGroup;
+        $where['xr_status'] = '完成';
+        if (!empty($user_id)) {
+            $where['xr_user_id'] = ['eq', $user_id];
+        }
+        $userInfo = M('xmps_xmrelation r')
+            ->field("distinct user_realusername,user_id")
+            ->join("xmps_xm on xm_id = xr_xm_id")
+            ->join("inner join sysuser u on u.user_id = r.xr_user_id")
+            ->where($where)->select();
+//dump($userInfo);die;
+        vendor("PHPExcel.PHPExcel");
+        $pathInfo = [];
+        foreach($userInfo as $key=>$userData){
+            // 查询数据
+            $where      = [];
+            $where['xr_user_id']   = array('eq' ,$userData['user_id']);
+            $where['voteoptionbx'] = array('eq' ,'1');
+            $data = $model->field('xm_name,xm_company,xm_createuser,xm_group,ishuibi,vote1,bx_detail,bx_time,0+cast(vote1rate as char) as vote1rate，avgvalue')
+                ->join('xmps_xmrelation on xr_xm_id=xmps_xm.xm_id')
+                ->join("left join (select xr_xm_id,count(xr_id) agreecount from xmps_xmrelation where ps_zz = 1 group by xr_xm_id) c on xmps_xm.xm_id=c.xr_xm_id") // 查询同意票数
+                ->where($where)
+                ->order("agreecount desc,avgvalue desc")
+                ->select();
+//            dump($data);
+
+            $excel = new \PHPExcel();
+            $titleForExport = C('mark.REMARK_OPTION')[$queryParam["xm_type"]]['title'];
+            $name = "同一指南方向下不同技术路线项目\r\n择优同时支持的专家补充意见表"; // 导出表头
+            $letter = ['A','B'];
+            $excel->getActiveSheet()->getPageSetup()->setOrientation(\PHPExcel_Worksheet_PageSetup::ORIENTATION_LANDSCAPE);
+            $styleArray = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => \PHPExcel_Style_Border::BORDER_THIN
+                    )
+                )
+            );
+            $styleArrayLeft = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => \PHPExcel_Style_Border::BORDER_THIN
+                    )
+                )
+            );
+            $styleArray['alignment'] = array(
+                'horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PHPExcel_Style_Alignment::VERTICAL_CENTER
+            );
+            $styleArrayLeft['alignment'] = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => \PHPExcel_Style_Border::BORDER_THIN
+                    )
+                ),
+                'horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PHPExcel_Style_Alignment::VERTICAL_CENTER
+            );
+            $styleArrayTop = array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => \PHPExcel_Style_Border::BORDER_THIN
+                    )
+                ),
+                "alignment"=>[
+                    'horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+                    'vertical' => \PHPExcel_Style_Alignment::VERTICAL_TOP
+                ]
+            );
+            $titleStyle = Array(
+                'borders' => array(
+                    'allborders' => array(
+                        'style' => \PHPExcel_Style_Border::BORDER_THIN
+                    )
+                ),
+                'alignment' => array(
+                    'horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PHPExcel_Style_Alignment::VERTICAL_CENTER
+                )
+            );
+            $titleStyleLeft = Array(
+                'alignment' => array(
+                    'horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+                    'vertical' => \PHPExcel_Style_Alignment::VERTICAL_CENTER
+                )
+            );
+//            dump($field);
+//            dump($letter[count($field)-1]);die;
+            // 设置列宽
+            $excel->getActiveSheet()->getStyle('A')->getAlignment()->setWrapText(true);
+            $excel->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+            $excel->getActiveSheet()->getStyle('B')->getAlignment()->setWrapText(true);
+            $excel->getActiveSheet()->getColumnDimension('B')->setWidth(80);
+            // 标题行样式设置
+            $excel->getActiveSheet()->setCellValue('A1', $name)->mergeCells('A1:B1');
+            $excel->getActiveSheet()->getStyle('A1:B1')->applyFromArray($titleStyle);
+            $excel->getActiveSheet()->getStyle('A1:B1')->getFont()->setName("黑体")->setSize(16)->setBold(true);
+            $excel->getActiveSheet()->getRowDimension(1)->setRowHeight(50);
+
+
+            // 第二行样式设置，显示值设置
+            $excel->getActiveSheet()->getRowDimension(2)->setRowHeight(30);
+            $excel->getActiveSheet()->setCellValue('A2', "重点专项");
+            $excel->getActiveSheet()->getStyle('A2:A6')->applyFromArray($titleStyle);
+            $excel->getActiveSheet()->getStyle('A2:A6')->getFont()->setName("仿宋")->setSize(13)->setBold(true);
+            $excel->getActiveSheet()->setCellValue('B2', "先进技术");
+            $excel->getActiveSheet()->getStyle('B2:B6')->applyFromArray($styleArray);
+            $excel->getActiveSheet()->getStyle('B2:B6')->getFont()->setName("仿宋")->setSize(13);
+
+            // 第三行显示值设置
+            $excel->getActiveSheet()->getRowDimension(3)->setRowHeight(30);
+            $excel->getActiveSheet()->setCellValue('A3', "指南方向");
+            $excel->getActiveSheet()->setCellValue('B3',$xmGroup);
+
+            // 第四行显示值设置
+            $index = 4;
+//            dump($data);die;
+            foreach ($data as $key=>$val) {
+                $titlepx = '';
+                if($index == 4){
+                    $titlepx = "排序第一的项目名称及申报单位";
+                }else if($index == 5){
+                    $titlepx = "排序第二的项目名称及申报单位";
+                }else if($index == 6){
+                    $titlepx = "排序第三的项目名称及申报单位";
+                }else if($index == 7){
+                    $titlepx = "排序第四的项目名称及申报单位";
+                }
+//                echo $index.'-'.$titlepx;
+                $excel->getActiveSheet()->setCellValue('A'.$index, $titlepx);
+                $excel->getActiveSheet()->setCellValue('B'.$index, $val['xm_name']."\r".$val['xm_company']);
+                $index ++;
+            }
+//            die;
+            $excel->getActiveSheet()->getStyle('A4:A'.$index)->applyFromArray($titleStyleLeft);
+            $excel->getActiveSheet()->getStyle('B4:B'.$index)->applyFromArray($styleArrayLeft);
+
+            $start = $index;
+            //技术路线判断
+            $excel->getActiveSheet()->setCellValue('A'.$index, "技术路线判断");
+            if($data[0]['ishuibi'] == 1){
+                $excel->getActiveSheet()->setCellValue('B'.$index,"回避");
+            }else if($data[0]['vote1'] == 1){
+                $excel->getActiveSheet()->setCellValue('B'.$index,"A □ 技术路线基本一致，不建议同时支持\r\nB ■ 技术路线差异较大，建议同时支持");
+            }else if($data[0]['vote1'] == 0){
+                $excel->getActiveSheet()->setCellValue('B'.$index,"A ■ 技术路线基本一致，不建议同时支持\r\nB □ 技术路线差异较大，建议同时支持");
+            }
+            $excel->getActiveSheet()->getStyle('A'.$index)->applyFromArray($titleStyle);
+            $excel->getActiveSheet()->getStyle('A'.$index)->getFont()->setName("仿宋")->setSize(13)->setBold(true);
+            $excel->getActiveSheet()->getStyle('B'.$index)->applyFromArray($styleArrayLeft);
+            $excel->getActiveSheet()->getStyle('B'.$index)->getFont()->setName("仿宋")->setSize(13);
+            $index ++;
+            $content = "如果选“B”，请说明技术路线差异较大之处：\r\n".$data[0]['bx_detail'];
+            $excel->getActiveSheet()->setCellValue('A'.$index,$content)->mergeCells('A'.$index.':B'.$index);
+            $excel->getActiveSheet()->getRowDimension($index)->setRowHeight(60);
+            $excel->getActiveSheet()->getStyle('A'.$index.':B'.$index)->applyFromArray($styleArrayTop);
+            $excel->getActiveSheet()->getStyle('B'.$index)->getFont()->setName("仿宋")->setSize(13);
+            $index ++;
+            // 择优时间建议
+            $excel->getActiveSheet()->setCellValue('A'.$index, "当选择B时，二次评估\r\n择优时间建议");
+            if($data[0]['ishuibi'] == 1){
+                $excel->getActiveSheet()->setCellValue('B'.$index,"回避");
+            }else if($data[0]['bx_time'] == 1){
+                $excel->getActiveSheet()->setCellValue('B'.$index,"A ■ 立项后1年\r\nB □ 立项后2年");
+            }else if($data[0]['bx_time'] == 2){
+                $excel->getActiveSheet()->setCellValue('B'.$index,"A □ 立项后1年\r\nB ■ 立项后2年");
+            }
+            $excel->getActiveSheet()->getStyle('A'.$index)->applyFromArray($titleStyle);
+            $excel->getActiveSheet()->getStyle('A'.$index)->getFont()->setName("仿宋")->setSize(13)->setBold(true);
+            $excel->getActiveSheet()->getStyle('B'.$index)->applyFromArray($styleArrayLeft);
+            $excel->getActiveSheet()->getStyle('B'.$index)->getFont()->setName("仿宋")->setSize(13);
+            $index ++;
+            $content = "专家签名\r\n\r\n\r\n                                                                  ".date("Y年m月d日");
+            $excel->getActiveSheet()->setCellValue('A'.$index,$content)->mergeCells('A'.$index.':B'.$index);
+            $excel->getActiveSheet()->getRowDimension($index)->setRowHeight(60);
+            $excel->getActiveSheet()->getStyle('A'.$index.':B'.$index)->applyFromArray($styleArrayTop);
+            $excel->getActiveSheet()->getStyle('B'.$index)->getFont()->setName("仿宋")->setSize(13);
+            // 设置页脚
+            $excel->getActiveSheet()->getHeaderFooter()->setOddFooter("第&P页/共&N页")->setAlignWithMargins(true);
+            $excel->getActiveSheet()->getPageMargins()->setFooter("0.5");
+//            $excel->getActiveSheet()->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 3);
+            $write = new \PHPExcel_Writer_Excel2007($excel);
+
+            $filename = $userData['user_realusername']."-专家补充意见表";
+
+            $filename = $filename . '.xlsx';
+            $savePath = 'Public/upload/excel/' . date('Y-m-d');
+            if (!is_dir($savePath)) mkdir($savePath, 0777, true);
+            $filePath = $savePath . '/' . $filename;
+            if(!@rename('测试编码.txt',  '测试编码修改.txt') && !@rename('测试编码修改.txt',  '测试编码.txt')){
+                $filePath = iconv('UTF-8','gbk',$filePath);
+            }
+//            dump($filePath);die;
+            $write->save($filePath);
+            $fileRootPath = getWebsiteRootPath();
+            $filePath = $savePath . '/' . $filename;
+            $pathInfo[] = $fileRootPath.$filePath;
+//        dump($pathInfo);
+//            die;
+        }
+        exit(json_encode(array('code' => 0, 'message' => $pathInfo)));
     }
 
     /**

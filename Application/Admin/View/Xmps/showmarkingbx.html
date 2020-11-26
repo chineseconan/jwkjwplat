@@ -1,0 +1,121 @@
+<include file="Public:header" />
+<style>
+    .btns{
+        padding: 10px 120px 10px 10px;
+        width:100%;
+        height:20px;
+    }
+    .btns .btn{
+        margin: 0 6px;
+        padding: 8px 20px;
+        box-sizing: border-box;
+    }
+    .title{
+        text-align:center;
+        font-size: 26px;
+        font-weight: bold;
+    }
+    .table{
+        text-align:center;
+        border: 2px solid #dddddd!important;
+        table-layout: fixed;
+        margin-bottom: 10px;
+    }
+    table tr{
+        height:30px;
+        line-height: 30px;
+    }
+    table td{
+        width:14%;
+        border-left: 1px solid #dddddd!important;
+    }
+    table p{
+        margin:0px;
+    }
+    .huibi{
+        text-align:center;
+        color: #ce1e1e;
+        font-size: 20px;
+        font-weight: normal;
+    }
+</style>
+<body  style="font-family: 微软雅黑;">
+    <div class="btns">
+<!--        <a class="btn btn-danger"  id="back" style="float:right;">返回项目列表</a>-->
+<!--        <button class="btn btn-warning" id="submit" style="float:right;" onclick="submitData();">提交</button>-->
+<!--        <button class="btn btn-success" id="fileshow" style="float:right;">查看申报材料</button>-->
+    </div>
+    <div>
+        <div style="margin:30px 10% 0px 10%;width:80%;font-size: 18px;">
+            <p class="title">同一指南方向下不同技术路线项目<br/>择优同时支持的专家补充意见表</p>
+            <?php if($data[0]['ishuibi'] == 1){?><p class="huibi">（已回避）</p><?php }?>
+            <table class="table" data-toggle="table" data-height="600" style="font-size: 18px;">
+                <tr>
+                    <td style="width: 30%;vertical-align: middle;"><p style="font-weight: bold;">重点专项</p></td>
+                    <td style="width: 70%;vertical-align: middle;">先进技术</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">指南方向</p></td>
+                    <td style="text-align: center;vertical-align: middle;">{$data[0]['xm_group']}</td>
+                </tr>
+                <foreach name="data" key="key" item="val">
+                    <tr>
+                        <td style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">
+                            排序第<?php if($key == 0){
+                                echo "一";
+                            }else if($key == 1){
+                                echo "二";
+                            }else if($key == 2){
+                                echo "三";
+                            }else if($key == 3){
+                                echo "四";
+                            }else if($key == 4){
+                                echo "五";
+                            }else if($key == 5){
+                                echo "六";
+                            }else if($key == 6){
+                                echo "七";
+                            }else if($key == 7){
+                                echo "八";
+                            }else if($key == 8){
+                                echo "九";
+                            }else if($key == 9){
+                                echo "十";
+                            }?>的项目名称及申报单位
+                        </p></td>
+                        <td style="text-align: left;vertical-align: middle;padding-left: 15px;">
+                            {$val.xm_name}<br/>
+                            {$val.xm_company}
+                        </td>
+                    </tr>
+                </foreach>
+                <tr>
+                    <td style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">技术路线判断</p></td>
+                    <td style="text-align: left;vertical-align: middle;padding-left:10%;">
+                        <b>A&emsp;</b><if condition="$val['vote1'] eq '0'">■<else/>□</if>&nbsp;技术路线基本一致，不建议同时支持<br/>
+                        <b>B&emsp;</b><if condition="$val['vote1'] eq '1'">■<else/>□</if>&nbsp;技术路线差异较大，建议同时支持
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: left;vertical-align: middle;">
+                        &emsp;如果选“B”，请说明技术路线差异较大之处：<br/>
+                        <pre id="bx_detail" style="width: 95%;margin: 5px 0 0 10px;height:100px;">{$val.bx_detail}</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;vertical-align: middle;"><p style="font-weight: bold;">当选择B时，二次评估择优时间建议</p></td>
+                    <td style="text-align: left;vertical-align: middle;padding-left:10%;">
+                        <b>A&emsp;</b><if condition="$val['bx_time'] eq '1'">■<else/>□</if>&nbsp;立项后1年<br/>
+                        <b>B&emsp;</b><if condition="$val['bx_time'] eq '2'">■<else/>□</if>&nbsp;立项后2年
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="btns">
+<!--        <a class="btn btn-danger"  id="btntj" style="float:right;" ><i class="fa fa-check"></i> &nbsp;提交</a>-->
+    </div>
+    <script src="__PUBLIC__/vendor/jquery/jquery1.11.1.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
+</body>
+</html>
