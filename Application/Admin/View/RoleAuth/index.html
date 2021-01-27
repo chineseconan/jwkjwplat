@@ -1,62 +1,32 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/switchery/switchery.css" rel="stylesheet">
-    <link href="__PUBLIC__/vendor/chosen/chosen.css" rel="stylesheet">
+﻿<include file="Public:tableheader" />
+<style>
+    th {
+        text-align: center;
+    }
 
-    <link href="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.css" rel="stylesheet">
-    <link href="__PUBLIC__/css/style.css?v=4.0.0" rel="stylesheet">
+    .tablelist2 {
+        width: 500px;
+    }
+    .form-control {
+        margin-top: 50px;
+        display: inline-block;
+        width: 250px;
+    }
 
-    <script src="__PUBLIC__/vendor/bootstrap-table/jquery.min.js"></script>
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap/js/bootstrap.min.js"></script>
+    .z-tab {
+        margin-left: 40%;
+        margin-top: 50px;
+        display: inline-block;
+    }
 
-    <script src="__PUBLIC__/vendor/switchery/switchery.js"></script>
-    <script src="__PUBLIC__/vendor/chosen/chosen.jquery.js"></script>
-    <script src="__PUBLIC__/vendor/chosen/chosen.order.jquery.js"></script>
-    <script src="__PUBLIC__/vendor/chosen-ajax-addition/chosen.ajaxaddition.jquery.js"></script>
-
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/bootstrap-table.js"></script>
-    <script src="__PUBLIC__/vendor/bootstrap-table/bootstrap-table/src/locale/bootstrap-table-zh-CN.js"></script>
-    <script type="text/javascript" src="__PUBLIC__/vendor/layui/layui.js"></script>
-    <link href="__PUBLIC__/css/tablepublic.css" rel="stylesheet">
-
-    <style>
-        th {
-            text-align: center;
-        }
-
-        .tablelist2 {
-            width: 500px;
-        }
-        .form-control {
-            margin-top: 50px;
-            display: inline-block;
-            width: 250px;
-        }
-
-        .z-tab {
-            margin-left: 40%;
-            margin-top: 50px;
-            display: inline-block;
-        }
-
-        .z-tab button {
-            margin: 10px;
-            display: inline-block;
-        }
-        .control-label{
-            font-size: 18px;
-        }
-    </style>
-</head>
-
+    .z-tab button {
+        margin: 10px;
+        display: inline-block;
+    }
+    .control-label{
+        font-size: 18px;
+    }
+</style>
 <body class="gray-bg">
 <div class="wrapper wrapper-content animated fadeInRight">
     <div class="ibox float-e-margins">
@@ -146,31 +116,25 @@
     });
     $(function () {
         $('#atpbiztable').bootstrapTable({
-            url: '__CONTROLLER__/getDataByRole',         //请求后台的URL（*）
-            method: 'post',                      //请求方式（*）
-            toolbar: '#atpbiztoolbar',                //工具按钮用哪个容器
-            striped: true,                      //是否显示行间隔色
-            cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
-            pagination: true,                   //是否显示分页（*）
+            url: '__CONTROLLER__/getDataByRole',
+            method: 'post',
+            toolbar: '#atpbiztoolbar',
+            striped: true,
+            cache: false,
+            pagination: true,
             iconSize: 'outline',
-            sortable: true,                     //是否启用排序
+            sortable: true,
             sortName: "role_name",
-            sortOrder: "asc",                   //排序方式
-            queryParams: queryParams,//传递参数（*）
-            sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
-            pageNumber: 1,                       //初始化加载第一页，默认第一页
-            pageSize: 10,                       //每页的记录行数（*）
-            pageList: [5, 10, 25, 50, 100],        //可供选择的每页的行数（*）
-//            strictSearch: true,
-//            showColumns: true,                  //是否显示所有的列
-//            showRefresh: true,                  //是否显示刷新按钮
-            minimumCountColumns: 2,             //最少允许的列数
-            clickToSelect: true,                //是否启用点击选中行
-//            height: 600,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
-            uniqueId: "role_id",                     //每一行的唯一标识，一般为主键列
-//            showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
-//            cardView: true,                    //是否显示详细视图
-            detailView: false,                   //是否显示父子表
+            sortOrder: "asc",
+            queryParams: queryParams,
+            sidePagination: "server",
+            pageNumber: 1,
+            pageSize: 10,
+            pageList: [5, 10, 25, 50, 100],
+            minimumCountColumns: 2,
+            clickToSelect: true,
+            uniqueId: "role_id",
+            detailView: false,
             columns: [[
                 {checkbox: true},
                 {
@@ -199,7 +163,7 @@
                     type: 2,
                     shadeClose: false,
                     content: '__CONTROLLER__/editByRole?roleid=' + row['role_id'],
-                    area: ['800px', '400px']
+                    area: ['800px', '550px']
                 });
             },
             onSort: function (name, order) {
@@ -221,15 +185,9 @@
             pageNumber: 1,                       //初始化加载第一页，默认第一页
             pageSize: 10,                       //每页的记录行数（*）
             pageList: [5, 10, 25, 50, 100],        //可供选择的每页的行数（*）
-//            strictSearch: true,
-//            showColumns: true,                  //是否显示所有的列
-//            showRefresh: true,                  //是否显示刷新按钮
             minimumCountColumns: 2,             //最少允许的列数
             clickToSelect: true,                //是否启用点击选中行
-//            height: 600,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
             uniqueId: "mi_id",                     //每一行的唯一标识，一般为主键列
-//            showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
-//            cardView: true,                    //是否显示详细视图
             detailView: false,                   //是否显示父子表
             columns: [[
                 {checkbox: true},
@@ -259,7 +217,7 @@
                     type: 2,
                     shadeClose:false,
                     content: '__CONTROLLER__/editByModel?modelid=' + row['mi_id'],
-                    area: ['800px', '380px']
+                    area: ['800px', '550px']
                 });
             },
             onSort: function (name, order) {
@@ -347,7 +305,7 @@
             type: 2,
             shadeClose: false,
             content: '__CONTROLLER__/editByRole?roleid=' + id,
-            area: ['800px', '380px']
+            area: ['800px', '550px']
         });
     }
     function updateModelInRow(id) {
@@ -357,7 +315,7 @@
             type: 2,
             shadeClose: false,
             content: '__CONTROLLER__/editByModel?modelid=' + id,
-            area: ['800px', '370px']
+            area: ['800px', '550px']
         });
     }
 </script>

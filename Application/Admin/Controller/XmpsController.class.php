@@ -540,6 +540,17 @@ class XmpsController extends BaseController {
                 if(bccomp(floatval($total),floatval($data['ps_total']),$Decimals) != 0 && $data['ps_total'] != -1){ // 验证总分
                     exit(makeStandResult(1,'项目'.$data['xm_name'].'总分计算有误，请刷新页面重试！'.$total."---".$data['ps_total']));
                 }
+                // 将是否与战斗关联写入ps_detail
+                if(C('isZD') != 0){
+                    if($data['ps_zz'] == '') exit(makeStandResult(2,'项目'.$data['xm_name'].'请填写 与战斗力关联程度'));
+                    $ps_zz = $M->field('ps_zz')->where("xr_xm_id='".$data["xm_id"]."' and ps_total is not null and ishuibi=0 ")->order('ps_zz asc')->select();
+                    $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
+                    $ps_detail = implode('',$ps_zz);
+                    if(!empty($ps_zz)){
+                        $M->where("xr_xm_id='".$xmid."'")->setField("ps_detail",  $ps_detail);
+//                    echo $M->_sql();die;
+                    }
+                }
             }
             // 保存
             $M->where("xr_id='".$data['xr_id']."'")->save($data);
@@ -555,17 +566,6 @@ class XmpsController extends BaseController {
                     $total += round($t["ps_total"],$Decimals);
                 }
                 $M->where("xr_xm_id='".$xmid."'")->setField("avgvalue",  number_format($total / ($xmcount - 2),3, '.', ''));
-            }
-            // 将是否与战斗关联写入ps_detail
-            if(C('isZD') != 0){
-                if($data['ps_zz'] == '') exit(makeStandResult(2,'项目'.$data['xm_name'].'请填写 与战斗力关联程度'));
-                $ps_zz = $M->field('ps_zz')->where("xr_xm_id='".$xmid."' and ps_total is not null and ishuibi=0 ")->order('ps_zz asc')->select();
-                $ps_zz     = removeArrKey($ps_zz,'ps_zz',false);
-                $ps_detail = implode('',$ps_zz);
-                if(!empty($ps_zz)){
-                    $M->where("xr_xm_id='".$xmid."'")->setField("ps_detail",  $ps_detail);
-//                    echo $M->_sql();die;
-                }
             }
             $M->commit();
             exit(makeStandResult(0,'保存成功'));

@@ -185,8 +185,8 @@ class RoleAuthController extends BaseController
             ->order("$queryParam[sort] $queryParam[sortOrder]")
             ->limit($queryParam['offset'], $queryParam['limit'])
             ->select();
-        $count = $model->count();
-        echo json_encode(array('total' => $count, 'rows' => $data));
+//        $count = $model->count();
+        echo json_encode($data);
     }
 
     public function addByModel()
@@ -207,8 +207,8 @@ class RoleAuthController extends BaseController
             ->limit($queryParam['offset'], $queryParam['limit'])
             ->select();
 //        echo $model->_sql();die;
-        $count = $model->count();
-        echo json_encode(array('total' => $count, 'rows' => $data));
+//        $count = $model->count();
+        echo json_encode($data);
     }
 
 

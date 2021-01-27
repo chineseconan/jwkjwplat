@@ -180,7 +180,8 @@
         },
         columns: tableColumn(),
         onEditableSave:function(field,row,oldValue,$el) {
-	        if((newValue != oldValue) || (oldValue == null)){
+            var newValue = row[field];
+            if((newValue != oldValue) || (oldValue == null)){
 		        $el.parents("tr").addClass("orange");
 		        row.notsave = 1;
             }
@@ -188,9 +189,8 @@
 
             var trObj = $($el).parents("tr");
             var index = trObj.attr("data-index");
-	        var newValue = row[field];
             row["ps_total"] = fomatFloat(totalnum);
-            row[field]      = fomatFloat(newValue);
+            if(field != 'ps_zz') row[field] = fomatFloat(newValue);
             $('#atpbiztable').bootstrapTable("updateRow",{
                 index:index,
                 row:row
@@ -561,11 +561,11 @@
                             continue;
                         }
                     }
-                    // if(('{$Think.config.isZD}' != 0) && (data[i]['ps_zz']=='' || data[i]['ps_zz']==null)){
-                    //     errorSign = true;
-                    //     errorMsg.push('项目"'+data[i]['xm_name']+'"请填写 与战斗力关联程度');
-                    //     continue;
-                    // }
+                    if(('{$Think.config.isZD}' != 0) && (data[i]['ps_zz']=='' || data[i]['ps_zz']==null)){
+                        errorSign = true;
+                        errorMsg.push('项目"'+data[i]['xm_name']+'"请填写 与战斗力关联程度');
+                        continue;
+                    }
                 }
                 if(errorSign !== false){
                     continue;
@@ -630,11 +630,11 @@
                             continue;
                         }
                     }
-                    // if(('{$Think.config.isZD}' != 0) && (data[i]['ps_zz']=='' || data[i]['ps_zz']==null)){
-                    //     errorSign = true;
-                    //     errorMsg.push('项目"'+data[i]['xm_name']+'"请填写 与战斗力关联程度');
-                    //     continue;
-                    // }
+                    if(('{$Think.config.isZD}' != 0) && (data[i]['ps_zz']=='' || data[i]['ps_zz']==null)){
+                        errorSign = true;
+                        errorMsg.push('项目"'+data[i]['xm_name']+'"请填写 与战斗力关联程度');
+                        continue;
+                    }
                 }
                 if(errorSign !== false){
                     continue;
