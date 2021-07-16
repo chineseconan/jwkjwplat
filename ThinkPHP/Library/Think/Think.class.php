@@ -151,7 +151,7 @@ class Think {
             include self::$_map[$class];
         }elseif(false !== strpos($class,'\\')){
           $name           =   strstr($class, '\\', true);
-          if(in_array($name,array('Think','Org','Behavior','Com','Vendor')) || is_dir(LIB_PATH.$name)){ 
+          if(in_array($name,array('Think','Org','Behavior','Com','Vendor')) || is_dir(LIB_PATH.$name)){
               // Library目录下面的命名空间自动定位
               $path       =   LIB_PATH;
           }else{
@@ -160,13 +160,22 @@ class Think {
               $path       =   isset($namespace[$name])? dirname($namespace[$name]).'/' : APP_PATH;
           }
           $filename       =   $path . str_replace('\\', '/', $class) . EXT;
-          if(is_file($filename)) {
+            if(is_file($filename)) {
               // Win环境下面严格区分大小写
               if (IS_WIN && false === strpos(str_replace('/', '\\', realpath($filename)), $class . EXT)){
                   return ;
               }
               include $filename;
-          }
+            }else{ // 20210427 PHPWord引入后缀名‘.php’修改
+                $filename       =   $path . str_replace('\\', '/', $class) . '.php';
+                if(is_file($filename)) {
+                    // Win环境下面严格区分大小写
+                    if (IS_WIN && false === strpos(str_replace('/', '\\', realpath($filename)), $class . '.php')){
+                        return ;
+                    }
+                    include $filename;
+                }
+            }
         }elseif (!C('APP_USE_NAMESPACE')) {
             // 自动加载的类库层
             foreach(explode(',',C('APP_AUTOLOAD_LAYER')) as $layer){
